@@ -3,8 +3,7 @@ package io.github.lunaiskey.lunixprisons.commands;
 import io.github.lunaiskey.lunixprisons.mines.GridManager;
 import io.github.lunaiskey.lunixprisons.mines.PMine;
 import io.github.lunaiskey.lunixprisons.mines.generator.PMineWorld;
-import org.apache.commons.lang3.tuple.Pair;
-import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,6 +22,17 @@ public class CommandPMine implements CommandExecutor {
                     mine.reset();
                 } else {
                     p.sendMessage("PMine not found. Please report this to an admin.");
+                }
+            }
+            if (args[0].equalsIgnoreCase("fly")) {
+                if (p.getLocation().getWorld().getName().equalsIgnoreCase(PMineWorld.getWorldName())) {
+                    if (p.getAllowFlight()) {
+                        p.setAllowFlight(false);
+                        p.setFlying(false);
+                    } else {
+                        p.setAllowFlight(true);
+                        p.setFlying(true);
+                    }
                 }
             }
             if (args[0].equalsIgnoreCase("tp")) {

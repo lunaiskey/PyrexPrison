@@ -2,6 +2,7 @@ package io.github.lunaiskey.lunixprisons.mines;
 
 import io.github.lunaiskey.lunixprisons.LunixPrison;
 import io.github.lunaiskey.lunixprisons.mines.generator.PMineWorld;
+import io.github.lunaiskey.lunixprisons.nms.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -9,6 +10,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -34,10 +36,10 @@ public class PMine {
         this.owner = owner;
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
-        this.mineSize = 50;
+        this.mineSize = 12;
         world = Bukkit.getWorld(PMineWorld.getWorldName());
         this.center = new Location(world, (225 * chunkX), 100, (225 * chunkZ));
-        min = new Location(center.getWorld(), center.getBlockX() - mineSize, 25, center.getBlockZ() - mineSize);
+        min = new Location(center.getWorld(), center.getBlockX() - mineSize, 50, center.getBlockZ() - mineSize);
         max = new Location(center.getWorld(), center.getBlockX() + mineSize, 100, center.getBlockZ() + mineSize);
         genBedrock();
         reset();
@@ -83,24 +85,30 @@ public class PMine {
         if (!resetting) {
             resetting = true;
         }
-        Bukkit.getScheduler().runTask(LunixPrison.getPlugin(), () -> {
-            for (int x = min.getBlockX(); x <= max.getBlockX(); ++x) {
-                for (int y = min.getBlockY(); y <= max.getBlockY(); ++y) {
-                    for (int z = min.getBlockZ(); z <= max.getBlockZ(); ++z) {
-                        Block b = world.getBlockAt(x, y, z);
-                        switch (new Random().nextInt(2) + 1) {
-                            case 1 -> b.setType(Material.STONE);
-                            case 2 -> b.setType(Material.DIORITE);
-                        }
+
+        Random rand = new Random();
+        Player p = Bukkit.getPlayer(owner);
+        Util util = new Util(world, ((CraftWorld) world).getHandle());
+        for (int x = min.getBlockX(); x <= max.getBlockX(); ++x) {
+            for (int y = min.getBlockY(); y <= max.getBlockY(); ++y) {
+                for (int z = min.getBlockZ(); z <= max.getBlockZ(); ++z) {
+                    Material mat = null;
+                    switch (rand.nextInt(4) + 1) {
+                        case 1 -> mat = Material.STONE;
+                        case 2 -> mat = Material.GRANITE;
+                        case 3 -> mat = Material.ANDESITE;
+                        case 4 -> mat = Material.DIORITE;
                     }
+                    util.setBlock(x,y,z,mat);
                 }
             }
-            Player p = Bukkit.getPlayer(owner);
-            p.sendMessage("Mine Reset!");
-        });
+        }
+        util.update();
+
         resetting = false;
         return true;
     }
+
 
     public void genBedrock() {
         Location wallMin = this.min.clone().subtract(1, 1, 1);
@@ -121,10 +129,8 @@ public class PMine {
                         if (y != wallMin.getBlockY()) {
                             continue;
                         }
-                        b.setType(Material.SEA_LANTERN);
-                        continue;
                     }
-                    b.setType(Material.BEDROCK);
+                    b.setType(Material.BEDROCK,false);
                 }
             }
         }

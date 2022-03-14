@@ -135,6 +135,11 @@ public final class LunixPrison extends JavaPlugin {
             this.getLogger().severe("Could not make mine folder.");
             return false;
         }
+        File pmineFolder = new File(getDataFolder(), "pmines");
+        if (!pmineFolder.exists() && !pmineFolder.mkdir()) {
+            this.getLogger().severe("Could not make pmine folder.");
+            return false;
+        }
         /*
         try {
             Config.initConfig(getDataFolder());

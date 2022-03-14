@@ -3,7 +3,8 @@ package io.github.lunaiskey.lunixprisons.listeners;
 import io.github.lunaiskey.lunixprisons.LunixPrison;
 import io.github.lunaiskey.lunixprisons.commands.CommandMine;
 import io.github.lunaiskey.lunixprisons.mines.GlobalMine;
-import org.apache.commons.lang3.tuple.MutableTriple;
+import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.*;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

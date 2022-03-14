@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.github.lunaiskey.lunixprisons.mines.generator.PMineWorld;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.ImmutablePair;
+import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 

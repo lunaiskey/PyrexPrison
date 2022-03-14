@@ -1,7 +1,7 @@
 name: LunixPrison
 version: '${project.version}'
 main: io.github.lunaiskey.lunixprisons.LunixPrison
-api-version: 1.18
+api-version: 1.17
 authors: [ Lunaiskey ]
 description: Yet another prison plugin.
 commands:
