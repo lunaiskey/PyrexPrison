@@ -1,4 +1,4 @@
-package io.github.lunaiskey.lunixprisons.mines;
+package io.github.lunaiskey.lunixprisons.mines.generator;
 
 import org.bukkit.generator.ChunkGenerator;
 

@@ -1,10 +1,13 @@
-package io.github.lunaiskey.lunixprisons.mines;
+package io.github.lunaiskey.lunixprisons.mines.generator;
 
+import io.github.lunaiskey.lunixprisons.mines.GlobalMine;
+import io.github.lunaiskey.lunixprisons.mines.generator.MineBiomeProvider;
+import io.github.lunaiskey.lunixprisons.mines.generator.MineWorldGenerator;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 
-public class Mines {
+public class PMineWorld {
 
     private final static String worldName = "mines";
 
@@ -15,6 +18,7 @@ public class Mines {
         wc.type(WorldType.FLAT);
         wc.generateStructures(false);
         wc.environment(World.Environment.NORMAL);
+        wc.createWorld();
     }
 
     public static String getWorldName() {

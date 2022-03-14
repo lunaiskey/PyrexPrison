@@ -1,9 +1,12 @@
 package io.github.lunaiskey.lunixprisons;
 
 import io.github.lunaiskey.lunixprisons.commands.CommandMine;
+import io.github.lunaiskey.lunixprisons.commands.CommandPMine;
 import io.github.lunaiskey.lunixprisons.listeners.PlayerEvents;
 import io.github.lunaiskey.lunixprisons.mines.GlobalMine;
-import io.github.lunaiskey.lunixprisons.mines.Mines;
+import io.github.lunaiskey.lunixprisons.mines.GridManager;
+import io.github.lunaiskey.lunixprisons.mines.generator.PMineWorld;
+import io.github.lunaiskey.lunixprisons.mines.PMine;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,6 +19,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public final class LunixPrison extends JavaPlugin {
 
@@ -27,6 +31,12 @@ public final class LunixPrison extends JavaPlugin {
     private static class IsMineFile implements FilenameFilter {
         public boolean accept(File file, String s) {
             return s.contains(".mine.yml");
+        }
+    }
+
+    private static class IsPMineFile implements FilenameFilter {
+        public boolean accept(File file, String s) {
+            return s.contains(".yml");
         }
     }
 
@@ -44,7 +54,7 @@ public final class LunixPrison extends JavaPlugin {
             return;
         }
 
-        new Mines().generateWorld();
+        new PMineWorld().generateWorld();
         File[] mineFiles = new File(getDataFolder(), "mines").listFiles(new IsMineFile());
         assert mineFiles != null;
         for (File file : mineFiles) {
@@ -64,7 +74,10 @@ public final class LunixPrison extends JavaPlugin {
                 this.getLogger().severe("Unable to load mine!");
             }
         }
+        loadPMines();
+
         Bukkit.getPluginCommand("mine").setExecutor(new CommandMine());
+        Bukkit.getPluginCommand("pmine").setExecutor(new CommandPMine());
         Bukkit.getPluginManager().registerEvents(new PlayerEvents(),this);
         this.getLogger().info(" version " + getDescription().getVersion() + " enabled!");
 
@@ -102,6 +115,9 @@ public final class LunixPrison extends JavaPlugin {
                 e.printStackTrace();
             }
         }
+        for (PMine pMine : GridManager.getPMinesMap().values()) {
+            pMine.save();
+        }
     }
 
     private File getMineFile(GlobalMine globalMine) {
@@ -130,6 +146,19 @@ public final class LunixPrison extends JavaPlugin {
 
          */
         return true;
+    }
+
+    private void loadPMines() {
+        File[] pmineFiles = new File(getDataFolder(), "pmines").listFiles(new IsPMineFile());
+        assert pmineFiles != null;
+        for (File file : pmineFiles) {
+            FileConfiguration fileConf = YamlConfiguration.loadConfiguration(file);
+            Map<String,Object> map = fileConf.getConfigurationSection("mine").getValues(false);
+            UUID owner = UUID.fromString(file.getName().replace(".yml",""));
+            int chunkX = (int) map.get("chunkX");
+            int chunkZ = (int) map.get("chunkZ");
+            GridManager.newPMine(owner,chunkX,chunkZ);
+        }
     }
 
     public static Map<String, GlobalMine> getMines() {

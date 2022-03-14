@@ -21,7 +21,6 @@ public class GlobalMine implements ConfigurationSerializable {
     private String name;
     private World world;
 
-
     public GlobalMine(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, String name, World world) {
         this.minX = minX;
         this.minY = minY;
@@ -53,9 +52,9 @@ public class GlobalMine implements ConfigurationSerializable {
         }
         if (world == null) {
             Logger l = LunixPrison.getPlugin().getLogger();
-            l.severe("[LunixPrison] Unable to find a world!");
-            l.severe("[LunixPrison] Attempted to load world named: " + me.get("world"));
-            l.severe("[LunixPrison] Worlds listed: " + Bukkit.getWorlds());
+            l.severe("Unable to find a world!");
+            l.severe("Attempted to load world named: " + me.get("world"));
+            l.severe("Worlds listed: " + Bukkit.getWorlds());
             throw new IllegalArgumentException("World was null!");
         }
         name = (String) me.get("name");

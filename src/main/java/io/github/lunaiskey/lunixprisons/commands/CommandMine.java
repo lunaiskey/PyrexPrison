@@ -49,17 +49,6 @@ public class CommandMine implements CommandExecutor {
                     sender.sendMessage("Mine '"+args[1]+"' doesn't exist.");
                 }
             }
-            if (args[0].equalsIgnoreCase("debug")) {
-                if (args[1].equalsIgnoreCase("getposition")) {
-                    Location l = p.getLocation().clone();
-                    p.sendMessage("you are in "+l.getWorld().getName()+" at "+Math.floor(l.getX())+","+Math.floor(l.getY())+","+Math.floor(l.getZ()));
-                }
-                if (args[1].equalsIgnoreCase("getgridposition")) {
-                    Location l = p.getLocation().clone();
-                    Pair<Integer,Integer> loc = new GridManager().getGridLocation(l);
-                    p.sendMessage(loc.getLeft()+","+loc.getRight());
-                }
-            }
         } else if (sender instanceof ConsoleCommandSender){
             sender.sendMessage("Console isn't currently supported. try again ingame.");
         }

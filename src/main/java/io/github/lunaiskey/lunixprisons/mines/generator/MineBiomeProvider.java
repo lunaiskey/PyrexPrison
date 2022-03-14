@@ -1,4 +1,4 @@
-package io.github.lunaiskey.lunixprisons.mines;
+package io.github.lunaiskey.lunixprisons.mines.generator;
 
 import org.bukkit.block.Biome;
 import org.bukkit.generator.BiomeProvider;
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MineBiomeProvider extends BiomeProvider {
+
     @Override
     public Biome getBiome(WorldInfo worldInfo, int x, int y, int z) {
         return Biome.PLAINS;

@@ -9,3 +9,5 @@ commands:
     usage: /<command>
   mineadmin:
     usage: /<command>
+  pmine:
+    usage: /<command>
