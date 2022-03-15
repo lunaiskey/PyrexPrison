@@ -38,15 +38,13 @@ public class GridManager {
         Pair<Integer,Integer> pair = new ImmutablePair<>(chunkX,chunkZ);
         pMines.put(pair,mine);
         ownerPMines.put(owner,pair);
+
     }
 
-    public boolean newPMine(UUID owner) {
+    public void newPMine(UUID owner) {
         if (getPMine(owner) == null) {
             Pair<Integer,Integer> newGridLoc = getNextIsland();
             newPMine(owner,newGridLoc.getLeft(),newGridLoc.getRight());
-            return true;
-        } else {
-            return false;
         }
     }
 

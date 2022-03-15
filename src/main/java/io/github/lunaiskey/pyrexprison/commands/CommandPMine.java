@@ -18,7 +18,7 @@ public class CommandPMine implements CommandExecutor {
     private Logger log;
 
     @Override
-    public boolean onCommand( CommandSender sender,  Command command,  String label,  String[] args) {
+    public boolean onCommand(CommandSender sender,  Command command,  String label,  String[] args) {
         log = PyrexPrison.getPlugin().getLogger();
         if (sender instanceof Player) {
             Player p = (Player) sender;
@@ -28,8 +28,8 @@ public class CommandPMine implements CommandExecutor {
                         "/pmine tp",
                         "/pmine fly",
                         "/pmine debug getposition",
-                        "/pmine debug getgridposition",
-                        "/pmine debug genbedrock (DOESNT NEED TO RUN.)"
+                        "/pmine debug getgridposition"
+                        //"/pmine debug genbedrock (DOESNT NEED TO RUN.)"
                         );
             } else if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("reset")) {
@@ -69,6 +69,7 @@ public class CommandPMine implements CommandExecutor {
                     return true;
                 }
             } else if (args.length == 2){
+                boolean debug = false;
                 if (args[0].equalsIgnoreCase("debug")) {
                     if (args[1].equalsIgnoreCase("getposition")) {
                         Location l = p.getLocation().clone();
@@ -88,10 +89,12 @@ public class CommandPMine implements CommandExecutor {
                         return true;
                     }
                     if (args[1].equalsIgnoreCase("genbedrock")) {
-                        Location l = p.getLocation().clone();
-                        Pair<Integer,Integer> loc = new GridManager().getGridLocation(l);
-                        PMine pMine = GridManager.getPMine(loc.getLeft(),loc.getRight());
-                        pMine.genBedrock();
+                        if (debug) {
+                            Location l = p.getLocation().clone();
+                            Pair<Integer,Integer> loc = new GridManager().getGridLocation(l);
+                            PMine pMine = GridManager.getPMine(loc.getLeft(),loc.getRight());
+                            pMine.genBedrock();
+                        }
                         return true;
                     }
                 }

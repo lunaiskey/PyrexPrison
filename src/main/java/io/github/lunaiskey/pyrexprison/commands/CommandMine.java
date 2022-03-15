@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Deprecated
 public class CommandMine implements CommandExecutor {
     private static Map<UUID, MutableTriple<String,Location,Location>> createMap = new HashMap<>();
 

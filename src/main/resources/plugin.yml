@@ -5,9 +5,7 @@ api-version: 1.17
 authors: [ Lunaiskey ]
 description: Yet another prison plugin.
 commands:
-  mine:
-    usage: /<command>
-  mineadmin:
-    usage: /<command>
+  #mine:
+  #  usage: /<command>
   pmine:
     usage: /<command>

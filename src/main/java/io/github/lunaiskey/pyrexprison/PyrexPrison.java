@@ -78,7 +78,7 @@ public final class PyrexPrison extends JavaPlugin {
         gridManager = new GridManager();
         loadPMines();
 
-        Bukkit.getPluginCommand("mine").setExecutor(new CommandMine());
+        //Bukkit.getPluginCommand("mine").setExecutor(new CommandMine());
         Bukkit.getPluginCommand("pmine").setExecutor(new CommandPMine());
         Bukkit.getPluginManager().registerEvents(new PlayerEvents(),this);
         this.getLogger().severe("MINES AND PMINES ARE CURRENTLY IN AN UNSAFE STATE.");
