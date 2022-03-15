@@ -1,10 +1,9 @@
-package io.github.lunaiskey.lunixprisons.mines.generator;
+package io.github.lunaiskey.pyrexprison.mines.generator;
 
 import org.bukkit.block.Biome;
 import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.WorldInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MineBiomeProvider extends BiomeProvider {

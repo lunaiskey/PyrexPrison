@@ -1,12 +1,12 @@
-package io.github.lunaiskey.lunixprisons;
+package io.github.lunaiskey.pyrexprison;
 
-import io.github.lunaiskey.lunixprisons.commands.CommandMine;
-import io.github.lunaiskey.lunixprisons.commands.CommandPMine;
-import io.github.lunaiskey.lunixprisons.listeners.PlayerEvents;
-import io.github.lunaiskey.lunixprisons.mines.GlobalMine;
-import io.github.lunaiskey.lunixprisons.mines.GridManager;
-import io.github.lunaiskey.lunixprisons.mines.generator.PMineWorld;
-import io.github.lunaiskey.lunixprisons.mines.PMine;
+import io.github.lunaiskey.pyrexprison.commands.CommandMine;
+import io.github.lunaiskey.pyrexprison.commands.CommandPMine;
+import io.github.lunaiskey.pyrexprison.listeners.PlayerEvents;
+import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
+import io.github.lunaiskey.pyrexprison.mines.GridManager;
+import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import io.github.lunaiskey.pyrexprison.mines.PMine;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,9 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public final class LunixPrison extends JavaPlugin {
+public final class PyrexPrison extends JavaPlugin {
 
-    private static LunixPrison plugin;
+    private static PyrexPrison plugin;
+    private GridManager gridManager;
 
     private static Map<String, GlobalMine> mines;
     private int saveTaskID = -1;
@@ -74,11 +75,15 @@ public final class LunixPrison extends JavaPlugin {
                 this.getLogger().severe("Unable to load mine!");
             }
         }
+        gridManager = new GridManager();
         loadPMines();
 
         Bukkit.getPluginCommand("mine").setExecutor(new CommandMine());
         Bukkit.getPluginCommand("pmine").setExecutor(new CommandPMine());
         Bukkit.getPluginManager().registerEvents(new PlayerEvents(),this);
+        this.getLogger().severe("MINES AND PMINES ARE CURRENTLY IN AN UNSAFE STATE.");
+        this.getLogger().severe("MINES NEED TO BE SECURED, CURRENTLY ANYONE CAN CREATE MINES");
+        this.getLogger().severe("Mines and PMines commands arent arg length checked. will be fixed later.");
         this.getLogger().info(" version " + getDescription().getVersion() + " enabled!");
 
     }
@@ -89,7 +94,7 @@ public final class LunixPrison extends JavaPlugin {
         this.getLogger().info("LunixPrisons disabled");
     }
 
-    public static LunixPrison getPlugin() {
+    public static PyrexPrison getPlugin() {
         return plugin;
     }
 
@@ -100,7 +105,7 @@ public final class LunixPrison extends JavaPlugin {
             scheduler.cancelTask(saveTaskID);
         }
         //Schedule save
-        scheduler.scheduleSyncDelayedTask(LunixPrison.getPlugin(), this::save, 60 * 20L);
+        scheduler.scheduleSyncDelayedTask(PyrexPrison.getPlugin(), this::save, 60 * 20L);
     }
 
     private void save() {
@@ -168,5 +173,9 @@ public final class LunixPrison extends JavaPlugin {
 
     public static Map<String, GlobalMine> getMines() {
         return mines;
+    }
+
+    public GridManager getGridManager() {
+        return gridManager;
     }
 }

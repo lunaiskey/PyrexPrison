@@ -1,8 +1,7 @@
-package io.github.lunaiskey.lunixprisons.commands;
+package io.github.lunaiskey.pyrexprison.commands;
 
-import io.github.lunaiskey.lunixprisons.LunixPrison;
-import io.github.lunaiskey.lunixprisons.mines.GlobalMine;
-import io.github.lunaiskey.lunixprisons.mines.GridManager;
+import io.github.lunaiskey.pyrexprison.PyrexPrison;
+import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -28,7 +27,7 @@ public class CommandMine implements CommandExecutor {
             }
             if (args[0].equalsIgnoreCase("createtest")) {
                 sender.sendMessage("Creating test mine");
-                LunixPrison.getMines().put("test",new GlobalMine(0,125,0,50,175,50,"test", Bukkit.getWorld("world")));
+                PyrexPrison.getMines().put("test",new GlobalMine(0,125,0,50,175,50,"test", Bukkit.getWorld("world")));
             }
             if (args[0].equalsIgnoreCase("create")) {
                 sender.sendMessage("Creating '"+args[1]+"' mine");
@@ -36,7 +35,7 @@ public class CommandMine implements CommandExecutor {
                 p.sendMessage("Please select the opposite positions of the mine by left and then right clicking.");
             }
             if (args[0].equalsIgnoreCase("reset")) {
-                GlobalMine globalMine = LunixPrison.getMines().get(args[1]);
+                GlobalMine globalMine = PyrexPrison.getMines().get(args[1]);
                 if (globalMine != null) {
                     if (globalMine.reset()) {
                         sender.sendMessage("Mine '"+ globalMine.getName()+"' has been successfully reset.");

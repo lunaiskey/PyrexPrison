@@ -1,6 +1,6 @@
-name: LunixPrison
+name: PyrexPrison
 version: '${project.version}'
-main: io.github.lunaiskey.lunixprisons.LunixPrison
+main: io.github.lunaiskey.pyrexprison.PyrexPrison
 api-version: 1.17
 authors: [ Lunaiskey ]
 description: Yet another prison plugin.

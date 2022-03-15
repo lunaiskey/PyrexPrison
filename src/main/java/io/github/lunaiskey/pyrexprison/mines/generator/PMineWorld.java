@@ -1,8 +1,6 @@
-package io.github.lunaiskey.lunixprisons.mines.generator;
+package io.github.lunaiskey.pyrexprison.mines.generator;
 
-import io.github.lunaiskey.lunixprisons.mines.GlobalMine;
-import io.github.lunaiskey.lunixprisons.mines.generator.MineBiomeProvider;
-import io.github.lunaiskey.lunixprisons.mines.generator.MineWorldGenerator;
+import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;

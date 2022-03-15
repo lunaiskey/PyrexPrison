@@ -1,8 +1,8 @@
-package io.github.lunaiskey.lunixprisons.listeners;
+package io.github.lunaiskey.pyrexprison.listeners;
 
-import io.github.lunaiskey.lunixprisons.LunixPrison;
-import io.github.lunaiskey.lunixprisons.commands.CommandMine;
-import io.github.lunaiskey.lunixprisons.mines.GlobalMine;
+import io.github.lunaiskey.pyrexprison.PyrexPrison;
+import io.github.lunaiskey.pyrexprison.commands.CommandMine;
+import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.*;
 
 import org.bukkit.ChatColor;
@@ -50,7 +50,7 @@ public class PlayerEvents implements Listener {
                 // locations are both in the same world
                 if (CommandMine.checkValidMineCoords(mine.getMiddle(),mine.getRight())) {
                     p.sendMessage("Created '"+mine.getLeft()+"' mine");
-                    LunixPrison.getMines().put(mine.getLeft(),new GlobalMine(mine.getMiddle().getBlockX(),mine.getMiddle().getBlockY(),mine.getMiddle().getBlockZ(),mine.getRight().getBlockX(),mine.getRight().getBlockY(),mine.getRight().getBlockZ(),mine.getLeft(),mine.getRight().getWorld()));
+                    PyrexPrison.getMines().put(mine.getLeft(),new GlobalMine(mine.getMiddle().getBlockX(),mine.getMiddle().getBlockY(),mine.getMiddle().getBlockZ(),mine.getRight().getBlockX(),mine.getRight().getBlockY(),mine.getRight().getBlockZ(),mine.getLeft(),mine.getRight().getWorld()));
 
                     CommandMine.getCreateMap().remove(p.getUniqueId());
                 } else {

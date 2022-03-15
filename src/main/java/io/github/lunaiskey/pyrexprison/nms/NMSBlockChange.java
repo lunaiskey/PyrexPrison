@@ -1,4 +1,4 @@
-package io.github.lunaiskey.lunixprisons.nms;
+package io.github.lunaiskey.pyrexprison.nms;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public class Util {
+public class NMSBlockChange {
 
     private final org.bukkit.World bukkitWorld;
     private final Level world;
     private final HashMap<BlockPos, BlockState> modified = new HashMap<>();
 
-    public Util(org.bukkit.World bukkitWorld, Level world) {
+    public NMSBlockChange(org.bukkit.World bukkitWorld, Level world) {
         this.bukkitWorld = bukkitWorld;
         this.world = world;
     }
@@ -56,7 +56,6 @@ public class Util {
         for (BlockPos pos : modified.keySet()) {
             engine.checkBlock(pos);
         }
-
 
 
         //unload & load chunk data

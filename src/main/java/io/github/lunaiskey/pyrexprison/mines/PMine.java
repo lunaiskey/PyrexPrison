@@ -1,8 +1,8 @@
-package io.github.lunaiskey.lunixprisons.mines;
+package io.github.lunaiskey.pyrexprison.mines;
 
-import io.github.lunaiskey.lunixprisons.LunixPrison;
-import io.github.lunaiskey.lunixprisons.mines.generator.PMineWorld;
-import io.github.lunaiskey.lunixprisons.nms.Util;
+import io.github.lunaiskey.pyrexprison.PyrexPrison;
+import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import io.github.lunaiskey.pyrexprison.nms.NMSBlockChange;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -62,7 +62,7 @@ public class PMine {
     }
 
     public void save() {
-        File file = new File(LunixPrison.getPlugin().getDataFolder() + "/pmines/" + owner + ".yml");
+        File file = new File(PyrexPrison.getPlugin().getDataFolder() + "/pmines/" + owner + ".yml");
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("chunkX", chunkX);
@@ -71,7 +71,7 @@ public class PMine {
         try {
             data.save(file);
         } catch (IOException e) {
-            LunixPrison.getPlugin().getLogger().severe("Failed to save " + owner + "'s Pmine.");
+            PyrexPrison.getPlugin().getLogger().severe("Failed to save " + owner + "'s Pmine.");
             e.printStackTrace();
         }
     }
@@ -88,7 +88,7 @@ public class PMine {
 
         Random rand = new Random();
         Player p = Bukkit.getPlayer(owner);
-        Util util = new Util(world, ((CraftWorld) world).getHandle());
+        NMSBlockChange NMSBlockChange = new NMSBlockChange(world, ((CraftWorld) world).getHandle());
         for (int x = min.getBlockX(); x <= max.getBlockX(); ++x) {
             for (int y = min.getBlockY(); y <= max.getBlockY(); ++y) {
                 for (int z = min.getBlockZ(); z <= max.getBlockZ(); ++z) {
@@ -99,11 +99,11 @@ public class PMine {
                         case 3 -> mat = Material.ANDESITE;
                         case 4 -> mat = Material.DIORITE;
                     }
-                    util.setBlock(x,y,z,mat);
+                    NMSBlockChange.setBlock(x,y,z,mat);
                 }
             }
         }
-        util.update();
+        NMSBlockChange.update();
 
         resetting = false;
         return true;

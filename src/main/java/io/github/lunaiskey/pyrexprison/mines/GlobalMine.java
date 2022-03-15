@@ -1,9 +1,9 @@
-package io.github.lunaiskey.lunixprisons.mines;
+package io.github.lunaiskey.pyrexprison.mines;
 
 import java.util.*;
 import java.util.logging.Logger;
 
-import io.github.lunaiskey.lunixprisons.LunixPrison;
+import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -51,7 +51,7 @@ public class GlobalMine implements ConfigurationSerializable {
             throw new IllegalArgumentException("Error finding world");
         }
         if (world == null) {
-            Logger l = LunixPrison.getPlugin().getLogger();
+            Logger l = PyrexPrison.getPlugin().getLogger();
             l.severe("Unable to find a world!");
             l.severe("Attempted to load world named: " + me.get("world"));
             l.severe("Worlds listed: " + Bukkit.getWorlds());
@@ -88,7 +88,7 @@ public class GlobalMine implements ConfigurationSerializable {
         if (!resetting) {
             resetting = true;
         }
-        Bukkit.getScheduler().runTask(LunixPrison.getPlugin(),() -> {
+        Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> {
             boolean test = false;
             int temp;
             if (minX > maxX) {temp = maxX;maxX=minX;minX=temp;}
