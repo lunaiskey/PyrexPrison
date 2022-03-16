@@ -38,7 +38,7 @@ public class GridManager {
         Pair<Integer,Integer> pair = new ImmutablePair<>(chunkX,chunkZ);
         pMines.put(pair,mine);
         ownerPMines.put(owner,pair);
-
+        mine.save();
     }
 
     public void newPMine(UUID owner) {

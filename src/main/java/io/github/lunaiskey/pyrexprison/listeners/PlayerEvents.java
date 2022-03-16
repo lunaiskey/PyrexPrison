@@ -3,6 +3,11 @@ package io.github.lunaiskey.pyrexprison.listeners;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.commands.CommandMine;
 import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
+import io.github.lunaiskey.pyrexprison.mines.GridManager;
+import io.github.lunaiskey.pyrexprison.mines.PMine;
+import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.*;
 
 import org.bukkit.ChatColor;
@@ -12,11 +17,57 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerEvents implements Listener {
 
+    private PyrexPrison plugin;
+    private GridManager gridManager;
+
+    public PlayerEvents(PyrexPrison plugin) {
+        this.plugin = plugin;
+        gridManager = plugin.getGridManager();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBreak(BlockBreakEvent e) {
+        Player p = e.getPlayer();
+        Block block = e.getBlock();
+        if (e.isCancelled()) {
+            return;
+        }
+        if (block.getLocation().getWorld().getName().equals(PMineWorld.getWorldName())) {
+            Pair<Integer,Integer> gridLoc = gridManager.getGridLocation(block.getLocation());
+            PMine pMine = GridManager.getPMine(gridLoc.getLeft(), gridLoc.getRight());
+            if (pMine != null) {
+                pMine.addMineBlocks(1);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        PMine mine = GridManager.getPMine(p.getUniqueId());
+        if (mine == null) {
+            PyrexPrison.getPlugin().getGridManager().newPMine(p.getUniqueId());
+        }
+        if (mine != null) {
+            mine.scheduleReset();
+        }
+    }
+    @EventHandler
+    public void onLeave(PlayerQuitEvent e) {
+
+    }
+
+
+
+    /*
     @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
     public void onInteract(PlayerInteractEvent e) {
         //player is in create mine action
@@ -61,5 +112,6 @@ public class PlayerEvents implements Listener {
             e.setCancelled(true);
         }
     }
+     */
 
 }

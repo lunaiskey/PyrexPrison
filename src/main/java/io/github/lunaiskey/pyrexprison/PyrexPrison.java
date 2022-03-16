@@ -80,7 +80,7 @@ public final class PyrexPrison extends JavaPlugin {
 
         //Bukkit.getPluginCommand("mine").setExecutor(new CommandMine());
         Bukkit.getPluginCommand("pmine").setExecutor(new CommandPMine());
-        Bukkit.getPluginManager().registerEvents(new PlayerEvents(),this);
+        Bukkit.getPluginManager().registerEvents(new PlayerEvents(this),this);
         this.getLogger().severe("MINES AND PMINES ARE CURRENTLY IN AN UNSAFE STATE.");
         this.getLogger().severe("MINES NEED TO BE SECURED, CURRENTLY ANYONE CAN CREATE MINES");
         this.getLogger().severe("Mines and PMines commands arent arg length checked. will be fixed later.");
@@ -168,6 +168,11 @@ public final class PyrexPrison extends JavaPlugin {
             int chunkX = (int) map.get("chunkX");
             int chunkZ = (int) map.get("chunkZ");
             GridManager.newPMine(owner,chunkX,chunkZ);
+            if (Bukkit.getPlayer(owner) == null || !Bukkit.getPlayer(owner).isOnline()) {
+                continue;
+            } else {
+                GridManager.getPMine(owner).reset();
+            }
         }
     }
 

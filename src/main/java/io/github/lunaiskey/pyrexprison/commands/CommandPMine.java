@@ -58,14 +58,8 @@ public class CommandPMine implements CommandExecutor {
                     return true;
                 }
                 if (args[0].equalsIgnoreCase("tp")) {
-                    PMine pMine = GridManager.getPMine(p.getUniqueId());
-                    if (pMine == null) {
-                        PyrexPrison.getPlugin().getGridManager().newPMine(p.getUniqueId());
-                        pMine = GridManager.getPMine(p.getUniqueId());
-                        p.teleport(GridManager.getPMine(p.getUniqueId()).getCenter().add(0.5,1,0.5));
-                    } else {
-                        p.teleport(GridManager.getPMine(p.getUniqueId()).getCenter().add(0.5,1,0.5));
-                    }
+                    p.teleport(GridManager.getPMine(p.getUniqueId()).getCenter().add(0.5,1,0.5));
+                    p.sendMessage("Teleporting to mine...");
                     return true;
                 }
             } else if (args.length == 2){
