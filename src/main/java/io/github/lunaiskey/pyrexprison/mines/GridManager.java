@@ -97,7 +97,7 @@ public class GridManager {
     private Pair<Integer,Integer> nextGridLocation(Pair<Integer,Integer> lastIsland) {
         final int x = lastIsland.getLeft();
         final int z = lastIsland.getRight();
-        final MutablePair<Integer,Integer> nextPos = (MutablePair<Integer, Integer>) lastIsland;
+        final MutablePair<Integer,Integer> nextPos = new MutablePair<>(lastIsland.getLeft(),lastIsland.getRight());
         if (x < z) {
             if (-1 * x < z) {
                 nextPos.setLeft(nextPos.getLeft() + 1);

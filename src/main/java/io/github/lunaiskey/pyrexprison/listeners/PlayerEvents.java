@@ -1,27 +1,23 @@
 package io.github.lunaiskey.pyrexprison.listeners;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
-import io.github.lunaiskey.pyrexprison.commands.CommandMine;
-import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
+import io.github.lunaiskey.pyrexprison.gui.PyrexInv;
 import io.github.lunaiskey.pyrexprison.mines.GridManager;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
+import io.github.lunaiskey.pyrexprison.mines.PMineInv;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.*;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
 
 public class PlayerEvents implements Listener {
 
@@ -44,7 +40,10 @@ public class PlayerEvents implements Listener {
             Pair<Integer,Integer> gridLoc = gridManager.getGridLocation(block.getLocation());
             PMine pMine = GridManager.getPMine(gridLoc.getLeft(), gridLoc.getRight());
             if (pMine != null) {
-                pMine.addMineBlocks(1);
+                if (pMine.isInMineRegion(block.getLocation())) {
+                    e.setDropItems(false);
+                    pMine.addMineBlocks(1);
+                }
             }
         }
     }
@@ -63,6 +62,19 @@ public class PlayerEvents implements Listener {
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
 
+    }
+
+    @EventHandler
+    public void onClick(InventoryClickEvent e) {
+        if (e.getClickedInventory() != null) {
+            Inventory inv = e.getInventory();
+            if (inv.getHolder() instanceof PyrexInv) {
+                PyrexInv holder = (PyrexInv) inv.getHolder();
+                switch(holder.getInvType()) {
+                    case PMINE_MAIN -> new PMineInv().onClick(e);
+                }
+            }
+        }
     }
 
 

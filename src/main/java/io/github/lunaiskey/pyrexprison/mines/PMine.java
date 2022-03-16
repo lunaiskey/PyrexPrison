@@ -43,12 +43,11 @@ public class PMine {
         this.owner = owner;
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
-
-        world = Bukkit.getWorld(PMineWorld.getWorldName());
+        this.world = Bukkit.getWorld(PMineWorld.getWorldName());
         this.center = new Location(world, (225 * chunkX), 100, (225 * chunkZ));
-        min = new Location(center.getWorld(), center.getBlockX() - mineSize, 51, center.getBlockZ() - mineSize);
-        max = new Location(center.getWorld(), center.getBlockX() + mineSize, 100, center.getBlockZ() + mineSize);
-        maxMineBlocks = (mineSize* 2L +1)*(mineSize* 2L +1)*(max.getBlockY()-min.getBlockY()+1);
+        this.min = new Location(center.getWorld(), center.getBlockX() - mineSize, 51, center.getBlockZ() - mineSize);
+        this.max = new Location(center.getWorld(), center.getBlockX() + mineSize, 100, center.getBlockZ() + mineSize);
+        this.maxMineBlocks = (mineSize* 2L +1)*(mineSize* 2L +1)*(max.getBlockY()-min.getBlockY()+1);
         checkBlocksBroken();
         Player p = Bukkit.getPlayer(owner);
         if (p != null) {
@@ -107,6 +106,7 @@ public class PMine {
 
         Random rand = new Random();
         Player p = Bukkit.getPlayer(owner);
+        teleportToCenter();
         NMSBlockChange NMSBlockChange = new NMSBlockChange(world, ((CraftWorld) world).getHandle());
         for (int x = min.getBlockX(); x <= max.getBlockX(); ++x) {
             for (int y = min.getBlockY(); y <= max.getBlockY(); ++y) {
@@ -158,9 +158,26 @@ public class PMine {
         }
     }
 
+    public void teleportToCenter() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (isInMineRegion(p)) {
+                p.teleport(getCenter().add(0.5,1,0.5));
+            }
+        }
+    }
+
+    public void teleportToCenter(Player p) {
+        p.teleport(getCenter().add(0.5,1,0.5));
+        p.sendMessage("Teleporting to mine...");
+    }
+
+    public boolean isInMineRegion(Location loc) {
+        return (loc.getBlockY() >= min.getBlockY() && loc.getBlockY() <= max.getBlockY() && loc.getBlockX() >= min.getBlockX() && loc.getBlockX() <= max.getBlockX() && loc.getBlockZ() >= min.getBlockZ() && loc.getBlockZ() <= max.getBlockZ());
+    }
+
     public boolean isInMineRegion(Player p) {
         Location loc = p.getEyeLocation();
-        return (loc.getBlockY() > min.getBlockY() && loc.getBlockY() < max.getBlockY() && loc.getBlockX() > min.getBlockX() && loc.getBlockX() < max.getBlockX() && loc.getBlockZ() > min.getBlockZ() && loc.getBlockZ() < max.getBlockZ());
+        return isInMineRegion(loc);
     }
 
     public void increaseSize(int amount) {

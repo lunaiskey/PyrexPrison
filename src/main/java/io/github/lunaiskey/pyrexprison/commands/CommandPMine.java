@@ -3,6 +3,7 @@ package io.github.lunaiskey.pyrexprison.commands;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.mines.GridManager;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
+import io.github.lunaiskey.pyrexprison.mines.PMineInv;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Location;
@@ -27,6 +28,7 @@ public class CommandPMine implements CommandExecutor {
                         "/pmine reset",
                         "/pmine tp",
                         "/pmine fly",
+                        "/pmine menu",
                         "/pmine debug getposition",
                         "/pmine debug getgridposition"
                         //"/pmine debug genbedrock (DOESNT NEED TO RUN.)"
@@ -60,6 +62,10 @@ public class CommandPMine implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("tp")) {
                     p.teleport(GridManager.getPMine(p.getUniqueId()).getCenter().add(0.5,1,0.5));
                     p.sendMessage("Teleporting to mine...");
+                    return true;
+                }
+                if (args[0].equalsIgnoreCase("menu")) {
+                    p.openInventory(new PMineInv().getInv());
                     return true;
                 }
             } else if (args.length == 2){
