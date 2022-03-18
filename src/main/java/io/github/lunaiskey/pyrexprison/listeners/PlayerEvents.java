@@ -2,10 +2,10 @@ package io.github.lunaiskey.pyrexprison.listeners;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInv;
-import io.github.lunaiskey.pyrexprison.mines.GridManager;
-import io.github.lunaiskey.pyrexprison.mines.PMine;
-import io.github.lunaiskey.pyrexprison.mines.PMineInv;
+import io.github.lunaiskey.pyrexprison.mines.*;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.*;
 
@@ -15,9 +15,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+
+import java.math.BigInteger;
 
 public class PlayerEvents implements Listener {
 
@@ -68,10 +71,12 @@ public class PlayerEvents implements Listener {
     public void onClick(InventoryClickEvent e) {
         if (e.getClickedInventory() != null) {
             Inventory inv = e.getInventory();
+            Player p = (Player) e.getWhoClicked();
             if (inv.getHolder() instanceof PyrexInv) {
                 PyrexInv holder = (PyrexInv) inv.getHolder();
                 switch(holder.getInvType()) {
                     case PMINE_MAIN -> new PMineInv().onClick(e);
+                    case PMINE_BLOCKS -> new PMineInvBlocks(p).onClick(e);
                 }
             }
         }
@@ -103,27 +108,32 @@ public class PlayerEvents implements Listener {
         }
     }
 
+     */
+
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         Player p = e.getPlayer();
-        if (ChatColor.stripColor(e.getMessage()).equalsIgnoreCase("confirm")) {
-            //confirming create mine
-            if (CommandMine.getCreateMap().containsKey(p.getUniqueId())) {
-                MutableTriple<String,Location,Location> mine = CommandMine.getCreateMap().get(p.getUniqueId());
-                // locations are both in the same world
-                if (CommandMine.checkValidMineCoords(mine.getMiddle(),mine.getRight())) {
-                    p.sendMessage("Created '"+mine.getLeft()+"' mine");
-                    PyrexPrison.getMines().put(mine.getLeft(),new GlobalMine(mine.getMiddle().getBlockX(),mine.getMiddle().getBlockY(),mine.getMiddle().getBlockZ(),mine.getRight().getBlockX(),mine.getRight().getBlockY(),mine.getRight().getBlockZ(),mine.getLeft(),mine.getRight().getWorld()));
-
-                    CommandMine.getCreateMap().remove(p.getUniqueId());
-                } else {
-                    p.sendMessage("No or Invalid coordinates given, Exiting...");
-                    CommandMine.getCreateMap().remove(p.getUniqueId());
+        if (PMineInvBlocks.getEditMap().containsKey(p.getUniqueId())) {
+            try {
+                double percentage = Double.parseDouble(ChatColor.stripColor(e.getMessage()));
+                if (percentage < 0) {
+                    percentage = 0;
                 }
-            }
+                if (percentage > 100) {
+                    percentage = 100;
+                }
+                double newValue = (Math.floor(percentage)/100);
+                PMine mine = GridManager.getPMine(p.getUniqueId());
+
+                mine.getComposition().put(PMineInvBlocks.getEditMap().get(p.getUniqueId()),newValue);
+
+            } catch (NumberFormatException ignored) {}
             e.setCancelled(true);
+            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineInvBlocks(p).getInv()));
+            PMineInvBlocks.getEditMap().remove(p.getUniqueId());
         }
+
     }
-     */
+
 
 }

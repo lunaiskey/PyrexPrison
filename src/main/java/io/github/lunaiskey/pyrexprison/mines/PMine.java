@@ -16,10 +16,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class PMine {
 
@@ -37,9 +34,10 @@ public class PMine {
     private BukkitTask resetTask = null;
     private int resetTime = 10; // in minutes
     private float resetPercentage = 0.50F;
-    private short sizeUpgradeTier;
+    private int sizeUpgradeTier;
+    private Map<Material,Double> composition;
 
-    public PMine(UUID owner, int chunkX, int chunkZ, int mineSize) {
+    public PMine(UUID owner, int chunkX, int chunkZ, int mineSize, Map<Material,Double> comp) {
         this.owner = owner;
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
@@ -56,10 +54,23 @@ public class PMine {
                 reset();
             }
         }
+        if (comp == null || comp.isEmpty()) {
+            composition = new LinkedHashMap<>();
+            composition.put(Material.COBBLESTONE,1D);
+            composition.put(Material.STONE,1D);
+            composition.put(Material.GRANITE,1D);
+            composition.put(Material.POLISHED_GRANITE,1D);
+            composition.put(Material.DIORITE,1D);
+            composition.put(Material.POLISHED_DIORITE,1D);
+            composition.put(Material.ANDESITE,1D);
+            composition.put(Material.POLISHED_ANDESITE,1D);
+        } else {
+            this.composition = comp;
+        }
     }
 
     public PMine(UUID owner, int chunkX, int chunkZ) {
-        this(owner,chunkX,chunkZ,12);
+        this(owner,chunkX,chunkZ,12,null);
     }
 
 
@@ -79,6 +90,10 @@ public class PMine {
         return center.clone();
     }
 
+    public Map<Material, Double> getComposition() {
+        return composition;
+    }
+
     public void save() {
         File file = new File(PyrexPrison.getPlugin().getDataFolder() + "/pmines/" + owner + ".yml");
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
@@ -86,6 +101,9 @@ public class PMine {
         map.put("chunkX", chunkX);
         map.put("chunkZ", chunkZ);
         data.createSection("mine", map);
+        if (composition != null) {
+            data.createSection("blocks", this.composition);
+        }
         try {
             data.save(file);
         } catch (IOException e) {
@@ -108,17 +126,17 @@ public class PMine {
         Player p = Bukkit.getPlayer(owner);
         teleportToCenter();
         NMSBlockChange NMSBlockChange = new NMSBlockChange(world, ((CraftWorld) world).getHandle());
+        List<CompositionEntry> probabilityMap = mapComposition(composition);
         for (int x = min.getBlockX(); x <= max.getBlockX(); ++x) {
             for (int y = min.getBlockY(); y <= max.getBlockY(); ++y) {
                 for (int z = min.getBlockZ(); z <= max.getBlockZ(); ++z) {
-                    Material mat = null;
-                    switch (rand.nextInt(4) + 1) {
-                        case 1 -> mat = Material.STONE;
-                        case 2 -> mat = Material.GRANITE;
-                        case 3 -> mat = Material.ANDESITE;
-                        case 4 -> mat = Material.DIORITE;
+                    double r = rand.nextDouble();
+                    for (CompositionEntry ce : probabilityMap) {
+                        if (r <= ce.getChance()) {
+                            NMSBlockChange.setBlock(x,y,z,ce.getBlock());
+                            break;
+                        }
                     }
-                    NMSBlockChange.setBlock(x,y,z,mat);
                 }
             }
         }
@@ -232,5 +250,45 @@ public class PMine {
             }
         }
         blocksBroken = blocks;
+    }
+
+    //TAKEN FROM MINERESETLITE BY TEAM-VK
+    public static class CompositionEntry {
+        private Material block;
+        private double chance;
+
+        public CompositionEntry(Material block, double chance) {
+            this.block = block;
+            this.chance = chance;
+        }
+
+        public Material getBlock() {
+            return block;
+        }
+
+        double getChance() {
+            return chance;
+        }
+    }
+
+    //TAKEN FROM MINERESETLITE BY TEAM-VK
+    private static ArrayList<CompositionEntry> mapComposition(Map<Material, Double> compositionIn) {
+        ArrayList<CompositionEntry> probabilityMap = new ArrayList<>();
+        Map<Material, Double> composition = new HashMap<>(compositionIn);
+        double max = 0;
+        for (Map.Entry<Material, Double> entry : composition.entrySet()) {
+            max += entry.getValue();
+        }
+        if (max <= 0) {
+            composition.put(Material.COBBLESTONE, 1-max);
+            max = 1;
+        }
+        double i = 0;
+        for (Map.Entry<Material, Double> entry : composition.entrySet()) {
+            double v = entry.getValue() / max;
+            i += v;
+            probabilityMap.add(new CompositionEntry(entry.getKey(), i));
+        }
+        return probabilityMap;
     }
 }

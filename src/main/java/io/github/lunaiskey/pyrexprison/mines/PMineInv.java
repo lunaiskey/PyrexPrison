@@ -26,7 +26,7 @@ public class PMineInv {
         }
         inv.setItem(11,ItemBuilder.createItem(ChatColor.GREEN+"Teleport to Mine",Material.NETHER_STAR, List.of("",ChatColor.YELLOW+"Click to teleport!")));
         inv.setItem(13,ItemBuilder.createItem(ChatColor.GREEN+"Reset Mine",Material.CLOCK, List.of("", ChatColor.YELLOW+"Click to reset!")));
-        inv.setItem(15,ItemBuilder.createItem(ChatColor.GREEN+"Change Mine Blocks [WIP]",Material.GRASS_BLOCK, List.of("",ChatColor.YELLOW+"Click to view menu!")));
+        inv.setItem(15,ItemBuilder.createItem(ChatColor.GREEN+"Change Mine Blocks",Material.GRASS_BLOCK, List.of("",ChatColor.YELLOW+"Click to view menu!")));
 
         for (int i = 18; i < 27;i++) {
             inv.setItem(i, ItemBuilder.createItem(" ", Material.PURPLE_STAINED_GLASS_PANE,null));
@@ -48,14 +48,14 @@ public class PMineInv {
         PMine mine = GridManager.getPMine(p.getUniqueId());
         if (mine != null) {
             switch (slot) {
-                case 11 -> mine.teleportToCenter(p);
-                case 13 -> mine.reset();
-                case 15 -> p.sendMessage(ChatColor.LIGHT_PURPLE + "This feature is currently a work in progress, Please try again later.");
+                case 11 -> {mine.teleportToCenter(p);Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
+                case 13 -> {mine.reset();Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
+                case 15 -> Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineInvBlocks(p).getInv()));
+
             }
         } else {
             p.sendMessage(ChatColor.RED+"Your Mine hasn't loaded correctly, Please contact an administrator.");
         }
-        Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);
-
+        //p.sendMessage(ChatColor.LIGHT_PURPLE + "This feature is currently a work in progress, Please try again later.");
     }
 }

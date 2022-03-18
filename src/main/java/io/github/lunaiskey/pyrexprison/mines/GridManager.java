@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.ImmutablePair;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.MutablePair;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
@@ -33,12 +34,16 @@ public class GridManager {
         return new ImmutablePair<>((int) x,(int) z);
     }
 
-    public static void newPMine(UUID owner, int chunkX, int chunkZ) {
-        PMine mine = new PMine(owner, chunkX, chunkZ);
+    public static void newPMine(UUID owner, int chunkX, int chunkZ, Map<Material,Double> composition) {
+        PMine mine = new PMine(owner, chunkX, chunkZ,12,composition);
         Pair<Integer,Integer> pair = new ImmutablePair<>(chunkX,chunkZ);
         pMines.put(pair,mine);
         ownerPMines.put(owner,pair);
         mine.save();
+    }
+
+    public static void newPMine(UUID owner, int chunkX, int chunkZ) {
+        newPMine(owner,chunkX,chunkZ,null);
     }
 
     public void newPMine(UUID owner) {

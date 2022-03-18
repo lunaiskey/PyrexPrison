@@ -8,6 +8,7 @@ import io.github.lunaiskey.pyrexprison.mines.GridManager;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -167,7 +169,14 @@ public final class PyrexPrison extends JavaPlugin {
             UUID owner = UUID.fromString(file.getName().replace(".yml",""));
             int chunkX = (int) map.get("chunkX");
             int chunkZ = (int) map.get("chunkZ");
-            GridManager.newPMine(owner,chunkX,chunkZ);
+            Map<Material,Double> blocksMap = new LinkedHashMap<>();
+            if (fileConf.getConfigurationSection("blocks") != null) {
+                Map<String,Object> blocksMapRaw = fileConf.getConfigurationSection("blocks").getValues(false);
+                for (String str : blocksMapRaw.keySet()) {
+                    blocksMap.put(Material.getMaterial(str),(double) blocksMapRaw.get(str));
+                }
+            }
+            GridManager.newPMine(owner,chunkX,chunkZ,blocksMap);
             if (Bukkit.getPlayer(owner) == null || !Bukkit.getPlayer(owner).isOnline()) {
                 continue;
             } else {
