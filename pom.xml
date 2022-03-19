@@ -6,7 +6,7 @@
 
     <groupId>io.github.lunaiskey</groupId>
     <artifactId>PyrexPrison</artifactId>
-    <version>0.3</version>
+    <version>0.3.1</version>
     <packaging>jar</packaging>
 
     <name>PyrexPrison</name>

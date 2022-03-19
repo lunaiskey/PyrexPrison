@@ -3,9 +3,11 @@ version: '${project.version}'
 main: io.github.lunaiskey.pyrexprison.PyrexPrison
 api-version: 1.17
 authors: [ Lunaiskey ]
-description: Yet another prison plugin.
+description: Made for PyrexMC Prison.
 commands:
-  #mine:
-  #  usage: /<command>
   pmine:
+    usage: /<command>
+  tokens:
+    usage: /<command>
+  gems:
     usage: /<command>

@@ -4,8 +4,16 @@ import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInv;
 import io.github.lunaiskey.pyrexprison.mines.*;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import io.github.lunaiskey.pyrexprison.nms.NBTTags;
+import io.github.lunaiskey.pyrexprison.player.Currency;
+import io.github.lunaiskey.pyrexprison.player.CurrencyType;
+import io.github.lunaiskey.pyrexprison.player.PlayerManager;
+import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
+import io.github.lunaiskey.pyrexprison.util.Numbers;
+import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.*;
 
@@ -16,20 +24,25 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.UUID;
 
 public class PlayerEvents implements Listener {
 
     private PyrexPrison plugin;
     private GridManager gridManager;
+    private PlayerManager playerManager;
 
     public PlayerEvents(PyrexPrison plugin) {
         this.plugin = plugin;
         gridManager = plugin.getGridManager();
+        playerManager = plugin.getPlayerManager();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -61,6 +74,10 @@ public class PlayerEvents implements Listener {
         if (mine != null) {
             mine.scheduleReset();
         }
+        Map<UUID, PyrexPlayer> playerMap = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap();
+        if (!playerMap.containsKey(p.getUniqueId())) {
+            PyrexPrison.getPlugin().getPlayerManager().createPyrexPlayer(p.getUniqueId());
+        }
     }
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
@@ -84,31 +101,24 @@ public class PlayerEvents implements Listener {
 
 
 
-    /*
-    @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent e) {
-        //player is in create mine action
         Player p = e.getPlayer();
-
-        if (CommandMine.getCreateMap().containsKey(e.getPlayer().getUniqueId())) {
-            MutableTriple<String, Location, Location> tuple = CommandMine.getCreateMap().get(p.getUniqueId());
-            if (e.getClickedBlock() != null) {
-                Location loc = e.getClickedBlock().getLocation();
-                if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-                    tuple.setMiddle(e.getClickedBlock().getLocation());
-                    p.sendMessage("Pos1 set at "+loc.getX()+","+loc.getY()+","+loc.getZ());
-
-                }
-                if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                    tuple.setRight(e.getClickedBlock().getLocation());
-                    p.sendMessage("Pos2 set at "+loc.getX()+","+loc.getY()+","+loc.getZ());
+        if (e.getItem() != null && e.getItem().getType() != Material.AIR) {
+            if (NBTTags.hasCustomTagContainer(e.getItem(),"voucher")) {
+                Pair<CurrencyType,Long> amountPair = NBTTags.getVoucherValue(e.getItem());
+                Currency.giveCurrency(p.getUniqueId(),amountPair.getLeft(),amountPair.getRight());
+                e.getItem().setAmount(e.getItem().getAmount()-1);
+                switch(amountPair.getLeft()) {
+                    case TOKENS -> p.sendMessage(StringUtil.color("&eRedeemed &f"+ Numbers.formattedNumber(amountPair.getRight())+" &eTokens."));
+                    case GEMS -> p.sendMessage(StringUtil.color("&aRedeemed &f"+Numbers.formattedNumber(amountPair.getRight())+" &aGems."));
                 }
             }
-
         }
     }
 
-     */
+
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
