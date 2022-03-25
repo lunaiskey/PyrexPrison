@@ -10,6 +10,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,20 +23,16 @@ public class Currency {
      * @param amount amount of currency to take
      * @return amount that was given
      */
-    public static double giveCurrency(UUID pUUID, CurrencyType type,  double amount) {
+    public static void giveCurrency(UUID pUUID, CurrencyType type, long amount) {
         if (amount < 0) {
-            return 0;
+            return;
         }
-        DecimalFormat df = new DecimalFormat("#.##");
-        df.setRoundingMode(RoundingMode.DOWN);
-        double newAmount = Double.parseDouble(df.format(amount));
         PyrexPlayer pPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(pUUID);
         switch (type) {
-            case TOKENS -> pPlayer.giveTokens(newAmount);
-            case GEMS -> pPlayer.giveGems(newAmount);
-            default -> {return 0;}
+            case TOKENS -> pPlayer.giveTokens(amount);
+            case GEMS -> pPlayer.giveGems(amount);
+            case PYREX_POINTS -> pPlayer.givePyrexPoints(amount);
         }
-        return newAmount;
     }
 
     /**
@@ -45,49 +42,47 @@ public class Currency {
      * @param amount amount of currency to take
      * @return amount that was taken
      */
-    public static double takeCurrency(UUID pUUID, CurrencyType type,  double amount) {
+    public static void takeCurrency(UUID pUUID, CurrencyType type,  long amount) {
         if (amount < 0) {
-            return 0;
+            return;
         }
-        DecimalFormat df = new DecimalFormat("#.##");
-        df.setRoundingMode(RoundingMode.DOWN);
-        double newAmount = Double.parseDouble(df.format(amount));
         PyrexPlayer pPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(pUUID);
         switch (type) {
             case TOKENS -> {
-                if (newAmount >= pPlayer.getTokens()) {
+                if (amount >= pPlayer.getTokens()) {
                     pPlayer.setTokens(0);
                     break;
                 }
-                pPlayer.takeTokens(newAmount);}
+                pPlayer.takeTokens(amount);}
             case GEMS -> {
-                if (newAmount >= pPlayer.getGems()) {
+                if (amount >= pPlayer.getGems()) {
                     pPlayer.setGems(0);
                     break;
                 }
-                pPlayer.takeTokens(newAmount);}
-            default -> {return 0;}
+                pPlayer.takeGems(amount);}
+            case PYREX_POINTS -> {
+                if (amount >= pPlayer.getPyrexPoints()) {
+                    pPlayer.setPyrexPoints(0);
+                    break;
+                }
+                pPlayer.takePyrexPoints(amount);}
         }
-        return newAmount;
     }
 
-    public static double setCurrency(UUID pUUID, CurrencyType type,  double amount) {
-        double newAmount = 0;
-        DecimalFormat df = new DecimalFormat("#.##");
-        df.setRoundingMode(RoundingMode.DOWN);
+    public static void setCurrency(UUID pUUID, CurrencyType type, long amount) {
+        long newAmount = 0;
         if (amount > 0) {
-            newAmount = Double.parseDouble(df.format(amount));
+            newAmount = amount;
         }
         PyrexPlayer pPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(pUUID);
         switch (type) {
             case TOKENS -> pPlayer.setTokens(newAmount);
             case GEMS -> pPlayer.setGems(newAmount);
-            default -> {return 0;}
+            case PYREX_POINTS -> pPlayer.setPyrexPoints(newAmount);
         }
-        return newAmount;
     }
 
-    public static double getAcceptedAmount(double original) {
+    private static double getAcceptedAmount(double original) {
         if (original < 0) {
             return 0;
         }
@@ -99,11 +94,40 @@ public class Currency {
     public static ItemStack getWithdrawVoucher(long amount, CurrencyType type) {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(StringUtil.color("   &7- &6&lBank Note &7-"));
+        List<String> lore = new ArrayList<>(List.of(
+                " ",
+                "&7• Type: %type%",
+                "&7• Amount: %amount%",
+                " ",
+                "&eRight Click to redeem!"));
+        String strType = "";
+        String strAmount = CurrencyType.getUnicode(type)+Numbers.formattedNumber(amount);
         switch (type) {
-            case TOKENS -> meta.setDisplayName(StringUtil.color("&e⛁&f"+ Numbers.formattedNumber(amount)+" &e&lNote"));
-            case GEMS -> meta.setDisplayName(StringUtil.color("&a❈&f"+Numbers.formattedNumber(amount)+" &a&lNote"));
+            case TOKENS -> {
+                strType = "&eTokens";
+                strAmount = "&e"+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount);
+            }
+            case GEMS -> {
+                strType = "&aGems";
+                strAmount = "&a"+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount);
+            }
+            case PYREX_POINTS -> {
+                strType = "&dPyrex Points";
+                strAmount = "&d"+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount);
+            }
         }
-        meta.setLore(List.of(StringUtil.color("&eRight Click to redeem!")));
+        for (int i = 0;i<lore.size();i++) {
+            String line = lore.get(i);
+            if (line.contains("%type%")) {
+                line = line.replace("%type%",strType);
+            }
+            if (line.contains("%amount%")) {
+                line = line.replace("%amount%",strAmount);
+            }
+            lore.set(i,StringUtil.color(line));
+        }
+        meta.setLore(lore);
         item.setItemMeta(meta);
         item = NBTTags.setCurrencyVoucherTags(item,amount,type);
         return item;

@@ -73,6 +73,10 @@ public class GridManager {
         return getPMinesMap().containsKey(new ImmutablePair<>(chunkX,chunkZ));
     }
 
+    public static Map<UUID, Pair<Integer, Integer>> getOwnerPMines() {
+        return ownerPMines;
+    }
+
     /*
     public Location getClosestIsland(Location location) {
         long x = Math.round((double) location.getBlockX() / Settings.islandDistance) * Settings.islandDistance + Settings.islandXOffset;

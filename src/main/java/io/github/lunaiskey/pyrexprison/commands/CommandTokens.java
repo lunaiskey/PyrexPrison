@@ -29,9 +29,9 @@ public class CommandTokens implements CommandExecutor {
     public boolean onCommand(CommandSender sender,  Command command,  String label,  String[] args) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
-            double tokens = playerManager.getPlayerMap().get(p.getUniqueId()).getTokens();
+            long tokens = playerManager.getPlayerMap().get(p.getUniqueId()).getTokens();
             if (args.length == 0) {
-                p.sendMessage(StringUtil.color("&eYou have "+unicode+"&f"+Numbers.formattedNumber((long) tokens)+"&e tokens."));
+                p.sendMessage(StringUtil.color("&eYou have "+unicode+"&f"+Numbers.formattedNumber(tokens)+"&e Tokens."));
                 return true;
             }
             if (args[0].equalsIgnoreCase("give")) {
@@ -49,7 +49,8 @@ public class CommandTokens implements CommandExecutor {
                     return true;
                 }
                 try {
-                    double amount = Currency.giveCurrency(givePlayer.getUniqueId(), currencyType,Double.parseDouble(args[2]));
+                    long amount = (long) Double.parseDouble(args[2]);
+                    Currency.giveCurrency(givePlayer.getUniqueId(), currencyType,amount);
                     if (amount == 0) {
                         p.sendMessage(StringUtil.color("&cAmount has to be more then 0"));
                         return true;
@@ -75,7 +76,8 @@ public class CommandTokens implements CommandExecutor {
                     return true;
                 }
                 try {
-                    double amount = Currency.takeCurrency(givePlayer.getUniqueId(), currencyType,Double.parseDouble(args[2]));
+                    long amount = (long) Double.parseDouble(args[2]);
+                    Currency.takeCurrency(givePlayer.getUniqueId(), currencyType,amount);
                     if (amount == 0) {
                         p.sendMessage(StringUtil.color("&cAmount has to be more then 0."));
                         return true;
@@ -101,7 +103,8 @@ public class CommandTokens implements CommandExecutor {
                     return true;
                 }
                 try {
-                    double amount = Currency.setCurrency(givePlayer.getUniqueId(), currencyType,Double.parseDouble(args[2]));
+                    long amount = (long) Double.parseDouble(args[2]);
+                    Currency.setCurrency(givePlayer.getUniqueId(), currencyType,amount);
                     if (amount < 0) {
                         p.sendMessage(StringUtil.color("&cAmount has to be positive."));
                         return true;
@@ -131,20 +134,20 @@ public class CommandTokens implements CommandExecutor {
                     return true;
                 }
                 try {
-                    double giverAmount = Currency.getAcceptedAmount(Double.parseDouble(args[2]));
-                    double giverBalance = playerManager.getPlayerMap().get(p.getUniqueId()).getTokens();
+                    long amount = (long) Double.parseDouble(args[2]);
+                    long balance = playerManager.getPlayerMap().get(p.getUniqueId()).getTokens();
 
-                    if (giverBalance < giverAmount) {
+                    if (amount > balance) {
                         p.sendMessage(StringUtil.color("&cInsufficient Tokens."));
                         return true;
                     }
-                    double amount = Currency.giveCurrency(givePlayer.getUniqueId(), currencyType,giverAmount);
-                    double remove = Currency.takeCurrency(p.getUniqueId(), currencyType,giverAmount);
-                    if (giverAmount == 0) {
+                    Currency.giveCurrency(givePlayer.getUniqueId(), currencyType,amount);
+                    Currency.takeCurrency(p.getUniqueId(), currencyType,amount);
+                    if (amount == 0) {
                         p.sendMessage(StringUtil.color("&cAmount has to be more then 0."));
                         return true;
                     }
-                    p.sendMessage(StringUtil.color("&ePaid "+unicode+"&f"+Numbers.formattedNumber((long)amount)+"&e Tokens to &f"+givePlayer.getName()+"&e."));
+                    p.sendMessage(StringUtil.color("&ePaid "+unicode+"&f"+Numbers.formattedNumber(amount)+"&e Tokens to &f"+givePlayer.getName()+"&e."));
                 } catch (NumberFormatException ex) {
                     p.sendMessage(StringUtil.color("&cAmount has to be a valid number."));
                 }
@@ -156,8 +159,8 @@ public class CommandTokens implements CommandExecutor {
                     return true;
                 }
                 try {
-                    long amount = (long) Currency.getAcceptedAmount(Double.parseDouble(args[1]));
-                    double playerBalance = playerManager.getPlayerMap().get(p.getUniqueId()).getTokens();
+                    long amount = (long) Double.parseDouble(args[1]);
+                    long playerBalance = playerManager.getPlayerMap().get(p.getUniqueId()).getTokens();
 
                     if (playerBalance < amount) {
                         p.sendMessage(StringUtil.color("&cInsufficient Tokens."));

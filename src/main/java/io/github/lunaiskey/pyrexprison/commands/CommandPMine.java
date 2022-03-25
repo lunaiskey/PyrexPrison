@@ -5,6 +5,7 @@ import io.github.lunaiskey.pyrexprison.mines.GridManager;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
 import io.github.lunaiskey.pyrexprison.mines.PMineInv;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -66,6 +67,10 @@ public class CommandPMine implements CommandExecutor {
                 }
                 if (args[0].equalsIgnoreCase("menu")) {
                     p.openInventory(new PMineInv().getInv());
+                    return true;
+                }
+                if (args[0].equalsIgnoreCase("getpickaxe")) {
+                    p.getInventory().addItem(new PyrexPickaxe().getItemStack());
                     return true;
                 }
             } else if (args.length == 2){

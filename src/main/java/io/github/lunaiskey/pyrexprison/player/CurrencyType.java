@@ -3,7 +3,7 @@ package io.github.lunaiskey.pyrexprison.player;
 public enum CurrencyType {
     TOKENS,
     GEMS,
-    CRYSTALS
+    PYREX_POINTS,
     ;
 
     public static String getUnicode(CurrencyType type) {
@@ -11,6 +11,7 @@ public enum CurrencyType {
         switch (type) {
             case TOKENS -> unicode = "⛁";
             case GEMS -> unicode = "❈";
+            case PYREX_POINTS -> unicode = "☀";
             default -> unicode = "$";
         }
         return unicode;

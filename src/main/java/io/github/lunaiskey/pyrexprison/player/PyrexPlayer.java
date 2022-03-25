@@ -1,6 +1,7 @@
 package io.github.lunaiskey.pyrexprison.player;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -12,26 +13,33 @@ import java.util.UUID;
 
 public class PyrexPlayer {
 
-    private double tokens;
-    private double gems;
+    private long tokens;
+    private long gems;
+    private long pyrexPoints;
     private int rank;
     private final UUID pUUID;
+    private PyrexPickaxe pickaxe = new PyrexPickaxe();
 
 
-    public PyrexPlayer(UUID pUUID, double tokens, double gems, int rank) {
+    public PyrexPlayer(UUID pUUID, long tokens, long gems, long pyrexPoints, int rank) {
         this.pUUID = pUUID;
         this.tokens = tokens;
         this.gems = gems;
+        this.pyrexPoints = pyrexPoints;
         this.rank = rank;
         save();
     }
 
-    public double getGems() {
+    public long getGems() {
         return gems;
     }
 
-    public double getTokens() {
+    public long getTokens() {
         return tokens;
+    }
+
+    public long getPyrexPoints() {
+        return pyrexPoints;
     }
 
     public int getRank() {
@@ -42,31 +50,42 @@ public class PyrexPlayer {
         return pUUID;
     }
 
-    public void setGems(double gems) {
+    public PyrexPickaxe getPickaxe() {
+        return pickaxe;
+    }
+
+    public void setGems(long gems) {
         this.gems = gems;
     }
 
-    public void setTokens(double tokens) {
+    public void setTokens(long tokens) {
         this.tokens = tokens;
+    }
+
+    public void setPyrexPoints(long pyrexPoints) {
+        this.pyrexPoints = pyrexPoints;
     }
 
     public void setRank(int rank) {
         this.rank = rank;
     }
 
-    public void giveTokens(double tokens) {
-        this.tokens += tokens;
-    }
-
-    public void giveGems(double gems) {
+    public void giveTokens(long tokens) {this.tokens += tokens;}
+    public void giveGems(long gems) {
         this.gems += gems;
     }
+    public void givePyrexPoints(long pyrexPoints) {
+        this.pyrexPoints += pyrexPoints;
+    }
 
-    public void takeTokens(double tokens) {
+    public void takeTokens(long tokens) {
         this.tokens -= tokens;
     }
-    public void takeGems(double gems) {
+    public void takeGems(long gems) {
         this.gems -= gems;
+    }
+    public void takePyrexPoints(long pyrexPoints) {
+        this.pyrexPoints -= pyrexPoints;
     }
 
     public void save() {
@@ -75,6 +94,7 @@ public class PyrexPlayer {
         Map<String, Object> currencyMap = new LinkedHashMap<>();
         currencyMap.put("tokens", tokens);
         currencyMap.put("gems", gems);
+        currencyMap.put("pyrexpoints", pyrexPoints);
         data.createSection("currencies", currencyMap);
         try {
             data.save(file);

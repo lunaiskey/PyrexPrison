@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
@@ -88,6 +89,14 @@ public class PMine {
 
     public Location getCenter() {
         return center.clone();
+    }
+
+    public Location getMin() {
+        return min;
+    }
+
+    public Location getMax() {
+        return max;
     }
 
     public Map<Material, Double> getComposition() {
@@ -179,13 +188,13 @@ public class PMine {
     public void teleportToCenter() {
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (isInMineRegion(p)) {
-                p.teleport(getCenter().add(0.5,1,0.5));
+                p.teleport(getCenter().add(0.5,1,0.5), PlayerTeleportEvent.TeleportCause.PLUGIN);
             }
         }
     }
 
     public void teleportToCenter(Player p) {
-        p.teleport(getCenter().add(0.5,1,0.5));
+        p.teleport(getCenter().add(0.5,1,0.5),PlayerTeleportEvent.TeleportCause.PLUGIN);
         p.sendMessage("Teleporting to mine...");
     }
 

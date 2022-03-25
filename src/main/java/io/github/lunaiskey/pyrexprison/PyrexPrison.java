@@ -2,12 +2,14 @@ package io.github.lunaiskey.pyrexprison;
 
 import io.github.lunaiskey.pyrexprison.commands.CommandGems;
 import io.github.lunaiskey.pyrexprison.commands.CommandPMine;
+import io.github.lunaiskey.pyrexprison.commands.CommandPyrexPoints;
 import io.github.lunaiskey.pyrexprison.commands.CommandTokens;
 import io.github.lunaiskey.pyrexprison.listeners.PlayerEvents;
 import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
 import io.github.lunaiskey.pyrexprison.mines.GridManager;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
+import io.github.lunaiskey.pyrexprison.pickaxe.PickaxeHandler;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import org.bukkit.Bukkit;
@@ -15,6 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
@@ -31,6 +34,7 @@ public final class PyrexPrison extends JavaPlugin {
     private static PyrexPrison plugin;
     private GridManager gridManager;
     private PlayerManager playerManager;
+    private PickaxeHandler pickaxeHandler;
 
     private static Map<String, GlobalMine> mines;
     private int saveTaskID = -1;
@@ -83,18 +87,23 @@ public final class PyrexPrison extends JavaPlugin {
         }
         gridManager = new GridManager();
         playerManager = new PlayerManager();
+        pickaxeHandler = new PickaxeHandler();
         loadPMines();
         loadPlayers();
+        checkPlayerData();
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PyrexExpansion(this).register();
+        }
 
         //Bukkit.getPluginCommand("mine").setExecutor(new CommandMine());
         Bukkit.getPluginCommand("pmine").setExecutor(new CommandPMine());
         Bukkit.getPluginCommand("tokens").setExecutor(new CommandTokens(this));
         Bukkit.getPluginCommand("gems").setExecutor(new CommandGems(this));
+        Bukkit.getPluginCommand("pyrexpoints").setExecutor(new CommandPyrexPoints(this));
         Bukkit.getPluginManager().registerEvents(new PlayerEvents(this),this);
-        this.getLogger().severe("MINES AND PMINES ARE CURRENTLY IN AN UNSAFE STATE.");
-        this.getLogger().severe("MINES NEED TO BE SECURED, CURRENTLY ANYONE CAN CREATE MINES");
-        this.getLogger().severe("Mines and PMines commands arent arg length checked. will be fixed later.");
-        this.getLogger().info(" version " + getDescription().getVersion() + " enabled!");
+        this.getLogger().severe("Permission checks aren't implemented yet.");
+        this.getLogger().severe("Please don't use this build on production");
+        this.getLogger().info("version " + getDescription().getVersion() + " enabled!");
 
     }
 
@@ -148,11 +157,6 @@ public final class PyrexPrison extends JavaPlugin {
             this.getLogger().severe("Could not make plugin folder.");
             return false;
         }
-        File mineFolder = new File(getDataFolder(), "mines");
-        if (!mineFolder.exists() && !mineFolder.mkdir()) {
-            this.getLogger().severe("Could not make mine folder.");
-            return false;
-        }
         File pmineFolder = new File(getDataFolder(), "pmines");
         if (!pmineFolder.exists() && !pmineFolder.mkdir()) {
             this.getLogger().severe("Could not make PMine folder.");
@@ -193,12 +197,11 @@ public final class PyrexPrison extends JavaPlugin {
                 }
             }
             GridManager.newPMine(owner,chunkX,chunkZ,blocksMap);
-            if (Bukkit.getPlayer(owner) == null || !Bukkit.getPlayer(owner).isOnline()) {
-                continue;
-            } else {
+            if (Bukkit.getPlayer(owner) != null) {
                 GridManager.getPMine(owner).reset();
             }
         }
+
     }
 
     private void loadPlayers() {
@@ -208,9 +211,21 @@ public final class PyrexPrison extends JavaPlugin {
             FileConfiguration fileConf = YamlConfiguration.loadConfiguration(file);
             UUID pUUID = UUID.fromString(file.getName().replace(".yml",""));
             Map<String,Object> currencyMap = fileConf.getConfigurationSection("currencies").getValues(false);
-            double tokens = (double) currencyMap.getOrDefault("tokens",0);
-            double gems = (double) currencyMap.getOrDefault("gems",0);
-            getPlayerManager().getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,tokens,gems,0));
+            long tokens = ((Number) currencyMap.getOrDefault("tokens",0L)).longValue();
+            long gems = ((Number) currencyMap.getOrDefault("gems",0L)).longValue();
+            long pyrexPoints = ((Number) currencyMap.getOrDefault("pyrexpoints",0L)).longValue();
+            getPlayerManager().getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,tokens,gems,pyrexPoints,0));
+        }
+    }
+
+    private void checkPlayerData() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (!playerManager.getPlayerMap().containsKey(p.getUniqueId())) {
+                playerManager.createPyrexPlayer(p.getUniqueId());
+            }
+            if (GridManager.getPMine(p.getUniqueId()) == null) {
+                gridManager.newPMine(p.getUniqueId());
+            }
         }
     }
 
@@ -224,5 +239,9 @@ public final class PyrexPrison extends JavaPlugin {
 
     public PlayerManager getPlayerManager() {
         return playerManager;
+    }
+
+    public PickaxeHandler getPickaxeHandler() {
+        return pickaxeHandler;
     }
 }

@@ -3,6 +3,8 @@ version: '${project.version}'
 main: io.github.lunaiskey.pyrexprison.PyrexPrison
 api-version: 1.17
 authors: [ Lunaiskey ]
+softdepend:
+  - PlaceholderAPI
 description: Made for PyrexMC Prison.
 commands:
   pmine:
@@ -10,4 +12,6 @@ commands:
   tokens:
     usage: /<command>
   gems:
+    usage: /<command>
+  pyrexpoints:
     usage: /<command>

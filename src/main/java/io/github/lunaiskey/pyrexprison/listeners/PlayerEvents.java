@@ -5,14 +5,19 @@ import io.github.lunaiskey.pyrexprison.gui.PyrexInv;
 import io.github.lunaiskey.pyrexprison.mines.*;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import io.github.lunaiskey.pyrexprison.player.Currency;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.*;
@@ -22,12 +27,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -49,6 +53,8 @@ public class PlayerEvents implements Listener {
     public void onBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
         Block block = e.getBlock();
+        ItemStack mainHand = e.getPlayer().getInventory().getItemInMainHand();
+        PyrexPickaxe pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).getPickaxe();
         if (e.isCancelled()) {
             return;
         }
@@ -58,7 +64,17 @@ public class PlayerEvents implements Listener {
             if (pMine != null) {
                 if (pMine.isInMineRegion(block.getLocation())) {
                     e.setDropItems(false);
+                    e.setExpToDrop(0);
                     pMine.addMineBlocks(1);
+                }
+            }
+        }
+        CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(mainHand);
+        if (pyrexDataMap.contains("id")) {
+            // is custom pickaxe
+            if (pyrexDataMap.getString("id").equals("PyrexPickaxe")) {
+                for (EnchantType type : pickaxe.getEnchants().keySet()) {
+                    PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onBlockBreak(e,pickaxe.getEnchants().get(type));
                 }
             }
         }
@@ -99,9 +115,6 @@ public class PlayerEvents implements Listener {
         }
     }
 
-
-
-
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent e) {
         Player p = e.getPlayer();
@@ -111,14 +124,13 @@ public class PlayerEvents implements Listener {
                 Currency.giveCurrency(p.getUniqueId(),amountPair.getLeft(),amountPair.getRight());
                 e.getItem().setAmount(e.getItem().getAmount()-1);
                 switch(amountPair.getLeft()) {
-                    case TOKENS -> p.sendMessage(StringUtil.color("&eRedeemed &f"+ Numbers.formattedNumber(amountPair.getRight())+" &eTokens."));
-                    case GEMS -> p.sendMessage(StringUtil.color("&aRedeemed &f"+Numbers.formattedNumber(amountPair.getRight())+" &aGems."));
+                    case TOKENS -> p.sendMessage(StringUtil.color("&eRedeemed "+CurrencyType.getUnicode(amountPair.getLeft())+"&f"+ Numbers.formattedNumber(amountPair.getRight())+" &eTokens."));
+                    case GEMS -> p.sendMessage(StringUtil.color("&aRedeemed "+CurrencyType.getUnicode(amountPair.getLeft())+"&f"+Numbers.formattedNumber(amountPair.getRight())+" &aGems."));
+                    case PYREX_POINTS -> p.sendMessage(StringUtil.color("&dRedeemed "+CurrencyType.getUnicode(amountPair.getLeft())+"&f"+Numbers.formattedNumber(amountPair.getRight())+" &dPyrex Points."));
                 }
             }
         }
     }
-
-
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
@@ -134,13 +146,65 @@ public class PlayerEvents implements Listener {
                 }
                 double newValue = (Math.floor(percentage)/100);
                 PMine mine = GridManager.getPMine(p.getUniqueId());
-
                 mine.getComposition().put(PMineInvBlocks.getEditMap().get(p.getUniqueId()),newValue);
-
             } catch (NumberFormatException ignored) {}
             e.setCancelled(true);
             Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineInvBlocks(p).getInv()));
             PMineInvBlocks.getEditMap().remove(p.getUniqueId());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player) {
+            Player p = (Player) e.getEntity();
+            if (p.getLocation().getWorld().getName().equals(PMineWorld.getWorldName())) {
+                switch (e.getCause()) {
+                    case FALL -> e.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        Player p = e.getPlayer();
+        Location to = e.getTo();
+        if (to.getWorld().getName().equals(PMineWorld.getWorldName())) {
+            PMine mine = GridManager.getPMine(p.getUniqueId());
+            if (mine != null) {
+                if (to.getBlockY() < to.getWorld().getMinHeight()) {
+                    p.getVelocity().setY(0);
+                    e.setTo(mine.getCenter().add(0.5,1,0.5));
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEquip(PlayerItemHeldEvent e) {
+
+        Player p = e.getPlayer();
+        ItemStack oldItem = p.getInventory().getItem(e.getPreviousSlot()) != null ? p.getInventory().getItem(e.getPreviousSlot()) : new ItemStack(Material.AIR);
+        ItemStack newItem = p.getInventory().getItem(e.getNewSlot()) != null ? p.getInventory().getItem(e.getNewSlot()) : new ItemStack(Material.AIR);
+        CompoundTag oldMap = NBTTags.getPyrexDataMap(oldItem);
+        CompoundTag newMap = NBTTags.getPyrexDataMap(newItem);
+        PyrexPickaxe pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).getPickaxe();
+        if (oldMap.contains("id")) {
+            // is custom pickaxe
+            if (oldMap.getString("id").equals("PyrexPickaxe")) {
+                for (EnchantType type : pickaxe.getEnchants().keySet()) {
+                    PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onUnEquip(p,oldItem,pickaxe.getEnchants().get(type));
+                }
+            }
+        }
+        if (newMap.contains("id")) {
+            // is custom pickaxe
+            if (newMap.getString("id").equals("PyrexPickaxe")) {
+                for (EnchantType type : pickaxe.getEnchants().keySet()) {
+                    PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onEquip(p,newItem,pickaxe.getEnchants().get(type));
+                }
+            }
         }
 
     }

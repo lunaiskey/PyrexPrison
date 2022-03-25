@@ -26,7 +26,7 @@ public class PlayerManager {
     }
 
     public void createPyrexPlayer(UUID pUUID) {
-        playerMap.put(pUUID,new PyrexPlayer(pUUID,0,0,0));
+        playerMap.put(pUUID,new PyrexPlayer(pUUID,0,0,0,0));
     }
 
 
