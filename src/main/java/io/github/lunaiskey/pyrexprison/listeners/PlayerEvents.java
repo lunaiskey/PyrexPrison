@@ -5,9 +5,11 @@ import io.github.lunaiskey.pyrexprison.gui.PyrexInv;
 import io.github.lunaiskey.pyrexprison.mines.*;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantInv;
 import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
-import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
 import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
+import io.github.lunaiskey.pyrexprison.pickaxe.AddLevelsInv;
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantPyrexInv;
 import io.github.lunaiskey.pyrexprison.player.Currency;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
@@ -26,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -33,7 +36,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.UUID;
 
@@ -97,7 +99,9 @@ public class PlayerEvents implements Listener {
     }
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
-
+        PyrexPlayer player = playerManager.getPlayerMap().get(e.getPlayer().getUniqueId());
+        player.save();
+        player.getPickaxe().save();
     }
 
     @EventHandler
@@ -110,6 +114,13 @@ public class PlayerEvents implements Listener {
                 switch(holder.getInvType()) {
                     case PMINE_MAIN -> new PMineInv().onClick(e);
                     case PMINE_BLOCKS -> new PMineInvBlocks(p).onClick(e);
+                    case ENCHANTS -> new EnchantInv(p).onClick(e);
+                    case ADD_LEVELS -> {
+                        if (holder instanceof EnchantPyrexInv) {
+                            EnchantPyrexInv enchantHolder = (EnchantPyrexInv) holder;
+                            new AddLevelsInv(p,enchantHolder.getType()).onClick(e);
+                        }
+                    }
                 }
             }
         }
@@ -127,6 +138,15 @@ public class PlayerEvents implements Listener {
                     case TOKENS -> p.sendMessage(StringUtil.color("&eRedeemed "+CurrencyType.getUnicode(amountPair.getLeft())+"&f"+ Numbers.formattedNumber(amountPair.getRight())+" &eTokens."));
                     case GEMS -> p.sendMessage(StringUtil.color("&aRedeemed "+CurrencyType.getUnicode(amountPair.getLeft())+"&f"+Numbers.formattedNumber(amountPair.getRight())+" &aGems."));
                     case PYREX_POINTS -> p.sendMessage(StringUtil.color("&dRedeemed "+CurrencyType.getUnicode(amountPair.getLeft())+"&f"+Numbers.formattedNumber(amountPair.getRight())+" &dPyrex Points."));
+                }
+            }
+        }
+        CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(e.getItem());
+        if (pyrexDataMap.contains("id")) {
+            // is custom pickaxe
+            if (pyrexDataMap.getString("id").equals("PyrexPickaxe")) {
+                if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                    p.openInventory(new EnchantInv(p).getInv());
                 }
             }
         }

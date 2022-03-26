@@ -9,7 +9,9 @@ import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
 import io.github.lunaiskey.pyrexprison.mines.GridManager;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
 import io.github.lunaiskey.pyrexprison.pickaxe.PickaxeHandler;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import org.bukkit.Bukkit;
@@ -24,10 +26,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class PyrexPrison extends JavaPlugin {
 
@@ -35,6 +34,7 @@ public final class PyrexPrison extends JavaPlugin {
     private GridManager gridManager;
     private PlayerManager playerManager;
     private PickaxeHandler pickaxeHandler;
+    private Random rand = new Random();
 
     private static Map<String, GlobalMine> mines;
     private int saveTaskID = -1;
@@ -144,7 +144,9 @@ public final class PyrexPrison extends JavaPlugin {
         }
         for (PyrexPlayer player : playerManager.getPlayerMap().values()) {
             player.save();
+            player.getPickaxe().save();
         }
+
     }
 
     private File getMineFile(GlobalMine globalMine) {
@@ -214,7 +216,15 @@ public final class PyrexPrison extends JavaPlugin {
             long tokens = ((Number) currencyMap.getOrDefault("tokens",0L)).longValue();
             long gems = ((Number) currencyMap.getOrDefault("gems",0L)).longValue();
             long pyrexPoints = ((Number) currencyMap.getOrDefault("pyrexpoints",0L)).longValue();
-            getPlayerManager().getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,tokens,gems,pyrexPoints,0));
+            Map<String,Object> pickaxeMap = fileConf.getConfigurationSection("pickaxeData").getValues(false);
+            Map<String,Object> pickaxeEnchant = fileConf.getConfigurationSection("pickaxeData.enchants").getValues(false);
+            Map<EnchantType,Integer> pickaxeEnchantMap = new HashMap<>();
+            for (String enchant : pickaxeEnchant.keySet()) {
+                pickaxeEnchantMap.put(EnchantType.valueOf(enchant),(int)pickaxeEnchant.get(enchant));
+            }
+            long blocksBroken = ((Number) pickaxeMap.getOrDefault("blocksBroken",0L)).longValue();
+            PyrexPickaxe pickaxe = new PyrexPickaxe(pUUID,pickaxeEnchantMap,blocksBroken);
+            getPlayerManager().getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,tokens,gems,pyrexPoints,0,pickaxe));
         }
     }
 
@@ -243,5 +253,9 @@ public final class PyrexPrison extends JavaPlugin {
 
     public PickaxeHandler getPickaxeHandler() {
         return pickaxeHandler;
+    }
+
+    public Random getRand() {
+        return rand;
     }
 }

@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.gui;
 
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;

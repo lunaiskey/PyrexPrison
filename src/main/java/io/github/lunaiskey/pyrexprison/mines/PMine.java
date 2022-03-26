@@ -34,7 +34,7 @@ public class PMine {
     private long blocksBroken = 0;
     private BukkitTask resetTask = null;
     private int resetTime = 10; // in minutes
-    private float resetPercentage = 0.50F;
+    private float resetPercentage = 0.90F;
     private int sizeUpgradeTier;
     private Map<Material,Double> composition;
 
@@ -220,7 +220,7 @@ public class PMine {
         return blocksBroken;
     }
 
-    public void addMineBlocks(int amount) {
+    public void addMineBlocks(long amount) {
         if (amount <= 0) {
             return;
         }

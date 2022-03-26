@@ -70,7 +70,7 @@ public class CommandPMine implements CommandExecutor {
                     return true;
                 }
                 if (args[0].equalsIgnoreCase("getpickaxe")) {
-                    p.getInventory().addItem(new PyrexPickaxe().getItemStack());
+                    p.getInventory().addItem(new PyrexPickaxe(p.getUniqueId()).getItemStack());
                     return true;
                 }
             } else if (args.length == 2){

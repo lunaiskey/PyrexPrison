@@ -18,15 +18,16 @@ public class PyrexPlayer {
     private long pyrexPoints;
     private int rank;
     private final UUID pUUID;
-    private PyrexPickaxe pickaxe = new PyrexPickaxe();
+    private PyrexPickaxe pickaxe;
 
 
-    public PyrexPlayer(UUID pUUID, long tokens, long gems, long pyrexPoints, int rank) {
+    public PyrexPlayer(UUID pUUID, long tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe) {
         this.pUUID = pUUID;
         this.tokens = tokens;
         this.gems = gems;
         this.pyrexPoints = pyrexPoints;
         this.rank = rank;
+        this.pickaxe = pickaxe;
         save();
     }
 

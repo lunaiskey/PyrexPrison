@@ -2,6 +2,7 @@ package io.github.lunaiskey.pyrexprison.player;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.Material;
@@ -26,7 +27,7 @@ public class PlayerManager {
     }
 
     public void createPyrexPlayer(UUID pUUID) {
-        playerMap.put(pUUID,new PyrexPlayer(pUUID,0,0,0,0));
+        playerMap.put(pUUID,new PyrexPlayer(pUUID,0,0,0,0,new PyrexPickaxe(pUUID)));
     }
 
 

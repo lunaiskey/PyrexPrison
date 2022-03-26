@@ -11,7 +11,7 @@ public class ItemBuilder {
     public static ItemStack createItem(String name, Material mat, List<String> lore) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
+        meta.setDisplayName(StringUtil.color(name));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
