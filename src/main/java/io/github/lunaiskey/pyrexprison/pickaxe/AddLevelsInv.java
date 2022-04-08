@@ -7,16 +7,20 @@ import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AddLevelsInv {
 
@@ -25,9 +29,11 @@ public class AddLevelsInv {
     private Player p;
     private Inventory inv;
     private EnchantType type;
+    private CurrencyType currencyType;
     private PyrexPickaxe pickaxe;
     private PyrexPlayer player;
     private PyrexEnchant enchant;
+    private Map<Integer,Integer> amountLoc = new HashMap<>();
 
     public AddLevelsInv(Player p, EnchantType type) {
         this.p = p;
@@ -36,18 +42,20 @@ public class AddLevelsInv {
         pickaxe = player.getPickaxe();
         enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type);
         name = "Add "+enchant.getName()+" Levels";
-        inv = new EnchantPyrexInv(name,size, PyrexInvType.ADD_LEVELS, type).getInventory();
+        inv = new EnchantPyrexHolder(name,size, PyrexInvType.ADD_LEVELS, type).getInventory();
+        amountLoc.put(0,1);
+        amountLoc.put(1,10);
+        amountLoc.put(2,100);
+        amountLoc.put(3,1000);
+        amountLoc.put(4,10000);
+        amountLoc.put(5,Integer.MAX_VALUE);
+        currencyType = enchant.getCurrencyType();
     }
 
     private void init() {
         for (int i = 0; i<size;i++) {
             switch(i) {
-                case 0 -> inv.setItem(i,getAddLevelButton(1));
-                case 1 -> inv.setItem(i,getAddLevelButton(10));
-                case 2 -> inv.setItem(i,getAddLevelButton(100));
-                case 3 -> inv.setItem(i,getAddLevelButton(1000));
-                case 4 -> inv.setItem(i,getAddLevelButton(10000));
-                case 5 -> inv.setItem(i,getAddLevelButton(Integer.MAX_VALUE));
+                case 0,1,2,3,4,5 -> inv.setItem(i,getAddLevelButton(amountLoc.get(i)));
                 case 6,8 -> inv.setItem(i,ItemBuilder.createItem(" ",Material.BLACK_STAINED_GLASS_PANE,null));
                 case 7 -> inv.setItem(i,pickaxe.getItemStack());
             }
@@ -61,6 +69,52 @@ public class AddLevelsInv {
 
     public void onClick(InventoryClickEvent e) {
         e.setCancelled(true);
+        switch (e.getRawSlot()) {
+            case 0, 1, 2, 3, 4, 5 -> {
+                int level = amountLoc.get(e.getRawSlot());
+                int start = pickaxe.getEnchants().getOrDefault(type, 0);
+                int end = Math.min(start + level, enchant.getMaxLevel());
+                if (level == Integer.MAX_VALUE) {
+                    Pair<Integer, BigInteger> pair = enchant.getMaxLevelFromAmount(start, player.getTokens());
+                    // afford or not
+                    if (player.getCurrency(currencyType).compareTo(pair.getRight()) >= 0) {
+                        // pickaxe level is max or not
+                        if (start < enchant.getMaxLevel()) {
+                            if (start != pair.getLeft()) {
+                                player.takeCurrency(currencyType,pair.getRight());
+                                pickaxe.getEnchants().put(type, pair.getLeft());
+                                PyrexPrison.getPlugin().getPickaxeHandler().updateInventoryPickaxe(p);
+                                p.sendMessage("Purchased " + (pair.getLeft() - start) + " Levels of " + enchant.getName() + ".");
+                                Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), () -> p.openInventory(getInv()));
+                            }
+                        } else {
+                            p.sendMessage(StringUtil.color("&cYou have the max level of this enchantment."));
+                        }
+                    //pair.getRight(); cost
+                    //pair.getLeft(); level
+                    } else {
+                        p.sendMessage(StringUtil.color("&cYou cannot afford any more levels of this enchantment."));
+                    }
+                } else {
+                    BigInteger cost = enchant.getCostBetweenLevels(start, end);
+                    if (start < enchant.getMaxLevel()) {
+                        if (player.getCurrency(currencyType).compareTo(cost) >= 0) {
+                            player.takeCurrency(currencyType,cost);
+                            pickaxe.getEnchants().put(type, end);
+                            p.sendMessage("Purchased " + (end - start) + " Levels of " + enchant.getName() + ".");
+                            PyrexPrison.getPlugin().getPickaxeHandler().updateInventoryPickaxe(p);
+                            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), () -> p.openInventory(getInv()));
+                        } else {
+                            p.sendMessage(StringUtil.color("&cYou cannot afford this level of enchantment."));
+                        }
+                    } else {
+                        p.sendMessage(StringUtil.color("&cYou have the max level of this enchantment."));
+                    }
+                    //enchant.getCostBetweenLevels(start,end); cost
+                    //end; level
+                }
+            }
+        }
     }
 
     private ItemStack getAddLevelButton(int level) {
@@ -79,11 +133,11 @@ public class AddLevelsInv {
         int end = Math.min(start + level, enchant.getMaxLevel());
         List<String> lore = new ArrayList<>();
         if (level == Integer.MAX_VALUE) {
-            Pair<Integer,Long> pair = enchant.getMaxLevelFromAmount(start, player.getTokens());
-            lore.add(StringUtil.color("&a&l| &7Cost: &e"+ CurrencyType.getUnicode(CurrencyType.TOKENS)+"&f"+Numbers.formattedNumber(pair.getRight())));
+            Pair<Integer,BigInteger> pair = enchant.getMaxLevelFromAmount(start, player.getCurrency(currencyType));
+            lore.add(StringUtil.color("&a&l| &7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+Numbers.formattedNumber(pair.getRight())));
             lore.add(StringUtil.color("&a&l| &7New Level: &e"+pair.getLeft()));
         } else {
-            lore.add(StringUtil.color("&a&l| &7Cost: &e"+ CurrencyType.getUnicode(CurrencyType.TOKENS)+"&f"+ Numbers.formattedNumber(enchant.getCostBetweenLevels(start,end))));
+            lore.add(StringUtil.color("&a&l| &7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+ Numbers.formattedNumber(enchant.getCostBetweenLevels(start,end))));
             lore.add(StringUtil.color("&a&l| &7New Level: &e"+end));
         }
         meta.setLore(lore);

@@ -2,8 +2,7 @@ package io.github.lunaiskey.pyrexprison.nms;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
-import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -12,8 +11,8 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_17_R1.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -62,8 +61,8 @@ public class NMSBlockChange {
         for (LevelChunk chunk : chunks) {
              ClientboundForgetLevelChunkPacket unload = new ClientboundForgetLevelChunkPacket(chunk.getPos().x, chunk.getPos().z);
 
-            ClientboundLevelChunkPacket load = new ClientboundLevelChunkPacket(chunk);
-            ClientboundLightUpdatePacket light = new ClientboundLightUpdatePacket(chunk.getPos(), engine,null,null, true);
+            ClientboundLevelChunkWithLightPacket load = new ClientboundLevelChunkWithLightPacket(chunk,engine,null,null, true);
+            //ClientboundLightUpdatePacket light = new ClientboundLightUpdatePacket(chunk.getPos(),engine,null,null, true);
 
 
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -77,7 +76,7 @@ public class NMSBlockChange {
                         chunk.getPos().z > chunkZ + dist) continue;
                 ep.connection.send(unload);
                 ep.connection.send(load);
-                ep.connection.send(light);
+                //ep.connection.send(light);
             }
         }
 

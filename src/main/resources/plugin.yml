@@ -1,7 +1,7 @@
 name: PyrexPrison
 version: '${project.version}'
 main: io.github.lunaiskey.pyrexprison.PyrexPrison
-api-version: 1.17
+api-version: 1.18
 authors: [ Lunaiskey ]
 softdepend:
   - PlaceholderAPI
@@ -15,3 +15,49 @@ commands:
     usage: /<command>
   pyrexpoints:
     usage: /<command>
+  enchants:
+    usage: /<command>
+    aliases: [enchant]
+  rankup:
+    usage: /<command>
+  armor:
+    usage: /<command>
+  getpickaxe:
+    usage: /<command>
+permissions:
+  pyrex.*:
+    description: Gives access to every command.
+    children:
+      pyrex.tokens.give: true
+      pyrex.tokens.take: true
+      pyrex.tokens.set: true
+      pyrex.gems.give: true
+      pyrex.gems.take: true
+      pyrex.gems.set: true
+      pyrex.points.give: true
+      pyrex.points.take: true
+      pyrex.points.set: true
+      pyrex.debug: true
+      pyrex.resetcooldown.bypass: true
+  pyrex.tokens.give:
+    description: Give Tokens to players.
+  pyrex.tokens.take:
+    description: Take Tokens from players.
+  pyrex.tokens.set:
+    description: Set a players Tokens.
+  pyrex.gems.give:
+    description: Give Gems to players.
+  pyrex.gems.take:
+    description: Take Gems from players.
+  pyrex.gems.set:
+    description: Set a players Gems.
+  pyrex.points.give:
+    description: Give PyrexPoints to players.
+  pyrex.points.take:
+    description: Take PyrexPoints from players.
+  pyrex.points.set:
+    description: Set a players PyrexPoints.
+  pyrex.debug:
+    description: Gives access to debug commands.
+  pyrex.resetcooldown.bypass:
+    description: Bypass private mine reset cooldown.

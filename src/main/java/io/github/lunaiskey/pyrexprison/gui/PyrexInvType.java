@@ -5,6 +5,7 @@ public enum PyrexInvType {
     PMINE_BLOCKS,
     ENCHANTS,
     ADD_LEVELS,
+    ARMOR,
     ;
 
 }

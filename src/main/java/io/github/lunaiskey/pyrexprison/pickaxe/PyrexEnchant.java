@@ -1,33 +1,37 @@
 package io.github.lunaiskey.pyrexprison.pickaxe;
 
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
+import io.github.lunaiskey.pyrexprison.player.CurrencyType;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.math.BigInteger;
+import java.util.List;
 
 public abstract class PyrexEnchant {
 
     private String name;
     private int maxLevel;
-    private long cost;
-    private long increaseCost;
     private double chance;
     private boolean enabled;
+    private List<String> description;
+    private CurrencyType currencyType;
 
-    public PyrexEnchant(String name, int maxLevel, long cost, long increaseCost, boolean enabled) {
+    public PyrexEnchant(String name,List<String> description, int maxLevel, CurrencyType currencyType, boolean enabled) {
         this.name = name;
+        this.description = description;
         this.maxLevel = maxLevel;
-        this.cost = cost;
-        this.increaseCost = increaseCost;
         this.enabled = enabled;
+        this.currencyType = currencyType;
     }
 
     public abstract void onBlockBreak(BlockBreakEvent e, int level);
     public abstract void onEquip(Player player, ItemStack pickaxe, int level);
     public abstract void onUnEquip(Player player, ItemStack pickaxe, int level);
-    public abstract long getLevelCost(int level);
-    public abstract Pair<Integer,Long> getMaxLevelFromAmount(int start, long amount);
-    public abstract long getCostBetweenLevels(int start,int end);
+
+    public abstract BigInteger getEquation(int n);
 
     public String getName() {
         return name;
@@ -37,11 +41,44 @@ public abstract class PyrexEnchant {
         return maxLevel;
     }
 
-    public long getCost() {
-        return cost;
+    public List<String> getDescription() {
+        return description;
     }
 
-    public long getIncreaseCost() {
-        return increaseCost;
+    public CurrencyType getCurrencyType() {
+        return currencyType;
+    }
+
+    public BigInteger getTotalCost(int level) {
+        BigInteger sum = BigInteger.ZERO;
+        for (int n = 0;n<level;n++) {
+            sum = sum.add(getEquation(n));
+        }
+        return sum;
+    }
+
+    public BigInteger getSingleLevelCost(int level) {
+        return getEquation(level);
+    }
+
+    public Pair<Integer,BigInteger> getMaxLevelFromAmount(int start, BigInteger amount) {
+        BigInteger sum = BigInteger.ZERO;
+        for (int n = start;n<getMaxLevel();n++) {
+            //if (sum+getEquation(n) < amount) {
+            if (sum.add(getEquation(n)).compareTo(amount) < 0) {
+                sum = sum.add(getEquation(n));
+            } else {
+                return new ImmutablePair<>(n,sum);
+            }
+        }
+        return new ImmutablePair<>(getMaxLevel(),sum);
+    }
+
+    public BigInteger getCostBetweenLevels(int start, int end) {
+        BigInteger sum = BigInteger.ZERO;
+        for (int n = start;n<end;n++) {
+            sum = sum.add(getEquation(n));
+        }
+        return sum;
     }
 }

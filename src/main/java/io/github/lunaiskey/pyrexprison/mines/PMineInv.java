@@ -1,7 +1,7 @@
 package io.github.lunaiskey.pyrexprison.mines;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
-import io.github.lunaiskey.pyrexprison.gui.PyrexInv;
+import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import org.bukkit.Bukkit;
@@ -18,7 +18,7 @@ public class PMineInv {
     private String name = "Personal Mine";
     private int size = 27;
 
-    private final Inventory inv = new PyrexInv(name,size, PyrexInvType.PMINE_MAIN).getInventory();
+    private final Inventory inv = new PyrexHolder(name,size, PyrexInvType.PMINE_MAIN).getInventory();
 
     private void init() {
         for (int i = 0; i < 9;i++) {
@@ -45,7 +45,7 @@ public class PMineInv {
         if (slot <= 9 || slot >= 18) {
             return;
         }
-        PMine mine = GridManager.getPMine(p.getUniqueId());
+        PMine mine = PMineManager.getPMine(p.getUniqueId());
         if (mine != null) {
             switch (slot) {
                 case 11 -> {mine.teleportToCenter(p);Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}

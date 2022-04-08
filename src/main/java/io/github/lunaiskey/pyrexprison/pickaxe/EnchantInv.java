@@ -1,7 +1,7 @@
 package io.github.lunaiskey.pyrexprison.pickaxe;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
-import io.github.lunaiskey.pyrexprison.gui.PyrexInv;
+import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
@@ -24,7 +24,7 @@ public class EnchantInv {
     private String name = "Enchantments";
     private int size = 54;
     private Player p;
-    private Inventory inv = new PyrexInv(name,size, PyrexInvType.ENCHANTS).getInventory();
+    private Inventory inv = new PyrexHolder(name,size, PyrexInvType.ENCHANTS).getInventory();
     private PyrexPickaxe pickaxe;
     private Map<Integer,EnchantType> enchantLocation = new HashMap<>();
 
@@ -33,6 +33,8 @@ public class EnchantInv {
         pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId()).getPickaxe();
         enchantLocation.put(20,EnchantType.FORTUNE);
         enchantLocation.put(21,EnchantType.JACK_HAMMER);
+        enchantLocation.put(22,EnchantType.GEM_FINDER);
+        enchantLocation.put(23,EnchantType.KEY_FINDER);
     }
 
     private void init() {
@@ -60,15 +62,26 @@ public class EnchantInv {
         ItemStack item = new ItemStack(Material.ENCHANTED_BOOK);
         ItemMeta meta = item.getItemMeta();
         PyrexEnchant enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type);
+        CurrencyType currencyType = enchant.getCurrencyType();
         int level = pickaxe.getEnchants().getOrDefault(type, 0);
         meta.setDisplayName(StringUtil.color("&b"+enchant.getName()+" &8[&7"+level+" -> "+(level+1)+"&8]"));
         List<String> lore = new ArrayList<>();
+        if (enchant.getDescription() != null && !enchant.getDescription().isEmpty()) {
+            for (String desc : enchant.getDescription()) {
+                lore.add(StringUtil.color("&7"+desc));
+            }
+        }
         lore.add(" ");
-        lore.add(StringUtil.color("&7Cost: &e"+ CurrencyType.getUnicode(CurrencyType.TOKENS) +"&f"+enchant.getCostBetweenLevels(level,level+1)));
-        lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
-        lore.add(" ");
+
+
         if (level == enchant.getMaxLevel()) {
+            lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
+            lore.add(" ");
             lore.add(StringUtil.color("&7Enchant is max level!"));
+            lore.add(" ");
+        } else {
+            lore.add(StringUtil.color("&7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+enchant.getCostBetweenLevels(level,level+1)));
+            lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
             lore.add(" ");
         }
         lore.add(StringUtil.color("&eL-Click to purchase levels."));

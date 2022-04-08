@@ -1,5 +1,7 @@
 package io.github.lunaiskey.pyrexprison.player;
 
+import org.bukkit.ChatColor;
+
 public enum CurrencyType {
     TOKENS,
     GEMS,
@@ -15,5 +17,16 @@ public enum CurrencyType {
             default -> unicode = "$";
         }
         return unicode;
+    }
+
+    public static ChatColor getColorCode(CurrencyType type) {
+        ChatColor color;
+        switch (type) {
+            case TOKENS -> color = ChatColor.YELLOW;
+            case GEMS -> color = ChatColor.GREEN;
+            case PYREX_POINTS -> color = ChatColor.LIGHT_PURPLE;
+            default -> color = ChatColor.GRAY;
+        }
+        return color;
     }
 }

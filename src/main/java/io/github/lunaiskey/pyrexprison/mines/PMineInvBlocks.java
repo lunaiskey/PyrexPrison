@@ -1,7 +1,7 @@
 package io.github.lunaiskey.pyrexprison.mines;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
-import io.github.lunaiskey.pyrexprison.gui.PyrexInv;
+import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -29,11 +29,11 @@ public class PMineInvBlocks {
         this.p = p;
     }
 
-    private final Inventory inv = new PyrexInv(name,size, PyrexInvType.PMINE_BLOCKS).getInventory();
+    private final Inventory inv = new PyrexHolder(name,size, PyrexInvType.PMINE_BLOCKS).getInventory();
 
     private void init() {
         int counter = 0;
-        PMine mine = GridManager.getPMine(p.getUniqueId());
+        PMine mine = PMineManager.getPMine(p.getUniqueId());
         if (mine != null) {
             Map<Material,Double> map = mine.getComposition();
             for (Material mat : map.keySet()) {

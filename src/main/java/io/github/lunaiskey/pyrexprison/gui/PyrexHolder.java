@@ -5,12 +5,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
-public class PyrexInv implements InventoryHolder {
+public class PyrexHolder implements InventoryHolder {
 
     private final Inventory inventory;
     private final PyrexInvType invType;
 
-    public PyrexInv(String name,int size, PyrexInvType invType) {
+    public PyrexHolder(String name, int size, PyrexInvType invType) {
         this.inventory = Bukkit.createInventory(this,size,name);
         this.invType = invType;
     }

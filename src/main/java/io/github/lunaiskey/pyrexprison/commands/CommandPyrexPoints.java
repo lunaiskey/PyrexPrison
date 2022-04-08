@@ -33,86 +33,100 @@ public class CommandPyrexPoints implements CommandExecutor {
                 p.sendMessage(StringUtil.color("&dYou have "+unicode+"&f"+ Numbers.formattedNumber(pyrexPoints)+"&d Pyrex Points."));
                 return true;
             }
-            if (args[0].equalsIgnoreCase("give")) {
-                if (args.length == 1) {
-                    p.sendMessage(StringUtil.color("&d/pyrexpoints give <player> <amount>"));
-                    return true;
-                }
-                Player givePlayer = Bukkit.getPlayer(args[1]);
-                if (givePlayer == null) {
-                    p.sendMessage(StringUtil.color("&cPlayer is not online."));
-                    return true;
-                }
-                if (args.length == 2) {
-                    p.sendMessage(StringUtil.color("&cAmount can't be empty"));
-                    return true;
-                }
-                try {
-                    long amount = (long) Double.parseDouble(args[2]);
-                    Currency.giveCurrency(givePlayer.getUniqueId(), currencyType,amount);
-                    if (amount <= 0) {
-                        p.sendMessage(StringUtil.color("&cAmount has to be more then 0"));
+            if (p.hasPermission("pyrex.points.give")) {
+                if (args[0].equalsIgnoreCase("give")) {
+                    if (args.length == 1) {
+                        p.sendMessage(StringUtil.color("&d/pyrexpoints give <player> <amount>"));
                         return true;
                     }
-                    p.sendMessage(StringUtil.color("&dGiven "+unicode+"&f"+Numbers.formattedNumber(amount)+"&d Pyrex Points to &f"+givePlayer.getName()+"&d."));
-                } catch (NumberFormatException ex) {
-                    p.sendMessage(StringUtil.color("&cAmount has to be a valid number."));
+                    Player givePlayer = Bukkit.getPlayer(args[1]);
+                    if (givePlayer == null) {
+                        p.sendMessage(StringUtil.color("&cPlayer is not online."));
+                        return true;
+                    }
+                    if (args.length == 2) {
+                        p.sendMessage(StringUtil.color("&cAmount can't be empty"));
+                        return true;
+                    }
+                    try {
+                        long amount = (long) Double.parseDouble(args[2]);
+
+                        if (amount <= 0) {
+                            p.sendMessage(StringUtil.color("&cAmount has to be more then 0"));
+                            return true;
+                        }
+                        Currency.giveCurrency(givePlayer.getUniqueId(), currencyType, amount);
+                        p.sendMessage(StringUtil.color("&dGiven " + unicode + "&f" + Numbers.formattedNumber(amount) + "&d Pyrex Points to &f" + givePlayer.getName() + "&d."));
+                    } catch (NumberFormatException ex) {
+                        p.sendMessage(StringUtil.color("&cAmount has to be a valid number."));
+                    }
+                    return true;
                 }
-                return true;
+            } else {
+                p.sendMessage(StringUtil.color("&cNo Permission."));
             }
-            if (args[0].equalsIgnoreCase("take")) {
-                if (args.length == 1) {
-                    p.sendMessage(StringUtil.color("&d/pyrexpoints take <player> <amount>"));
-                    return true;
-                }
-                Player givePlayer = Bukkit.getPlayer(args[1]);
-                if (givePlayer == null) {
-                    p.sendMessage(StringUtil.color("&cPlayer is not online."));
-                    return true;
-                }
-                if (args.length == 2) {
-                    p.sendMessage(StringUtil.color("&cAmount can't be empty."));
-                    return true;
-                }
-                try {
-                    long amount = (long) Double.parseDouble(args[2]);
-                    Currency.takeCurrency(givePlayer.getUniqueId(), currencyType,amount);
-                    if (amount <= 0) {
-                        p.sendMessage(StringUtil.color("&cAmount has to be more then 0."));
+            if (p.hasPermission("pyrex.points.take")) {
+                if (args[0].equalsIgnoreCase("take")) {
+                    if (args.length == 1) {
+                        p.sendMessage(StringUtil.color("&d/pyrexpoints take <player> <amount>"));
                         return true;
                     }
-                    p.sendMessage(StringUtil.color("&dTaken "+unicode+"&f"+Numbers.formattedNumber(amount)+"&d Pyrex Points from &f"+givePlayer.getName()+"&d."));
-                } catch (NumberFormatException ex) {
-                    p.sendMessage(StringUtil.color("&cAmount has to be a valid number."));
+                    Player givePlayer = Bukkit.getPlayer(args[1]);
+                    if (givePlayer == null) {
+                        p.sendMessage(StringUtil.color("&cPlayer is not online."));
+                        return true;
+                    }
+                    if (args.length == 2) {
+                        p.sendMessage(StringUtil.color("&cAmount can't be empty."));
+                        return true;
+                    }
+                    try {
+                        long amount = (long) Double.parseDouble(args[2]);
+                        if (amount <= 0) {
+                            p.sendMessage(StringUtil.color("&cAmount has to be more then 0."));
+                            return true;
+                        }
+                        Currency.takeCurrency(givePlayer.getUniqueId(), currencyType,amount);
+                        p.sendMessage(StringUtil.color("&dTaken "+unicode+"&f"+Numbers.formattedNumber(amount)+"&d Pyrex Points from &f"+givePlayer.getName()+"&d."));
+                    } catch (NumberFormatException ex) {
+                        p.sendMessage(StringUtil.color("&cAmount has to be a valid number."));
+                    }
+                    return true;
                 }
-                return true;
+            } else {
+                p.sendMessage(StringUtil.color("&cNo Permission."));
             }
-            if (args[0].equalsIgnoreCase("set")) {
-                if (args.length == 1) {
-                    p.sendMessage(StringUtil.color("&d/pyrexpoints set <player> <amount>"));
-                    return true;
-                }
-                Player givePlayer = Bukkit.getPlayer(args[1]);
-                if (givePlayer == null) {
-                    p.sendMessage(StringUtil.color("&cPlayer is not online."));
-                    return true;
-                }
-                if (args.length == 2) {
-                    p.sendMessage(StringUtil.color("&cAmount can't be empty."));
-                    return true;
-                }
-                try {
-                    long amount = (long) Double.parseDouble(args[2]);
-                    Currency.setCurrency(givePlayer.getUniqueId(), currencyType,amount);
-                    if (amount < 0) {
-                        p.sendMessage(StringUtil.color("&cAmount has to be positive."));
+            if (p.hasPermission("pyrex.points.set")) {
+                if (args[0].equalsIgnoreCase("set")) {
+                    if (args.length == 1) {
+                        p.sendMessage(StringUtil.color("&d/pyrexpoints set <player> <amount>"));
                         return true;
                     }
-                    p.sendMessage(StringUtil.color("&dSet &f"+givePlayer.getName()+"'s&d Pyrex Points to &f"+Numbers.formattedNumber(amount)+"&d."));
-                } catch (NumberFormatException ex) {
-                    p.sendMessage(StringUtil.color("&cAmount has to be a valid number."));
+                    Player givePlayer = Bukkit.getPlayer(args[1]);
+                    if (givePlayer == null) {
+                        p.sendMessage(StringUtil.color("&cPlayer is not online."));
+                        return true;
+                    }
+                    if (args.length == 2) {
+                        p.sendMessage(StringUtil.color("&cAmount can't be empty."));
+                        return true;
+                    }
+                    try {
+                        long amount = (long) Double.parseDouble(args[2]);
+
+                        if (amount < 0) {
+                            p.sendMessage(StringUtil.color("&cAmount has to be positive."));
+                            return true;
+                        }
+                        Currency.setCurrency(givePlayer.getUniqueId(), currencyType, amount);
+                        p.sendMessage(StringUtil.color("&dSet &f" + givePlayer.getName() + "'s&d Pyrex Points to &f" + Numbers.formattedNumber(amount) + "&d."));
+                    } catch (NumberFormatException ex) {
+                        p.sendMessage(StringUtil.color("&cAmount has to be a valid number."));
+                    }
+                    return true;
                 }
-                return true;
+            } else {
+                p.sendMessage(StringUtil.color("&cNo Permission."));
             }
             if (args[0].equalsIgnoreCase("pay")) {
                 if (args.length == 1) {
@@ -140,12 +154,12 @@ public class CommandPyrexPoints implements CommandExecutor {
                         p.sendMessage(StringUtil.color("&cInsufficient Pyrex Points."));
                         return true;
                     }
-                    Currency.giveCurrency(givePlayer.getUniqueId(), currencyType,amount);
-                    Currency.takeCurrency(p.getUniqueId(), currencyType,amount);
-                    if (amount == 0) {
+                    if (amount <= 0) {
                         p.sendMessage(StringUtil.color("&cAmount has to be more then 0."));
                         return true;
                     }
+                    Currency.giveCurrency(givePlayer.getUniqueId(), currencyType,amount);
+                    Currency.takeCurrency(p.getUniqueId(), currencyType,amount);
                     p.sendMessage(StringUtil.color("&dPaid "+unicode+"&f"+Numbers.formattedNumber(amount)+"&d Pyrex Points to &f"+givePlayer.getName()+"&d."));
                 } catch (NumberFormatException ex) {
                     p.sendMessage(StringUtil.color("&cAmount has to be a valid number."));
@@ -165,8 +179,7 @@ public class CommandPyrexPoints implements CommandExecutor {
                         p.sendMessage(StringUtil.color("&cInsufficient Pyrex Points."));
                         return true;
                     }
-
-                    if (amount == 0) {
+                    if (amount <= 0) {
                         p.sendMessage(StringUtil.color("&cAmount has to be more then 0."));
                         return true;
                     }

@@ -2,21 +2,16 @@ package io.github.lunaiskey.pyrexprison.pickaxe.enchants;
 
 import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.math.BigInteger;
 import java.util.List;
 
-public class Speed extends PyrexEnchant {
-
-    public Speed() {
-        super("Speed", List.of("Gives you permanent Speed", "while holding your pickaxe."), 3, CurrencyType.TOKENS,   true);
+public class KeyFinder extends PyrexEnchant {
+    public KeyFinder() {
+        super("Key Finder", List.of("&c[WIP]","Gives you a chance to get a key","while mining, higher levels increase","your chance to get better keys."), 0, CurrencyType.GEMS,   true);
     }
 
     @Override
@@ -26,16 +21,12 @@ public class Speed extends PyrexEnchant {
 
     @Override
     public void onEquip(Player player, ItemStack pickaxe, int level) {
-        if (level <= 0) {
-            this.onUnEquip(player, pickaxe, level);
-            return;
-        }
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, level-1, true, true));
+
     }
 
     @Override
     public void onUnEquip(Player player, ItemStack pickaxe, int level) {
-        player.removePotionEffect(PotionEffectType.SPEED);
+
     }
 
     @Override

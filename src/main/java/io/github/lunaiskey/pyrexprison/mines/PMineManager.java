@@ -1,24 +1,58 @@
 package io.github.lunaiskey.pyrexprison.mines;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.ImmutablePair;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.MutablePair;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-public class GridManager {
+public class PMineManager {
 
     private static Map<Pair<Integer,Integer>, PMine> pMines = new HashMap<>();
     private static Map<UUID, Pair<Integer,Integer>> ownerPMines = new HashMap<>();
     private final int gridIslandSize = 225;
-    ImmutablePair<Integer,Integer> last = null;
+    private ImmutablePair<Integer,Integer> last = null;
 
+    public void loadPMines() {
+        File[] pmineFiles = new File(PyrexPrison.getPlugin().getDataFolder(), "pmines").listFiles(new IsPMineFile());
+        assert pmineFiles != null;
+        for (File file : pmineFiles) {
+            FileConfiguration fileConf = YamlConfiguration.loadConfiguration(file);
+            Map<String,Object> map = fileConf.getConfigurationSection("mine").getValues(false);
+            UUID owner = UUID.fromString(file.getName().replace(".yml",""));
+            int chunkX = (int) map.get("chunkX");
+            int chunkZ = (int) map.get("chunkZ");
+            Map<Material,Double> blocksMap = new LinkedHashMap<>();
+            if (fileConf.getConfigurationSection("blocks") != null) {
+                Map<String,Object> blocksMapRaw = fileConf.getConfigurationSection("blocks").getValues(false);
+                for (String str : blocksMapRaw.keySet()) {
+                    blocksMap.put(Material.getMaterial(str),(double) blocksMapRaw.get(str));
+                }
+            }
+            PMineManager.newPMine(owner,chunkX,chunkZ,blocksMap);
+            if (Bukkit.getPlayer(owner) != null) {
+                PMineManager.getPMine(owner).reset();
+            }
+        }
+    }
+
+    public static class IsPMineFile implements FilenameFilter {
+        public boolean accept(File file, String s) {
+            return s.contains(".yml");
+        }
+    }
 
     public Location getMinCorner(int chunkX,int chunkZ) {
         return new Location(Bukkit.getWorld(PMineWorld.getWorldName()),-112+(gridIslandSize *chunkX),0,-112+(gridIslandSize *chunkZ));
@@ -43,7 +77,7 @@ public class GridManager {
     }
 
     public static void newPMine(UUID owner, int chunkX, int chunkZ) {
-        newPMine(owner,chunkX,chunkZ,null);
+        newPMine(owner,chunkX,chunkZ,new HashMap<>());
     }
 
     public void newPMine(UUID owner) {
@@ -76,17 +110,6 @@ public class GridManager {
     public static Map<UUID, Pair<Integer, Integer>> getOwnerPMines() {
         return ownerPMines;
     }
-
-    /*
-    public Location getClosestIsland(Location location) {
-        long x = Math.round((double) location.getBlockX() / Settings.islandDistance) * Settings.islandDistance + Settings.islandXOffset;
-        long z = Math.round((double) location.getBlockZ() / Settings.islandDistance) * Settings.islandDistance + Settings.islandZOffset;
-        long y = 100;
-        return new Location(location.getWorld(), x, y, z);
-    }
-
-     */
-
 
     private Pair<Integer,Integer> getNextIsland() {
         // Find the next free spot

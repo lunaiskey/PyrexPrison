@@ -34,19 +34,26 @@ public class PyrexPickaxe {
     }
 
     public PyrexPickaxe(UUID player) {
-        this.player = player;
-        this.enchants = new HashMap<>();
+        this(player,new HashMap<>(),0);
         enchants.put(EnchantType.EFFICIENCY, 100);
         enchants.put(EnchantType.HASTE,3);
         enchants.put(EnchantType.SPEED,3);
         enchants.put(EnchantType.JUMP_BOOST,3);
-        blocksBroken = 0;
     }
 
     public ItemStack getItemStack() {
         ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
         CompoundTag tag = NBTTags.getPyrexDataMap(item);
-        tag.putString("id","PyrexPickaxe");
+        tag.putString("id","PYREX_PICKAXE");
+        item = NBTTags.addCustomTagContainer(item,"PyrexData",tag);
+        return PyrexPrison.getPlugin().getPickaxeHandler().updatePickaxe(item,player);
+    }
+
+    /*
+    public ItemStack getItemStack() {
+        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
+        CompoundTag tag = NBTTags.getPyrexDataMap(item);
+        tag.putString("id",PickaxeHandler.getId());
         item = NBTTags.addCustomTagContainer(item,"PyrexData",tag);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(StringUtil.color("&dYour Pickaxe"));
@@ -69,6 +76,8 @@ public class PyrexPickaxe {
         return item;
     }
 
+     */
+
     public long getBlocksBroken() {
         return blocksBroken;
     }
@@ -79,24 +88,5 @@ public class PyrexPickaxe {
 
     public void setBlocksBroken(long blocksBroken) {
         this.blocksBroken = blocksBroken;
-    }
-
-    public void save() {
-        File file = new File(PyrexPrison.getPlugin().getDataFolder() + "/playerdata/" + player + ".yml");
-        FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-        Map<String, Object> map = new LinkedHashMap<>();
-        Map<String, Object> enchantMap = new LinkedHashMap<>();
-        map.put("blocksBroken",blocksBroken);
-        for (EnchantType type : enchants.keySet()) {
-            enchantMap.put(type.name(),enchants.get(type));
-        }
-        data.createSection("pickaxeData", map);
-        data.createSection("pickaxeData.enchants",enchantMap);
-        try {
-            data.save(file);
-        } catch (IOException e) {
-            PyrexPrison.getPlugin().getLogger().severe("Failed to save " + player + "'s Pickaxe Data.");
-            e.printStackTrace();
-        }
     }
 }

@@ -1,19 +1,23 @@
 package io.github.lunaiskey.pyrexprison.pickaxe.enchants;
 
 import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.ImmutablePair;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
+import io.github.lunaiskey.pyrexprison.player.CurrencyType;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.math.BigInteger;
+import java.util.List;
+
 public class JumpBoost extends PyrexEnchant {
 
 
     public JumpBoost() {
-        super("Jump Boost", 3, 0, 0, true);
+        super("Jump Boost", List.of("Gives you permanent Jump Boost", "while holding your pickaxe."), 3, CurrencyType.TOKENS,   true);
     }
 
     @Override
@@ -36,17 +40,8 @@ public class JumpBoost extends PyrexEnchant {
     }
 
     @Override
-    public long getLevelCost(int level) {
-        return 0;
+    public BigInteger getEquation(int n) {
+        return BigInteger.ZERO;
     }
 
-    @Override
-    public Pair<Integer,Long> getMaxLevelFromAmount(int start, long amount) {
-        return new ImmutablePair<>(0,0L);
-    }
-
-    @Override
-    public long getCostBetweenLevels(int start, int end) {
-        return 0;
-    }
 }

@@ -12,6 +12,8 @@ public enum EnchantType {
     SPEED,
     JUMP_BOOST,
     JACK_HAMMER,
+    GEM_FINDER,
+    KEY_FINDER
     ;
 
     public static Set<EnchantType> getSortedSet() {
@@ -22,6 +24,8 @@ public enum EnchantType {
         type.add(SPEED);
         type.add(JUMP_BOOST);
         type.add(JACK_HAMMER);
+        type.add(GEM_FINDER);
+        type.add(KEY_FINDER);
         return type;
     }
 }

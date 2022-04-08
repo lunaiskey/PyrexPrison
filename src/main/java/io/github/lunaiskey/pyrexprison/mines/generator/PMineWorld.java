@@ -1,6 +1,5 @@
 package io.github.lunaiskey.pyrexprison.mines.generator;
 
-import io.github.lunaiskey.pyrexprison.mines.GlobalMine;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
@@ -23,7 +22,4 @@ public class PMineWorld {
         return worldName;
     }
 
-    public static void addMine(String name, GlobalMine globalMine) {
-
-    }
 }

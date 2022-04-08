@@ -1,46 +1,72 @@
 package io.github.lunaiskey.pyrexprison.player;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
 import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
+import io.github.lunaiskey.pyrexprison.player.armor.Armor;
+import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class PyrexPlayer {
 
-    private long tokens;
+    private BigInteger tokens;
     private long gems;
     private long pyrexPoints;
     private int rank;
     private final UUID pUUID;
     private PyrexPickaxe pickaxe;
+    private final Map<ArmorType,Armor> armor = new HashMap<>();
+    private boolean isArmorEquiped;
 
 
-    public PyrexPlayer(UUID pUUID, long tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe) {
+    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe) {
         this.pUUID = pUUID;
         this.tokens = tokens;
         this.gems = gems;
         this.pyrexPoints = pyrexPoints;
         this.rank = rank;
         this.pickaxe = pickaxe;
+        this.isArmorEquiped = false;
+        armor.put(ArmorType.HELMET,new Armor(ArmorType.HELMET));
+        armor.put(ArmorType.CHESTPLATE,new Armor(ArmorType.CHESTPLATE));
+        armor.put(ArmorType.LEGGINGS,new Armor(ArmorType.LEGGINGS));
+        armor.put(ArmorType.BOOTS,new Armor(ArmorType.BOOTS));
         save();
+    }
+
+    public PyrexPlayer(UUID pUUID) {
+        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID));
     }
 
     public long getGems() {
         return gems;
     }
 
-    public long getTokens() {
+    public BigInteger getTokens() {
         return tokens;
     }
 
     public long getPyrexPoints() {
         return pyrexPoints;
+    }
+
+    public BigInteger getCurrency(CurrencyType type) {
+        BigInteger amount = BigInteger.ZERO;
+        switch (type) {
+            case GEMS -> amount = BigInteger.valueOf(getGems()) ;
+            case PYREX_POINTS -> amount = BigInteger.valueOf(getPyrexPoints());
+            case TOKENS -> amount = getTokens();
+        }
+        return amount;
     }
 
     public int getRank() {
@@ -55,11 +81,31 @@ public class PyrexPlayer {
         return pickaxe;
     }
 
+    public Map<ArmorType, Armor> getArmor() {
+        return armor;
+    }
+
+    public Armor getHelmet() {
+        return armor.get(ArmorType.HELMET);
+    }
+
+    public Armor getChestplate() {
+        return armor.get(ArmorType.CHESTPLATE);
+    }
+
+    public Armor getLeggings() {
+        return armor.get(ArmorType.LEGGINGS);
+    }
+
+    public Armor getBoots() {
+        return armor.get(ArmorType.BOOTS);
+    }
+
     public void setGems(long gems) {
         this.gems = gems;
     }
 
-    public void setTokens(long tokens) {
+    public void setTokens(BigInteger tokens) {
         this.tokens = tokens;
     }
 
@@ -67,11 +113,25 @@ public class PyrexPlayer {
         this.pyrexPoints = pyrexPoints;
     }
 
+    public void setCurrency(CurrencyType type, long amount) {
+        switch (type) {
+            case GEMS -> setGems(amount);
+            case PYREX_POINTS -> setPyrexPoints(amount);
+        }
+    }
+
+    public void setCurrency(CurrencyType type, BigInteger amount) {
+        switch (type) {
+            case TOKENS -> setTokens(amount);
+        }
+    }
+
     public void setRank(int rank) {
         this.rank = rank;
     }
 
-    public void giveTokens(long tokens) {this.tokens += tokens;}
+    public void giveTokens(BigInteger tokens) {this.tokens = this.tokens.add(tokens);}
+    public void giveTokens(long tokens) {this.tokens = this.tokens.add(BigInteger.valueOf(tokens));}
     public void giveGems(long gems) {
         this.gems += gems;
     }
@@ -79,14 +139,40 @@ public class PyrexPlayer {
         this.pyrexPoints += pyrexPoints;
     }
 
-    public void takeTokens(long tokens) {
-        this.tokens -= tokens;
+    public void giveCurrency(CurrencyType type, long amount) {
+        giveCurrency(type, BigInteger.valueOf(amount));
+    }
+
+    public void giveCurrency(CurrencyType type, BigInteger amount) {
+        switch (type) {
+            case GEMS -> giveGems(amount.longValue());
+            case PYREX_POINTS -> givePyrexPoints(amount.longValue());
+            case TOKENS -> giveTokens(amount);
+        }
+    }
+
+    public void takeTokens(BigInteger tokens) {
+        this.tokens = this.tokens.subtract(tokens);
     }
     public void takeGems(long gems) {
         this.gems -= gems;
     }
     public void takePyrexPoints(long pyrexPoints) {
         this.pyrexPoints -= pyrexPoints;
+    }
+
+    public void takeCurrency(CurrencyType type, BigInteger amount) {
+        switch (type) {
+            case GEMS -> takeGems(amount.longValue());
+            case PYREX_POINTS -> takePyrexPoints(amount.longValue());
+            case TOKENS -> takeTokens(amount);
+        }
+    }
+
+    public void payForBlocks(long amount) {
+        long base = 1;
+        int fortune = Math.max(pickaxe.getEnchants().getOrDefault(EnchantType.FORTUNE,0),5);
+        giveTokens((base*(fortune))*amount);
     }
 
     public void save() {
@@ -97,6 +183,19 @@ public class PyrexPlayer {
         currencyMap.put("gems", gems);
         currencyMap.put("pyrexpoints", pyrexPoints);
         data.createSection("currencies", currencyMap);
+        Map<String, Object> playerData = new LinkedHashMap<>();
+        playerData.put("rank",rank);
+        data.createSection("pyrexData",playerData);
+        if (pickaxe != null) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            Map<String, Object> enchantMap = new LinkedHashMap<>();
+            map.put("blocksBroken",pickaxe.getBlocksBroken());
+            for (EnchantType type : pickaxe.getEnchants().keySet()) {
+                enchantMap.put(type.name(),pickaxe.getEnchants().get(type));
+            }
+            data.createSection("pickaxeData", map);
+            data.createSection("pickaxeData.enchants",enchantMap);
+        }
         try {
             data.save(file);
         } catch (IOException e) {
