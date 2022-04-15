@@ -46,6 +46,7 @@ public final class PyrexPrison extends JavaPlugin {
         pmineManager.loadPMines();
         playerManager.loadPlayers();
 
+        playerManager.initGemstoneMap();
         new FunctionManager().registerCommands();
 
         checkPlayerData();

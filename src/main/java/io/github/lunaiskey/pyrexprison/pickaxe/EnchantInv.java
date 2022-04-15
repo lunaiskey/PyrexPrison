@@ -33,8 +33,9 @@ public class EnchantInv {
         pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId()).getPickaxe();
         enchantLocation.put(20,EnchantType.FORTUNE);
         enchantLocation.put(21,EnchantType.JACK_HAMMER);
-        enchantLocation.put(22,EnchantType.GEM_FINDER);
-        enchantLocation.put(23,EnchantType.KEY_FINDER);
+        enchantLocation.put(23,EnchantType.GEM_FINDER);
+        enchantLocation.put(24,EnchantType.KEY_FINDER);
+        enchantLocation.put(22,EnchantType.STRIKE);
     }
 
     private void init() {

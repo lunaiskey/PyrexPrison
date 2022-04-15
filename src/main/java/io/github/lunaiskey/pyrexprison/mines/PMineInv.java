@@ -4,6 +4,7 @@ import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
+import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -21,15 +22,15 @@ public class PMineInv {
     private final Inventory inv = new PyrexHolder(name,size, PyrexInvType.PMINE_MAIN).getInventory();
 
     private void init() {
-        for (int i = 0; i < 9;i++) {
-            inv.setItem(i, ItemBuilder.createItem(" ", Material.PURPLE_STAINED_GLASS_PANE,null));
-        }
-        inv.setItem(11,ItemBuilder.createItem(ChatColor.GREEN+"Teleport to Mine",Material.NETHER_STAR, List.of("",ChatColor.YELLOW+"Click to teleport!")));
-        inv.setItem(13,ItemBuilder.createItem(ChatColor.GREEN+"Reset Mine",Material.CLOCK, List.of("", ChatColor.YELLOW+"Click to reset!")));
-        inv.setItem(15,ItemBuilder.createItem(ChatColor.GREEN+"Change Mine Blocks",Material.GRASS_BLOCK, List.of("",ChatColor.YELLOW+"Click to view menu!")));
-
-        for (int i = 18; i < 27;i++) {
-            inv.setItem(i, ItemBuilder.createItem(" ", Material.PURPLE_STAINED_GLASS_PANE,null));
+        for (int i = 0; i < size;i++) {
+            switch(i) {
+                case 0,9,18,8,17,26 -> inv.setItem(i, ItemBuilder.createItem(" ", Material.PURPLE_STAINED_GLASS_PANE,null));
+                case 11 -> inv.setItem(i,ItemBuilder.createItem(StringUtil.color("&aTeleport to Mine"),Material.COMPASS, List.of(ChatColor.YELLOW+"Click to teleport!")));
+                case 12 -> inv.setItem(i,ItemBuilder.createItem(StringUtil.color("&aReset Mine"),Material.CLOCK, List.of(ChatColor.YELLOW+"Click to reset!")));
+                case 14 -> inv.setItem(i,ItemBuilder.createItem(StringUtil.color("&aChange Mine Blocks"),Material.GRASS_BLOCK, List.of(ChatColor.YELLOW+"Click to view menu!")));
+                case 15 -> inv.setItem(i,ItemBuilder.createItem(StringUtil.color("&aMine Upgrades"),Material.COMMAND_BLOCK,List.of(StringUtil.color("&eClick to view!"))));
+                default -> inv.setItem(i, ItemBuilder.createItem(" ", Material.BLACK_STAINED_GLASS_PANE,null));
+            }
         }
     }
 
@@ -49,9 +50,9 @@ public class PMineInv {
         if (mine != null) {
             switch (slot) {
                 case 11 -> {mine.teleportToCenter(p);Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
-                case 13 -> {mine.reset();Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
-                case 15 -> Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineInvBlocks(p).getInv()));
-
+                case 12 -> {mine.reset();Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
+                case 14 -> Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineInvBlocks(p).getInv()));
+                case 15 -> {p.sendMessage(StringUtil.color("&cThis feature is currently unavailable."));Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
             }
         } else {
             p.sendMessage(ChatColor.RED+"Your Mine hasn't loaded correctly, Please contact an administrator.");

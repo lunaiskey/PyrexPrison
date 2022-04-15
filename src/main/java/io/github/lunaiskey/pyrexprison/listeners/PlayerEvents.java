@@ -12,6 +12,11 @@ import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorInv;
+import io.github.lunaiskey.pyrexprison.player.armor.ArmorPyrexHolder;
+import io.github.lunaiskey.pyrexprison.player.armor.ArmorUpgradeInv;
+import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStone;
+import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStoneInv;
+import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStoneType;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -28,6 +33,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -77,7 +83,28 @@ public class PlayerEvents implements Listener {
                 for (EnchantType type : pickaxe.getEnchants().keySet()) {
                     PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onBlockBreak(e,pickaxe.getEnchants().get(type));
                 }
+
                 PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).payForBlocks(1);
+                pickaxe.setBlocksBroken(pickaxe.getBlocksBroken()+1);
+                PyrexPrison.getPlugin().getPickaxeHandler().updateInventoryPickaxe(p);
+
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlace(BlockPlaceEvent e) {
+        Player p = e.getPlayer();
+        CompoundTag tag = NBTTags.getPyrexDataMap(e.getItemInHand());
+        if (tag.contains("id")) {
+            String id = tag.get("id").getAsString();
+            String[] idArray = id.split("_");
+            if (idArray.length == 2 && idArray[1].equals("GEMSTONE")) {
+                try {
+                    PyrexPrison.getPlugin().getPlayerManager().getGemstonesMap().get(GemStoneType.valueOf(idArray[0])).onPlace(e);
+                } catch (Exception ignored){
+                    e.setCancelled(true);
+                }
             }
         }
     }
@@ -85,11 +112,14 @@ public class PlayerEvents implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        if (p.getWorld().getName().equals(PMineWorld.getWorldName())) {
+            p.setAllowFlight(true);
+            p.setFlying(true);
+        }
         PMine mine = PMineManager.getPMine(p.getUniqueId());
         if (mine == null) {
             PyrexPrison.getPlugin().getPmineManager().newPMine(p.getUniqueId());
-        }
-        if (mine != null) {
+        } else {
             mine.scheduleReset();
         }
         Map<UUID, PyrexPlayer> playerMap = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap();
@@ -101,10 +131,20 @@ public class PlayerEvents implements Listener {
     }
 
     @EventHandler
-    public void onLeave(PlayerQuitEvent e) {
+    public void onQuit(PlayerQuitEvent e) {
         PyrexPlayer player = playerManager.getPlayerMap().get(e.getPlayer().getUniqueId());
         player.save();
         CommandPMine.getResetCooldown().remove(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent e) {
+        if (e.getTo().getWorld() != null && e.getTo().getWorld().getName().equals(PMineWorld.getWorldName())) {
+            if (e.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN && e.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND) {
+                e.getPlayer().setAllowFlight(true);
+                e.getPlayer().setFlying(true);
+            }
+        }
     }
 
     @EventHandler
@@ -122,9 +162,20 @@ public class PlayerEvents implements Listener {
                         if (holder instanceof EnchantPyrexHolder) {
                             EnchantPyrexHolder enchantHolder = (EnchantPyrexHolder) holder;
                             new AddLevelsInv(p,enchantHolder.getType()).onClick(e);
+                        } else {
+                            e.setCancelled(true);
                         }
                     }
                     case ARMOR -> new ArmorInv(p).onClick(e);
+                    case ARMOR_UPGRADES -> {
+                        if (holder instanceof ArmorPyrexHolder) {
+                            ArmorPyrexHolder armorPyrexHolder = (ArmorPyrexHolder) holder;
+                            new ArmorUpgradeInv(p,armorPyrexHolder.getType()).onClick(e);
+                        } else {
+                            e.setCancelled(true);
+                        }
+                    }
+                    case GEMSTONES -> new GemStoneInv().onClick(e);
                 }
             }
         }

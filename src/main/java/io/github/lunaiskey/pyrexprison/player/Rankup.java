@@ -169,9 +169,11 @@ public class Rankup {
         return String.valueOf(level);
     }
 
+
+
     public static double getRankUpPercentage(Player p) {
         PyrexPlayer player = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId());
-        double percentage = new BigDecimal(player.getTokens()).divide(new BigDecimal(getLevelCost(player.getRank()+1))).doubleValue() * 100;
+        double percentage = new BigDecimal(player.getTokens()).divide(new BigDecimal(getLevelCost(player.getRank()+1)),4,RoundingMode.HALF_UP).doubleValue() * 100;
         return percentage > 100 ? 100 : percentage;
     }
 

@@ -7,9 +7,11 @@ import io.github.lunaiskey.pyrexprison.player.armor.Armor;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,14 +30,14 @@ public class PyrexPlayer {
     private boolean isArmorEquiped;
 
 
-    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe) {
+    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped) {
         this.pUUID = pUUID;
         this.tokens = tokens;
         this.gems = gems;
         this.pyrexPoints = pyrexPoints;
         this.rank = rank;
         this.pickaxe = pickaxe;
-        this.isArmorEquiped = false;
+        this.isArmorEquiped = isArmorEquiped;
         armor.put(ArmorType.HELMET,new Armor(ArmorType.HELMET));
         armor.put(ArmorType.CHESTPLATE,new Armor(ArmorType.CHESTPLATE));
         armor.put(ArmorType.LEGGINGS,new Armor(ArmorType.LEGGINGS));
@@ -44,7 +46,7 @@ public class PyrexPlayer {
     }
 
     public PyrexPlayer(UUID pUUID) {
-        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID));
+        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false);
     }
 
     public long getGems() {
@@ -101,6 +103,10 @@ public class PyrexPlayer {
         return armor.get(ArmorType.BOOTS);
     }
 
+    public boolean isArmorEquiped() {
+        return isArmorEquiped;
+    }
+
     public void setGems(long gems) {
         this.gems = gems;
     }
@@ -128,6 +134,10 @@ public class PyrexPlayer {
 
     public void setRank(int rank) {
         this.rank = rank;
+    }
+
+    public void setArmorEquiped(boolean armorEquiped) {
+        isArmorEquiped = armorEquiped;
     }
 
     public void giveTokens(BigInteger tokens) {this.tokens = this.tokens.add(tokens);}
@@ -170,10 +180,33 @@ public class PyrexPlayer {
     }
 
     public void payForBlocks(long amount) {
-        long base = 1;
+        double multiplier = getTotalMultiplier();
         int fortune = Math.max(pickaxe.getEnchants().getOrDefault(EnchantType.FORTUNE,0),5);
-        giveTokens((base*(fortune))*amount);
+        BigInteger tokens = BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(fortune)).multiply(BigDecimal.valueOf(multiplier+1)).toBigInteger();
+        giveTokens(tokens);
     }
+
+    public double getBaseMultiplier() {
+        return 0;
+    }
+
+    public double getRankMultiplier() {
+        int rank = Math.max(getRank(),0);
+        if (rank <= 100) {
+            return 0.1*rank;
+        } else {
+            return (100*0.1) + ((rank-100)*0.025);
+        }
+    }
+
+    /**
+     * All multipliers added together, don't multiply the original amount by this, do amount + amount*getTotalMultiplier because this can return 0.
+     * @return Total Multiplier, can be 0.
+     */
+    public double getTotalMultiplier() {
+        return getBaseMultiplier()+getRankMultiplier();
+    }
+
 
     public void save() {
         File file = new File(PyrexPrison.getPlugin().getDataFolder() + "/playerdata/" + pUUID + ".yml");
@@ -186,6 +219,9 @@ public class PyrexPlayer {
         Map<String, Object> playerData = new LinkedHashMap<>();
         playerData.put("rank",rank);
         data.createSection("pyrexData",playerData);
+        Map<String, Object> armorData = new LinkedHashMap<>();
+        armorData.put("isArmorEquiped",isArmorEquiped);
+        data.createSection("armor",armorData);
         if (pickaxe != null) {
             Map<String, Object> map = new LinkedHashMap<>();
             Map<String, Object> enchantMap = new LinkedHashMap<>();

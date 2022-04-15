@@ -13,6 +13,8 @@ commands:
     usage: /<command>
   gems:
     usage: /<command>
+  gemstones:
+    usage: /<command>
   pyrexpoints:
     usage: /<command>
   enchants:
@@ -24,6 +26,9 @@ commands:
     usage: /<command>
   getpickaxe:
     usage: /<command>
+  multiplier:
+    usage: /<command>
+    aliases: [multi]
 permissions:
   pyrex.*:
     description: Gives access to every command.

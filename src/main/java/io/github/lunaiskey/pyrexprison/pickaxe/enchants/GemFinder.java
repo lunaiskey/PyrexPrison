@@ -12,7 +12,7 @@ import java.util.List;
 
 public class GemFinder extends PyrexEnchant {
     public GemFinder() {
-        super("Gem Finder", List.of("&c[WIP]","Has a chance to give you a","pile of gems."),0, CurrencyType.TOKENS,  true);
+        super("Gemstone Finder", List.of("&c[WIP]","Increases your chances of finding Gemstones."),0, CurrencyType.TOKENS,  true);
     }
 
     @Override

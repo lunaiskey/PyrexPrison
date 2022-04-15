@@ -5,7 +5,9 @@ import io.github.lunaiskey.pyrexprison.nms.NBTTags;
 import io.github.lunaiskey.pyrexprison.pickaxe.enchants.*;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -32,6 +34,7 @@ public class PickaxeHandler {
         enchantments.put(EnchantType.JACK_HAMMER,new JackHammer());
         enchantments.put(EnchantType.KEY_FINDER,new KeyFinder());
         enchantments.put(EnchantType.GEM_FINDER,new GemFinder());
+        enchantments.put(EnchantType.STRIKE,new Strike());
     }
 
     public Map<EnchantType, PyrexEnchant> getEnchantments() {
@@ -52,10 +55,14 @@ public class PickaxeHandler {
             }
             if (pyrexDataMap.getString("id").equals("PYREX_PICKAXE")) {
                 ItemMeta meta = item.getItemMeta();
-                meta.setDisplayName(StringUtil.color("&dYour Pickaxe"));
+                OfflinePlayer player = Bukkit.getOfflinePlayer(p);
+                meta.setDisplayName(StringUtil.color("&d"+player.getName()+"'s &fPickaxe"));
                 List<String> lore = new ArrayList<>();
                 PyrexPickaxe pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p).getPickaxe();
                 Map<EnchantType, Integer> enchants = pickaxe.getEnchants();
+                lore.add(" ");
+                lore.add(StringUtil.color("&d&lPickaxe Stats:"));
+                lore.add(StringUtil.color("&d&l| &fBlocks: "+pickaxe.getBlocksBroken()));
                 lore.add(" ");
                 lore.add(StringUtil.color("&d&lEnchants"));
                 for (EnchantType enchantType : EnchantType.getSortedSet()) {

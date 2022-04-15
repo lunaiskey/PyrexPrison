@@ -30,7 +30,11 @@ public class CommandEnchant implements CommandExecutor {
                         if (pyrexDataMap.contains("id")) {
                             // is custom pickaxe
                             if (pyrexDataMap.getString("id").equals(PickaxeHandler.getId())) {
-                                pickaxe.getEnchants().put(type,newLevel);
+                                if (newLevel > 0) {
+                                    pickaxe.getEnchants().put(type,newLevel);
+                                } else {
+                                    pickaxe.getEnchants().remove(type);
+                                }
                                 PyrexPrison.getPlugin().getPickaxeHandler().updateInventoryPickaxe(p);
                             }
                         }

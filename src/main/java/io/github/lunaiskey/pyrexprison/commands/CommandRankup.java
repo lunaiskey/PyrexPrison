@@ -26,13 +26,14 @@ public class CommandRankup implements CommandExecutor {
             if (player.getTokens().compareTo(cost) >= 0) {
                 int newLevel = rankup.rankup(p);
                 int nextLevel = newLevel+1;
+                player.takeTokens(cost);
                 p.sendMessage(
                         StringUtil.color("&b&lYou have ranked up to &f&l"+newLevel+"&b&l!"),
                         StringUtil.color(" &3&l- &bNext Rankup: &f"+nextLevel),
                         StringUtil.color(" &3&l- &bCost: "+CurrencyType.getColorCode(CurrencyType.TOKENS)+CurrencyType.getUnicode(CurrencyType.TOKENS)+"&f"+ Numbers.formattedNumber(rankup.getLevelCost(nextLevel)))
                 );
             } else {
-                p.sendMessage(StringUtil.color("&7You still need "+Numbers.formattedNumber(cost.subtract(player.getTokens()))+"to rankup."));
+                p.sendMessage(StringUtil.color("&7You still need "+Numbers.formattedNumber(cost.subtract(player.getTokens()))+" to rankup."));
             }
 
         }

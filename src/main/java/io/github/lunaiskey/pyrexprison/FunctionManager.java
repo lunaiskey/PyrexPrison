@@ -17,5 +17,7 @@ public class FunctionManager {
         Bukkit.getPluginCommand("rankup").setExecutor(new CommandRankup());
         Bukkit.getPluginCommand("armor").setExecutor(new CommandArmor());
         Bukkit.getPluginCommand("getpickaxe").setExecutor(new CommandGetPickaxe());
+        Bukkit.getPluginCommand("multiplier").setExecutor(new CommandMultiplier(plug));
+        Bukkit.getPluginCommand("gemstones").setExecutor(new CommandGemstones());
     }
 }

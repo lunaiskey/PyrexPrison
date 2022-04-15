@@ -6,6 +6,8 @@ public enum PyrexInvType {
     ENCHANTS,
     ADD_LEVELS,
     ARMOR,
+    ARMOR_UPGRADES,
+    GEMSTONES,
     ;
 
 }

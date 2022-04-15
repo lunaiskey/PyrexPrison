@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.pickaxe;
 
+import com.sun.jna.platform.unix.solaris.LibKstat;
 import org.bukkit.Material;
 
 import java.util.LinkedHashSet;
@@ -13,7 +14,8 @@ public enum EnchantType {
     JUMP_BOOST,
     JACK_HAMMER,
     GEM_FINDER,
-    KEY_FINDER
+    KEY_FINDER,
+    STRIKE,
     ;
 
     public static Set<EnchantType> getSortedSet() {
@@ -24,6 +26,7 @@ public enum EnchantType {
         type.add(SPEED);
         type.add(JUMP_BOOST);
         type.add(JACK_HAMMER);
+        type.add(STRIKE);
         type.add(GEM_FINDER);
         type.add(KEY_FINDER);
         return type;
