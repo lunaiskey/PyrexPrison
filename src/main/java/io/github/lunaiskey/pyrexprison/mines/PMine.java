@@ -56,15 +56,15 @@ public class PMine {
             }
         }
         if (comp == null || comp.isEmpty()) {
-            composition = new LinkedHashMap<>();
-            composition.put(Material.COBBLESTONE,1D);
-            composition.put(Material.STONE,1D);
-            composition.put(Material.GRANITE,1D);
-            composition.put(Material.POLISHED_GRANITE,1D);
-            composition.put(Material.DIORITE,1D);
-            composition.put(Material.POLISHED_DIORITE,1D);
-            composition.put(Material.ANDESITE,1D);
-            composition.put(Material.POLISHED_ANDESITE,1D);
+            this.composition = new LinkedHashMap<>();
+            this.composition.put(Material.COBBLESTONE,1D);
+            this.composition.put(Material.STONE,1D);
+            this.composition.put(Material.GRANITE,1D);
+            this.composition.put(Material.POLISHED_GRANITE,1D);
+            this.composition.put(Material.DIORITE,1D);
+            this.composition.put(Material.POLISHED_DIORITE,1D);
+            this.composition.put(Material.ANDESITE,1D);
+            this.composition.put(Material.POLISHED_ANDESITE,1D);
         } else {
             this.composition = comp;
         }
@@ -281,19 +281,22 @@ public class PMine {
     }
 
     //TAKEN FROM MINERESETLITE BY TEAM-VK
-    private static ArrayList<CompositionEntry> mapComposition(Map<Material, Double> compositionIn) {
-        ArrayList<CompositionEntry> probabilityMap = new ArrayList<>();
-        Map<Material, Double> composition = new HashMap<>(compositionIn);
+    private static List<CompositionEntry> mapComposition(Map<Material, Double> compositionIn) {
+        List<CompositionEntry> probabilityMap = new ArrayList<>();
+        Map<Material, Double> comp = new HashMap<>();
+        if (compositionIn != null && !compositionIn.isEmpty()) {
+            comp.putAll(compositionIn);
+        }
         double max = 0;
-        for (Map.Entry<Material, Double> entry : composition.entrySet()) {
+        for (Map.Entry<Material, Double> entry : comp.entrySet()) {
             max += entry.getValue();
         }
         if (max <= 0) {
-            composition.put(Material.COBBLESTONE, 1-max);
+            comp.put(Material.COBBLESTONE, 1-max);
             max = 1;
         }
         double i = 0;
-        for (Map.Entry<Material, Double> entry : composition.entrySet()) {
+        for (Map.Entry<Material, Double> entry : comp.entrySet()) {
             double v = entry.getValue() / max;
             i += v;
             probabilityMap.add(new CompositionEntry(entry.getKey(), i));

@@ -73,7 +73,7 @@ public class PMineManager {
         Pair<Integer,Integer> pair = new ImmutablePair<>(chunkX,chunkZ);
         pMines.put(pair,mine);
         ownerPMines.put(owner,pair);
-        mine.save();
+        pMines.get(pair).save();
     }
 
     public static void newPMine(UUID owner, int chunkX, int chunkZ) {
