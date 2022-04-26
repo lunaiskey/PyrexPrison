@@ -1,7 +1,6 @@
 package io.github.lunaiskey.pyrexprison.commands;
 
-import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStoneInv;
-import org.bukkit.Bukkit;
+import io.github.lunaiskey.pyrexprison.player.inventories.GemStoneGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,7 +12,7 @@ public class CommandGemstones implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
-            p.openInventory(new GemStoneInv().getInv());
+            p.openInventory(new GemStoneGUI().getInv());
         } else {
             sender.sendMessage("This is a player only command.");
         }

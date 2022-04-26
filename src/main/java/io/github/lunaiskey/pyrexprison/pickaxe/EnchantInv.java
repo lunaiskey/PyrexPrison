@@ -3,6 +3,7 @@ package io.github.lunaiskey.pyrexprison.pickaxe;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
+import io.github.lunaiskey.pyrexprison.pickaxe.enchants.XPBoost;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
@@ -33,9 +34,14 @@ public class EnchantInv {
         pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId()).getPickaxe();
         enchantLocation.put(20,EnchantType.FORTUNE);
         enchantLocation.put(21,EnchantType.JACK_HAMMER);
-        enchantLocation.put(23,EnchantType.GEM_FINDER);
-        enchantLocation.put(24,EnchantType.KEY_FINDER);
         enchantLocation.put(22,EnchantType.STRIKE);
+        enchantLocation.put(23,EnchantType.EXPLOSIVE);
+        enchantLocation.put(24,EnchantType.NUKE);
+        enchantLocation.put(29,EnchantType.GEM_FINDER);
+        enchantLocation.put(30,EnchantType.KEY_FINDER);
+        enchantLocation.put(31,EnchantType.LOOT_FINDER);
+        enchantLocation.put(32,EnchantType.XP_BOOST);
+
     }
 
     private void init() {
@@ -75,17 +81,17 @@ public class EnchantInv {
         lore.add(" ");
 
 
-        if (level == enchant.getMaxLevel()) {
+        if (level >= enchant.getMaxLevel()) {
             lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
             lore.add(" ");
             lore.add(StringUtil.color("&7Enchant is max level!"));
-            lore.add(" ");
         } else {
             lore.add(StringUtil.color("&7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+enchant.getCostBetweenLevels(level,level+1)));
             lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
             lore.add(" ");
+            lore.add(StringUtil.color("&eL-Click to purchase levels."));
         }
-        lore.add(StringUtil.color("&eL-Click to purchase levels."));
+
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -95,7 +101,17 @@ public class EnchantInv {
         e.setCancelled(true);
         Player p = (Player) e.getWhoClicked();
         if (enchantLocation.containsKey(e.getRawSlot())) {
-            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->p.openInventory(new AddLevelsInv(p,enchantLocation.get(e.getRawSlot())).getInv()));
+            PyrexEnchant enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(enchantLocation.get(e.getRawSlot()));
+            int level = pickaxe.getEnchants().getOrDefault(enchantLocation.get(e.getRawSlot()), 0);
+            if (enchant.isEnabled()) {
+                if (level < enchant.getMaxLevel()) {
+                    Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->p.openInventory(new AddLevelsInv(p,enchantLocation.get(e.getRawSlot())).getInv()));
+                } else {
+                    p.sendMessage(StringUtil.color("&cYou have maxed out this enchantment."));
+                }
+            } else {
+                p.sendMessage(StringUtil.color("&cThis enchantment is currently unavailable."));
+            }
         }
     }
 }

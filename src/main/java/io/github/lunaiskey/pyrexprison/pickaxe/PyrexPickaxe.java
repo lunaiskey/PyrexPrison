@@ -30,15 +30,13 @@ public class PyrexPickaxe {
         enchants.put(EnchantType.HASTE,3);
         enchants.put(EnchantType.SPEED,3);
         enchants.put(EnchantType.JUMP_BOOST,3);
+        enchants.put(EnchantType.NIGHT_VISION,1);
+        enchants.put(EnchantType.FORTUNE,5);
         this.blocksBroken = blocksBroken;
     }
 
     public PyrexPickaxe(UUID player) {
         this(player,new HashMap<>(),0);
-        enchants.put(EnchantType.EFFICIENCY, 100);
-        enchants.put(EnchantType.HASTE,3);
-        enchants.put(EnchantType.SPEED,3);
-        enchants.put(EnchantType.JUMP_BOOST,3);
     }
 
     public ItemStack getItemStack() {

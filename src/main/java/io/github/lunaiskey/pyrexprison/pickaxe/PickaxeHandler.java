@@ -34,7 +34,12 @@ public class PickaxeHandler {
         enchantments.put(EnchantType.JACK_HAMMER,new JackHammer());
         enchantments.put(EnchantType.KEY_FINDER,new KeyFinder());
         enchantments.put(EnchantType.GEM_FINDER,new GemFinder());
+        enchantments.put(EnchantType.LOOT_FINDER,new LootFinder());
         enchantments.put(EnchantType.STRIKE,new Strike());
+        enchantments.put(EnchantType.EXPLOSIVE,new Explosive());
+        enchantments.put(EnchantType.NUKE,new Nuke());
+        enchantments.put(EnchantType.XP_BOOST,new XPBoost());
+        enchantments.put(EnchantType.NIGHT_VISION,new NightVision());
     }
 
     public Map<EnchantType, PyrexEnchant> getEnchantments() {

@@ -3,6 +3,7 @@ package io.github.lunaiskey.pyrexprison.commands;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.player.Rankup;
+import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,14 +26,15 @@ public class CommandMultiplier implements CommandExecutor {
             PyrexPlayer pyrexPlayer = plugin.getPlayerManager().getPlayerMap().get(p.getUniqueId());
             double baseMulti = pyrexPlayer.getBaseMultiplier();
             double rankMultiplier = pyrexPlayer.getRankMultiplier();
+            double armorMultiplier = pyrexPlayer.getArmorMultiplier();
             p.sendMessage(
-                    StringUtil.color("&f&lMultipliers:"),
                     " ",
+                    StringUtil.color("&f&lMultipliers:"),
                     StringUtil.color("&7- &eBase:&f "+(1+baseMulti)),
-                    StringUtil.color("&7- &bRank:&f "+rankMultiplier),
-                    StringUtil.color("&7- &cArmor:&f "+"N/A"),
+                    StringUtil.color("&7- &bRank:&f "+ Numbers.formatDouble(rankMultiplier)),
+                    StringUtil.color("&7- &cArmor:&f "+Numbers.formatDouble(armorMultiplier)),
                     StringUtil.color("&7- &dBooster:&f "+"N/A"),
-                    StringUtil.color("&7- &fTotal:&f "+(baseMulti+rankMultiplier+1))
+                    StringUtil.color("&7- &fTotal:&f "+Numbers.formatDouble(baseMulti+rankMultiplier+armorMultiplier+1))
             );
         } else {
             sender.sendMessage("You need to be a player to run this command.");

@@ -1,7 +1,6 @@
 package io.github.lunaiskey.pyrexprison.commands;
 
-import io.github.lunaiskey.pyrexprison.player.armor.ArmorInv;
-import io.github.lunaiskey.pyrexprison.util.StringUtil;
+import io.github.lunaiskey.pyrexprison.player.inventories.ArmorGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,7 +12,7 @@ public class CommandArmor implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
-            p.openInventory(new ArmorInv(p).getInv());
+            p.openInventory(new ArmorGUI(p).getInv());
         }
         return true;
     }

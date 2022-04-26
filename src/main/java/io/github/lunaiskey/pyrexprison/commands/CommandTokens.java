@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.commands;
 
+import io.github.lunaiskey.pyrexprison.items.pyrexitems.Voucher;
 import io.github.lunaiskey.pyrexprison.player.Currency;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
@@ -184,7 +185,7 @@ public class CommandTokens implements CommandExecutor {
                         p.sendMessage(StringUtil.color("&cAmount has to be more then 0."));
                         return true;
                     }
-                    if (!p.getInventory().addItem(Currency.getWithdrawVoucher(amount,currencyType)).isEmpty()) {
+                    if (!p.getInventory().addItem(new Voucher(amount,currencyType).getItemStack()).isEmpty()) {
                         p.sendMessage(StringUtil.color("&cNot enough inventory space."));
                         return true;
                     }

@@ -19,5 +19,7 @@ public class FunctionManager {
         Bukkit.getPluginCommand("getpickaxe").setExecutor(new CommandGetPickaxe());
         Bukkit.getPluginCommand("multiplier").setExecutor(new CommandMultiplier(plug));
         Bukkit.getPluginCommand("gemstones").setExecutor(new CommandGemstones());
+        Bukkit.getPluginCommand("pitem").setExecutor(new CommandPItem());
+        Bukkit.getPluginCommand("viewplayer").setExecutor(new CommandViewPlayer());
     }
 }

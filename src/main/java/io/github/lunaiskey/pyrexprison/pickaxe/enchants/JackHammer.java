@@ -18,7 +18,7 @@ import java.util.Random;
 
 public class JackHammer extends PyrexEnchant {
     public JackHammer() {
-        super("Jackhammer", List.of("Has a chance to break an","entire layer of your mine"), 10000, CurrencyType.TOKENS,   true);
+        super("Jackhammer", List.of("Has a chance to break an","entire layer of your mine"), 1000, CurrencyType.TOKENS,   true);
     }
 
     @Override
@@ -73,6 +73,6 @@ public class JackHammer extends PyrexEnchant {
      */
 
     private double getChance(int level) {
-        return 0.001D*level;
+        return 0.01D*level;
     }
 }

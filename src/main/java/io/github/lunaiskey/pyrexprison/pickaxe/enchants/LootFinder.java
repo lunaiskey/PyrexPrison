@@ -9,9 +9,9 @@ import org.bukkit.inventory.ItemStack;
 import java.math.BigInteger;
 import java.util.List;
 
-public class KeyFinder extends PyrexEnchant {
-    public KeyFinder() {
-        super("Key Finder", List.of("&c[WIP]","Gives you a chance to get a key","while mining, higher levels increase","your chance to get better keys."), 0, CurrencyType.GEMS,   false);
+public class LootFinder extends PyrexEnchant {
+    public LootFinder() {
+        super("Loot Finder", List.of("&c[WIP]","Gives a chance to find Geodes."), 250, CurrencyType.TOKENS, false);
     }
 
     @Override

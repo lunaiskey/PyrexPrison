@@ -8,6 +8,7 @@ public enum PyrexInvType {
     ARMOR,
     ARMOR_UPGRADES,
     GEMSTONES,
+    VIEW_PLAYER,
     ;
 
 }

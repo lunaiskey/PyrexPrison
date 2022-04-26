@@ -5,6 +5,8 @@ import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
 import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import io.github.lunaiskey.pyrexprison.player.armor.Armor;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
+import io.github.lunaiskey.pyrexprison.player.armor.upgrades.AbilityType;
+import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.SalesBoost;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -30,7 +32,7 @@ public class PyrexPlayer {
     private boolean isArmorEquiped;
 
 
-    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped) {
+    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped, Map<ArmorType,Armor> armor) {
         this.pUUID = pUUID;
         this.tokens = tokens;
         this.gems = gems;
@@ -38,15 +40,19 @@ public class PyrexPlayer {
         this.rank = rank;
         this.pickaxe = pickaxe;
         this.isArmorEquiped = isArmorEquiped;
-        armor.put(ArmorType.HELMET,new Armor(ArmorType.HELMET));
-        armor.put(ArmorType.CHESTPLATE,new Armor(ArmorType.CHESTPLATE));
-        armor.put(ArmorType.LEGGINGS,new Armor(ArmorType.LEGGINGS));
-        armor.put(ArmorType.BOOTS,new Armor(ArmorType.BOOTS));
+        if (armor == null || armor.isEmpty()) {
+            this.armor.put(ArmorType.HELMET,new Armor(ArmorType.HELMET));
+            this.armor.put(ArmorType.CHESTPLATE,new Armor(ArmorType.CHESTPLATE));
+            this.armor.put(ArmorType.LEGGINGS,new Armor(ArmorType.LEGGINGS));
+            this.armor.put(ArmorType.BOOTS,new Armor(ArmorType.BOOTS));
+        } else {
+            this.armor.putAll(armor);
+        }
         save();
     }
 
     public PyrexPlayer(UUID pUUID) {
-        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false);
+        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false,null);
     }
 
     public long getGems() {
@@ -191,12 +197,21 @@ public class PyrexPlayer {
     }
 
     public double getRankMultiplier() {
-        int rank = Math.max(getRank(),0);
+        double rank = Math.max(getRank(),0);
         if (rank <= 100) {
-            return 0.1*rank;
+            return 0.1D*rank;
         } else {
-            return (100*0.1) + ((rank-100)*0.025);
+            return (0.1*100D) + ((rank-100)*0.025);
         }
+    }
+
+    public double getArmorMultiplier() {
+        double multiplier = 0;
+        for (Armor armor : getArmor().values()) {
+            SalesBoost boost = (SalesBoost) armor.getAbilties().getOrDefault(AbilityType.SALES_BOOST,new SalesBoost(0));
+            multiplier += boost.getMultiplier(boost.getLevel());
+        }
+        return multiplier;
     }
 
     /**
@@ -231,6 +246,19 @@ public class PyrexPlayer {
             }
             data.createSection("pickaxeData", map);
             data.createSection("pickaxeData.enchants",enchantMap);
+        }
+        for (Armor armor : armor.values()) {
+            Map<String, Object> pieceData = new LinkedHashMap<>();
+            pieceData.put("tier",armor.getTier());
+            if (armor.hasCustomColor()) {
+                pieceData.put("customColor",armor.getCustomColor().asRGB());
+            }
+            data.createSection("armor."+armor.getType().getName(),pieceData);
+            Map<String,Object> abilityData = new LinkedHashMap<>();
+            for(AbilityType type : armor.getAbilties().keySet()) {
+                abilityData.put(type.name(),armor.getAbilties().get(type).getLevel());
+            }
+            data.createSection("armor."+armor.getType().getName()+".abilities",abilityData);
         }
         try {
             data.save(file);

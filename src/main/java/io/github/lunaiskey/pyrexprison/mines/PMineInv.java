@@ -49,7 +49,7 @@ public class PMineInv {
         PMine mine = PMineManager.getPMine(p.getUniqueId());
         if (mine != null) {
             switch (slot) {
-                case 11 -> {mine.teleportToCenter(p);Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
+                case 11 -> {mine.teleportToCenter(p,false,false);Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
                 case 12 -> {mine.reset();Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}
                 case 14 -> Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineInvBlocks(p).getInv()));
                 case 15 -> {p.sendMessage(StringUtil.color("&cThis feature is currently unavailable."));Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);}

@@ -1,9 +1,11 @@
-package io.github.lunaiskey.pyrexprison.player.armor.gemstones;
+package io.github.lunaiskey.pyrexprison.player.inventories;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInventory;
+import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStone;
+import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStoneType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.Material;
@@ -17,14 +19,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class GemStoneInv implements PyrexInventory {
+public class GemStoneGUI implements PyrexInventory {
 
     private String name = "Gemstones";
     private int size = 36;
     private Inventory inv = new PyrexHolder(name,size, PyrexInvType.GEMSTONES).getInventory();
-    private Map<Integer,GemStoneType> gemStoneTypeMap = new HashMap<>();
+    private Map<Integer, GemStoneType> gemStoneTypeMap = new HashMap<>();
 
-    public GemStoneInv() {
+    public GemStoneGUI() {
         gemStoneTypeMap.put(11,GemStoneType.AMETHYST);
         gemStoneTypeMap.put(12,GemStoneType.JASPER);
         gemStoneTypeMap.put(13,GemStoneType.OPAL);
@@ -39,7 +41,7 @@ public class GemStoneInv implements PyrexInventory {
 
     @Override
     public void init() {
-        Map<GemStoneType,GemStone> gemStoneMap = PyrexPrison.getPlugin().getPlayerManager().getGemstonesMap();
+        Map<GemStoneType, GemStone> gemStoneMap = PyrexPrison.getPlugin().getPlayerManager().getGemstonesMap();
         for (int i = 0;i<size;i++) {
             switch (i) {
                 case 0,9,18,27,8,17,26,35 -> inv.setItem(i, ItemBuilder.createItem(" ", Material.PURPLE_STAINED_GLASS_PANE,null));

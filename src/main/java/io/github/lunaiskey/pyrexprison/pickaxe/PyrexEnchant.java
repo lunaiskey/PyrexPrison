@@ -45,6 +45,10 @@ public abstract class PyrexEnchant {
         return description;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     public CurrencyType getCurrencyType() {
         return currencyType;
     }

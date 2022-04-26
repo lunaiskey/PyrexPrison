@@ -29,6 +29,11 @@ commands:
   multiplier:
     usage: /<command>
     aliases: [multi]
+  pitem:
+    usage: /<command>
+    permission: pyrex.admin.pitem
+  viewplayer:
+    usage: /<command>
 permissions:
   pyrex.*:
     description: Gives access to every command.
@@ -44,6 +49,7 @@ permissions:
       pyrex.points.set: true
       pyrex.debug: true
       pyrex.resetcooldown.bypass: true
+      pyrex.admin.getitem: true
   pyrex.tokens.give:
     description: Give Tokens to players.
   pyrex.tokens.take:

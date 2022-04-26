@@ -36,7 +36,7 @@ public class Fortune extends PyrexEnchant {
 
     @Override
     public BigInteger getEquation(int n) {
-        return BigInteger.valueOf(5000L+(5000L*(n+1)));
+        return BigInteger.valueOf(5000L+(5000L*(n-5)));
     }
 
 }

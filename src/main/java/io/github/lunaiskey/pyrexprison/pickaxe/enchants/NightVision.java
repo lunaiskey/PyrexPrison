@@ -5,13 +5,16 @@ import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.math.BigInteger;
 import java.util.List;
 
-public class KeyFinder extends PyrexEnchant {
-    public KeyFinder() {
-        super("Key Finder", List.of("&c[WIP]","Gives you a chance to get a key","while mining, higher levels increase","your chance to get better keys."), 0, CurrencyType.GEMS,   false);
+public class NightVision extends PyrexEnchant {
+
+    public NightVision() {
+        super("Night Vision", List.of("Gives you permanent Night Vision ","while holding your pickaxe."), 1, CurrencyType.TOKENS, true);
     }
 
     @Override
@@ -21,16 +24,20 @@ public class KeyFinder extends PyrexEnchant {
 
     @Override
     public void onEquip(Player player, ItemStack pickaxe, int level) {
-
+        if (level <= 0) {
+            this.onUnEquip(player, pickaxe, level);
+            return;
+        }
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, level-1, true, true));
     }
 
     @Override
     public void onUnEquip(Player player, ItemStack pickaxe, int level) {
-
+        player.removePotionEffect(PotionEffectType.NIGHT_VISION);
     }
 
     @Override
     public BigInteger getEquation(int n) {
-        return BigInteger.ZERO;
+        return null;
     }
 }

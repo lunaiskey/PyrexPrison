@@ -1,7 +1,10 @@
 package io.github.lunaiskey.pyrexprison.player.armor;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.EquipmentSlot;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public enum ArmorType {
@@ -17,7 +20,7 @@ public enum ArmorType {
         slot=i;
     }
 
-    public int getSlot() {
+    public int getIntSlot() {
         return slot;
     }
 
@@ -31,5 +34,24 @@ public enum ArmorType {
             default -> str = "";
         }
         return str;
+    }
+
+    public static List<ArmorType> getSortedList() {
+        List<ArmorType> list = new ArrayList<>();
+        list.add(HELMET);
+        list.add(CHESTPLATE);
+        list.add(LEGGINGS);
+        list.add(BOOTS);
+        return list;
+    }
+
+    public EquipmentSlot getSlot() {
+        return switch (getIntSlot()) {
+            case 5 -> EquipmentSlot.HEAD;
+            case 6 -> EquipmentSlot.CHEST;
+            case 7 -> EquipmentSlot.LEGS;
+            case 8 -> EquipmentSlot.FEET;
+            default -> null;
+        };
     }
 }

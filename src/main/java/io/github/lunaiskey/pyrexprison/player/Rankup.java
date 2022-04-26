@@ -141,6 +141,7 @@ public class Rankup {
 
 
 
+
     public int rankup(Player p) {
         return rankup(p,1);
     }

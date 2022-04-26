@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison;
 
+import io.github.lunaiskey.pyrexprison.items.ItemManager;
 import io.github.lunaiskey.pyrexprison.listeners.PlayerEvents;
 import io.github.lunaiskey.pyrexprison.mines.PMineManager;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
@@ -12,6 +13,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
@@ -25,7 +27,9 @@ public final class PyrexPrison extends JavaPlugin {
     private PMineManager pmineManager;
     private PlayerManager playerManager;
     private PickaxeHandler pickaxeHandler;
+    private ItemManager itemManager;
     private Random rand = new Random();
+    private Set<UUID> savePending = new HashSet<>();
 
     private int saveTaskID = -1;
 
@@ -43,13 +47,17 @@ public final class PyrexPrison extends JavaPlugin {
         pmineManager = new PMineManager();
         playerManager = new PlayerManager();
         pickaxeHandler = new PickaxeHandler();
+        itemManager = new ItemManager();
+
         pmineManager.loadPMines();
         playerManager.loadPlayers();
-
         playerManager.initGemstoneMap();
+        itemManager.registerItems();
         new FunctionManager().registerCommands();
 
         checkPlayerData();
+        buffSave();
+
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PyrexExpansion(this).register();
         }
@@ -62,8 +70,8 @@ public final class PyrexPrison extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        save();
-        this.getLogger().info("saving data...");
+        Bukkit.getScheduler().cancelTask(saveTaskID);
+        saveAll();
     }
 
     public static PyrexPrison getPlugin() {
@@ -71,23 +79,31 @@ public final class PyrexPrison extends JavaPlugin {
     }
 
     public void buffSave() {
-        BukkitScheduler scheduler = getServer().getScheduler();
-        if (saveTaskID!= -1) {
+        BukkitScheduler scheduler = Bukkit.getScheduler();
+        if (saveTaskID != -1) {
             //Cancel old task
             scheduler.cancelTask(saveTaskID);
         }
         //Schedule save
-        scheduler.scheduleSyncDelayedTask(PyrexPrison.getPlugin(), this::save, 60 * 20L);
+        saveTaskID = scheduler.scheduleSyncRepeatingTask(PyrexPrison.getPlugin(), this::saveAll, 5 * 60 * 20L,5 * 60 * 20L);
+        this.getLogger().info("Buffered a save task to happen in 5 minutes.");
+
     }
 
-    private void save() {
-        for (PMine pMine : PMineManager.getPMinesMap().values()) {
-            pMine.save();
+    private void save(UUID player, boolean slient) {
+        if (PMineManager.getPMine(player) != null) {
+            PMineManager.getPMine(player).save();
         }
-        for (PyrexPlayer player : playerManager.getPlayerMap().values()) {
-            player.save();
+        if (playerManager.getPlayerMap().get(player) != null) {
+            playerManager.getPlayerMap().get(player).save();
         }
+    }
 
+    private void saveAll() {
+        for (UUID uuid : savePending) {
+            save(uuid,true);
+        }
+        this.getLogger().info("Saving Player and Mine data...");
     }
 
     private boolean setupConfig() {
@@ -117,6 +133,7 @@ public final class PyrexPrison extends JavaPlugin {
             if (PMineManager.getPMine(p.getUniqueId()) == null) {
                 pmineManager.newPMine(p.getUniqueId());
             }
+            savePending.add(p.getUniqueId());
         }
     }
 
@@ -133,7 +150,15 @@ public final class PyrexPrison extends JavaPlugin {
         return pickaxeHandler;
     }
 
+    public ItemManager getItemManager() {
+        return itemManager;
+    }
+
     public Random getRand() {
         return rand;
+    }
+
+    public Set<UUID> getSavePending() {
+        return savePending;
     }
 }

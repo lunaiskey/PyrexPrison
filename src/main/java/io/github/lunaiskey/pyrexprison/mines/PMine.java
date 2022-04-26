@@ -133,7 +133,7 @@ public class PMine {
 
         Random rand = new Random();
         Player p = Bukkit.getPlayer(owner);
-        teleportToCenter();
+        teleportToCenter(true,true);
         NMSBlockChange NMSBlockChange = new NMSBlockChange(world, ((CraftWorld) world).getHandle());
         List<CompositionEntry> probabilityMap = mapComposition(composition);
         for (int x = min.getBlockX(); x <= max.getBlockX(); ++x) {
@@ -185,17 +185,24 @@ public class PMine {
         }
     }
 
-    public void teleportToCenter() {
+    public void teleportToCenter(boolean keepLook,boolean silent) {
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (isInMineRegion(p)) {
-                p.teleport(getCenter().add(0.5,1,0.5), PlayerTeleportEvent.TeleportCause.PLUGIN);
+                teleportToCenter(p,keepLook,silent);
             }
         }
     }
 
-    public void teleportToCenter(Player p) {
-        p.teleport(getCenter().add(0.5,1,0.5),PlayerTeleportEvent.TeleportCause.PLUGIN);
-        p.sendMessage("Teleporting to mine...");
+    public void teleportToCenter(Player p,boolean keepLook,boolean silent) {
+        Location oldLoc = p.getLocation();
+        Location newLoc = getCenter().add(0.5,1,0.5);
+        if (keepLook) {
+            newLoc.setDirection(oldLoc.getDirection());
+        }
+        p.teleport(newLoc,PlayerTeleportEvent.TeleportCause.PLUGIN);
+        if (!silent) {
+            p.sendMessage("Teleporting to mine...");
+        }
     }
 
     public boolean isInMineRegion(Location loc) {
