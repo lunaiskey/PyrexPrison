@@ -89,7 +89,7 @@ public class PlayerManager {
             Map<ArmorType, Armor> armorMap = new HashMap<>();
             for (ArmorType type : ArmorType.values()) {
                 Color color = armorData.get(type.getName()+".customColor") != null ? Color.fromRGB((Integer) armorData.get(type.getName()+".customColor")) : null;
-                int tier = (int) armorData.get(type.getName()+".tier");
+                int tier = (int) armorData.getOrDefault(type.getName()+".tier",0);
                 Map<AbilityType, Ability> abilityMap = new HashMap<>();
                 Map<String,Object> abilities;
                 try {
@@ -104,12 +104,12 @@ public class PlayerManager {
                                 case ENCHANTMENT_PROC -> abilityMap.put(abilityType,new EnchantmentProc(level));
                                 case XP_BOOST -> abilityMap.put(abilityType,new XPBoost(level));
                             }
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
                         }
                     }
                     Armor piece = new Armor(type,tier,color,abilityMap);
                     armorMap.put(type,piece);
-                } catch (Exception e) {}
+                } catch (Exception ignored) {}
             }
             //Finished Loading
             getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,tokens,gems,pyrexPoints,rank,pickaxe,isArmorEquiped,armorMap));
