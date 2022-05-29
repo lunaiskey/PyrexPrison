@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.items;
 
+import io.github.lunaiskey.pyrexprison.nms.NBTTags;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -26,6 +27,7 @@ public abstract class PyrexItem {
 
     public ItemStack getItemStack() {
         ItemStack item = new ItemStack(mat);
+        item = NBTTags.addPyrexData(item,"id",getItemID().name());
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(StringUtil.color(name));
         meta.setLore(description);

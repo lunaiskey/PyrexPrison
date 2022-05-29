@@ -1,7 +1,11 @@
-package io.github.lunaiskey.pyrexprison.pickaxe;
+package io.github.lunaiskey.pyrexprison.pickaxe.inventories;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantPyrexHolder;
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
@@ -22,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AddLevelsInv {
+public class PickaxeAddLevelsGUI {
 
     private String name;
     private int size = 9;
@@ -35,14 +39,14 @@ public class AddLevelsInv {
     private PyrexEnchant enchant;
     private Map<Integer,Integer> amountLoc = new HashMap<>();
 
-    public AddLevelsInv(Player p, EnchantType type) {
+    public PickaxeAddLevelsGUI(Player p, EnchantType type) {
         this.p = p;
         this.type = type;
         this.player = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId());
         pickaxe = player.getPickaxe();
         enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type);
         name = "Add "+enchant.getName()+" Levels";
-        inv = new EnchantPyrexHolder(name,size, PyrexInvType.ADD_LEVELS, type).getInventory();
+        inv = new EnchantPyrexHolder(name,size, PyrexInvType.PICKAXE_ENCHANTS_ADD_LEVELS, type).getInventory();
         amountLoc.put(0,1);
         amountLoc.put(1,10);
         amountLoc.put(2,100);

@@ -28,7 +28,7 @@ public class JackHammer extends PyrexEnchant {
         double roll = rand.nextDouble();
         if (roll*100 <= getChance(level)) {
             Pair<Integer,Integer> gridLoc = PyrexPrison.getPlugin().getPmineManager().getGridLocation(e.getBlock().getLocation());
-            PMine mine = PMineManager.getPMine(gridLoc.getLeft(),gridLoc.getRight());
+            PMine mine = PyrexPrison.getPlugin().getPmineManager().getPMine(gridLoc.getLeft(),gridLoc.getRight());
             if (mine == null) {
                 return;
             }
@@ -44,7 +44,7 @@ public class JackHammer extends PyrexEnchant {
                 }
             }
             mine.addMineBlocks(counter);
-            PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).payForBlocks(counter);
+            PyrexPrison.getPlugin().getPlayerManager().payForBlocks(e.getPlayer(),counter);
             //p.sendMessage("JackHammer Triggered");
         }
     }
@@ -61,8 +61,8 @@ public class JackHammer extends PyrexEnchant {
 
     @Override
     public BigInteger getEquation(int n) {
-
-        return BigInteger.valueOf(2000+(1500L*n));
+        //return BigInteger.valueOf(2000+(1500L*n));
+        return BigInteger.valueOf(8000+(25000L*n));
     }
     /*
     @Override

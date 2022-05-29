@@ -4,21 +4,14 @@ import io.github.lunaiskey.pyrexprison.items.ItemManager;
 import io.github.lunaiskey.pyrexprison.listeners.PlayerEvents;
 import io.github.lunaiskey.pyrexprison.mines.PMineManager;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
-import io.github.lunaiskey.pyrexprison.mines.PMine;
 import io.github.lunaiskey.pyrexprison.pickaxe.PickaxeHandler;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
-import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.*;
 
 public final class PyrexPrison extends JavaPlugin {
@@ -29,7 +22,7 @@ public final class PyrexPrison extends JavaPlugin {
     private PickaxeHandler pickaxeHandler;
     private ItemManager itemManager;
     private Random rand = new Random();
-    private Set<UUID> savePending = new HashSet<>();
+    private final Set<UUID> savePending = new HashSet<>();
 
     private int saveTaskID = -1;
 
@@ -49,11 +42,10 @@ public final class PyrexPrison extends JavaPlugin {
         pickaxeHandler = new PickaxeHandler();
         itemManager = new ItemManager();
 
-        pmineManager.loadPMines();
         playerManager.loadPlayers();
-        playerManager.initGemstoneMap();
+        pmineManager.loadPMines();
         itemManager.registerItems();
-        new FunctionManager().registerCommands();
+        new CommandManager().registerCommands();
 
         checkPlayerData();
         buffSave();
@@ -72,6 +64,7 @@ public final class PyrexPrison extends JavaPlugin {
     public void onDisable() {
         Bukkit.getScheduler().cancelTask(saveTaskID);
         saveAll();
+        this.getLogger().info("Saved "+savePending.size()+" Players.");
     }
 
     public static PyrexPrison getPlugin() {
@@ -91,8 +84,8 @@ public final class PyrexPrison extends JavaPlugin {
     }
 
     private void save(UUID player, boolean slient) {
-        if (PMineManager.getPMine(player) != null) {
-            PMineManager.getPMine(player).save();
+        if (PyrexPrison.getPlugin().getPmineManager().getPMine(player) != null) {
+            PyrexPrison.getPlugin().getPmineManager().getPMine(player).save();
         }
         if (playerManager.getPlayerMap().get(player) != null) {
             playerManager.getPlayerMap().get(player).save();
@@ -102,6 +95,7 @@ public final class PyrexPrison extends JavaPlugin {
     private void saveAll() {
         for (UUID uuid : savePending) {
             save(uuid,true);
+            savePending.removeIf(n -> (Bukkit.getPlayer(n) == null));
         }
         this.getLogger().info("Saving Player and Mine data...");
     }
@@ -130,7 +124,7 @@ public final class PyrexPrison extends JavaPlugin {
             if (!playerManager.getPlayerMap().containsKey(p.getUniqueId())) {
                 playerManager.createPyrexPlayer(p.getUniqueId());
             }
-            if (PMineManager.getPMine(p.getUniqueId()) == null) {
+            if (PyrexPrison.getPlugin().getPmineManager().getPMine(p.getUniqueId()) == null) {
                 pmineManager.newPMine(p.getUniqueId());
             }
             savePending.add(p.getUniqueId());
@@ -161,4 +155,6 @@ public final class PyrexPrison extends JavaPlugin {
     public Set<UUID> getSavePending() {
         return savePending;
     }
+
+
 }

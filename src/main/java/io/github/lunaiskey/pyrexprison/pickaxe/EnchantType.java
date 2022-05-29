@@ -2,7 +2,9 @@ package io.github.lunaiskey.pyrexprison.pickaxe;
 
 import io.github.lunaiskey.pyrexprison.pickaxe.enchants.NightVision;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 public enum EnchantType {
@@ -19,7 +21,9 @@ public enum EnchantType {
     STRIKE,
     EXPLOSIVE,
     XP_BOOST,
-    NUKE
+    NUKE,
+    //HORIZONTAL_BREAK,
+    //VERTICAL_BREAK,
     ;
 
     public static Set<EnchantType> getSortedSet() {
@@ -33,11 +37,24 @@ public enum EnchantType {
         type.add(JACK_HAMMER);
         type.add(STRIKE);
         type.add(EXPLOSIVE);
+        //type.add(HORIZONTAL_BREAK);
+        //type.add(VERTICAL_BREAK);
         type.add(NUKE);
         type.add(GEM_FINDER);
         type.add(KEY_FINDER);
         type.add(LOOT_FINDER);
         type.add(XP_BOOST);
         return type;
+    }
+
+    public static Map<EnchantType,Integer> getDefaultMap() {
+        Map<EnchantType,Integer> map = new HashMap<>();
+        map.put(EnchantType.EFFICIENCY, 100);
+        map.put(EnchantType.HASTE,3);
+        map.put(EnchantType.SPEED,3);
+        map.put(EnchantType.JUMP_BOOST,3);
+        map.putIfAbsent(EnchantType.NIGHT_VISION,1);
+        map.putIfAbsent(EnchantType.FORTUNE,5);
+        return map;
     }
 }

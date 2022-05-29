@@ -1,24 +1,24 @@
 package io.github.lunaiskey.pyrexprison.player;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
+import io.github.lunaiskey.pyrexprison.items.ItemID;
+import io.github.lunaiskey.pyrexprison.mines.PMine;
 import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
 import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import io.github.lunaiskey.pyrexprison.player.armor.Armor;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.AbilityType;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.SalesBoost;
+import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.XPBoost;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class PyrexPlayer {
 
@@ -30,9 +30,11 @@ public class PyrexPlayer {
     private PyrexPickaxe pickaxe;
     private final Map<ArmorType,Armor> armor = new HashMap<>();
     private boolean isArmorEquiped;
+    private ItemID selectedGemstone;
+    private int gemstoneCount;
 
 
-    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped, Map<ArmorType,Armor> armor) {
+    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped, Map<ArmorType,Armor> armor,ItemID selectedGemstone,int gemstoneCount) {
         this.pUUID = pUUID;
         this.tokens = tokens;
         this.gems = gems;
@@ -40,6 +42,7 @@ public class PyrexPlayer {
         this.rank = rank;
         this.pickaxe = pickaxe;
         this.isArmorEquiped = isArmorEquiped;
+        this.gemstoneCount = gemstoneCount;
         if (armor == null || armor.isEmpty()) {
             this.armor.put(ArmorType.HELMET,new Armor(ArmorType.HELMET));
             this.armor.put(ArmorType.CHESTPLATE,new Armor(ArmorType.CHESTPLATE));
@@ -48,11 +51,16 @@ public class PyrexPlayer {
         } else {
             this.armor.putAll(armor);
         }
+        if (selectedGemstone != null) {
+            this.selectedGemstone = selectedGemstone;
+        } else {
+            this.selectedGemstone = ItemID.AMETHYST_GEMSTONE;
+        }
         save();
     }
 
     public PyrexPlayer(UUID pUUID) {
-        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false,null);
+        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false,null,ItemID.AMETHYST_GEMSTONE,0);
     }
 
     public long getGems() {
@@ -125,25 +133,20 @@ public class PyrexPlayer {
         this.pyrexPoints = pyrexPoints;
     }
 
-    public void setCurrency(CurrencyType type, long amount) {
-        switch (type) {
-            case GEMS -> setGems(amount);
-            case PYREX_POINTS -> setPyrexPoints(amount);
-        }
-    }
-
-    public void setCurrency(CurrencyType type, BigInteger amount) {
-        switch (type) {
-            case TOKENS -> setTokens(amount);
-        }
-    }
-
     public void setRank(int rank) {
         this.rank = rank;
+        PMine mine = PyrexPrison.getPlugin().getPmineManager().getPMine(pUUID);
+        if (mine != null) {
+            mine.checkMineBlocks();
+        }
     }
 
     public void setArmorEquiped(boolean armorEquiped) {
         isArmorEquiped = armorEquiped;
+    }
+
+    public void setPickaxe(PyrexPickaxe pickaxe) {
+        this.pickaxe = pickaxe;
     }
 
     public void giveTokens(BigInteger tokens) {this.tokens = this.tokens.add(tokens);}
@@ -185,13 +188,6 @@ public class PyrexPlayer {
         }
     }
 
-    public void payForBlocks(long amount) {
-        double multiplier = getTotalMultiplier();
-        int fortune = Math.max(pickaxe.getEnchants().getOrDefault(EnchantType.FORTUNE,0),5);
-        BigInteger tokens = BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(fortune)).multiply(BigDecimal.valueOf(multiplier+1)).toBigInteger();
-        giveTokens(tokens);
-    }
-
     public double getBaseMultiplier() {
         return 0;
     }
@@ -214,14 +210,46 @@ public class PyrexPlayer {
         return multiplier;
     }
 
+    public int getXPBoostTotal() {
+        int total = 0;
+        for (Armor armor : getArmor().values()) {
+            XPBoost boost = (XPBoost) armor.getAbilties().getOrDefault(AbilityType.XP_BOOST,new XPBoost(0));
+            total += boost.getBoost(boost.getLevel());
+        }
+        return total;
+    }
+
     /**
      * All multipliers added together, don't multiply the original amount by this, do amount + amount*getTotalMultiplier because this can return 0.
      * @return Total Multiplier, can be 0.
      */
     public double getTotalMultiplier() {
-        return getBaseMultiplier()+getRankMultiplier();
+        return getBaseMultiplier()+getRankMultiplier()+getArmorMultiplier();
     }
 
+    public ItemID getSelectedGemstone() {
+        if (selectedGemstone.name().contains("_GEMSTONE")) {
+            return selectedGemstone;
+        } else {
+            return ItemID.AMETHYST_GEMSTONE;
+        }
+    }
+
+    public void setSelectedGemstone(ItemID selectedGemstone) {
+        if (selectedGemstone.name().contains("_GEMSTONE")) {
+            this.selectedGemstone = selectedGemstone;
+        } else {
+            this.selectedGemstone = ItemID.AMETHYST_GEMSTONE;
+        }
+    }
+
+    public int getGemstoneCount() {
+        return gemstoneCount;
+    }
+
+    public void setGemstoneCount(int gemstoneCount) {
+        this.gemstoneCount = gemstoneCount;
+    }
 
     public void save() {
         File file = new File(PyrexPrison.getPlugin().getDataFolder() + "/playerdata/" + pUUID + ".yml");
@@ -233,6 +261,8 @@ public class PyrexPlayer {
         data.createSection("currencies", currencyMap);
         Map<String, Object> playerData = new LinkedHashMap<>();
         playerData.put("rank",rank);
+        playerData.put("selectedGemstone",selectedGemstone.name());
+        playerData.put("gemstoneCount",gemstoneCount);
         data.createSection("pyrexData",playerData);
         Map<String, Object> armorData = new LinkedHashMap<>();
         armorData.put("isArmorEquiped",isArmorEquiped);
@@ -240,12 +270,17 @@ public class PyrexPlayer {
         if (pickaxe != null) {
             Map<String, Object> map = new LinkedHashMap<>();
             Map<String, Object> enchantMap = new LinkedHashMap<>();
+            List<String> disabledEnchantsList = new ArrayList<>();
             map.put("blocksBroken",pickaxe.getBlocksBroken());
             for (EnchantType type : pickaxe.getEnchants().keySet()) {
                 enchantMap.put(type.name(),pickaxe.getEnchants().get(type));
             }
+            for (EnchantType type : pickaxe.getDisabledEnchants()) {
+                disabledEnchantsList.add(type.name());
+            }
             data.createSection("pickaxeData", map);
             data.createSection("pickaxeData.enchants",enchantMap);
+            data.set("pickaxeData.disabledEnchants",disabledEnchantsList);
         }
         for (Armor armor : armor.values()) {
             Map<String, Object> pieceData = new LinkedHashMap<>();

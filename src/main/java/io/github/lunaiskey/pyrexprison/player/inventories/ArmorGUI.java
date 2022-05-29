@@ -4,6 +4,7 @@ import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInventory;
+import io.github.lunaiskey.pyrexprison.nms.NBTTags;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
@@ -69,12 +70,29 @@ public class ArmorGUI implements PyrexInventory {
                 pyrexPlayer.setArmorEquiped(false);
                 e.getInventory().setItem(16,getToggleButton(false));
             } else {
-                p.getInventory().setHelmet(pyrexPlayer.getHelmet().getItemStack());
-                p.getInventory().setChestplate(pyrexPlayer.getChestplate().getItemStack());
-                p.getInventory().setLeggings(pyrexPlayer.getLeggings().getItemStack());
-                p.getInventory().setBoots(pyrexPlayer.getBoots().getItemStack());
-                pyrexPlayer.setArmorEquiped(true);
-                e.getInventory().setItem(16,getToggleButton(true));
+                boolean allSlotsEmpty = true;
+                for (ItemStack item : p.getInventory().getArmorContents()) {
+                    if (item != null) {
+                        if (NBTTags.getPyrexDataMap(item).get("id") != null) {
+                            if (!NBTTags.getPyrexDataMap(item).get("id").getAsString().contains("PYREX_ARMOR_")) {
+                                allSlotsEmpty = false;
+                            }
+                        } else {
+                            allSlotsEmpty = false;
+                        }
+                        break;
+                    }
+                }
+                if (allSlotsEmpty) {
+                    p.getInventory().setHelmet(pyrexPlayer.getHelmet().getItemStack());
+                    p.getInventory().setChestplate(pyrexPlayer.getChestplate().getItemStack());
+                    p.getInventory().setLeggings(pyrexPlayer.getLeggings().getItemStack());
+                    p.getInventory().setBoots(pyrexPlayer.getBoots().getItemStack());
+                    pyrexPlayer.setArmorEquiped(true);
+                    e.getInventory().setItem(16,getToggleButton(true));
+                } else {
+                    p.sendMessage(StringUtil.color("&cPlease remove all items from your armor slots before trying to equip your armor."));
+                }
             }
         }
         switch (e.getRawSlot()) {

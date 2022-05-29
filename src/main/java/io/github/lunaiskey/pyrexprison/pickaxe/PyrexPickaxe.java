@@ -21,22 +21,34 @@ public class PyrexPickaxe {
 
     private UUID player;
     private Map<EnchantType,Integer> enchants;
+    private Set<EnchantType> disabledEnchants;
     private long blocksBroken;
 
-    public PyrexPickaxe(UUID player, Map<EnchantType,Integer> enchants, long blocksBroken) {
+    public PyrexPickaxe(UUID player, Map<EnchantType,Integer> enchants,Set<EnchantType> disabledEnchants, long blocksBroken) {
         this.player = player;
+        if (enchants == null) {
+            enchants = new HashMap<>();
+        }
+        for (EnchantType type : EnchantType.getDefaultMap().keySet()) {
+            if (enchants.containsKey(type)) {
+                if (enchants.get(type) < EnchantType.getDefaultMap().get(type)) {
+                    enchants.put(type,EnchantType.getDefaultMap().get(type));
+                }
+            } else {
+                enchants.put(type,EnchantType.getDefaultMap().get(type));
+            }
+        }
         this.enchants = enchants;
-        enchants.put(EnchantType.EFFICIENCY, 100);
-        enchants.put(EnchantType.HASTE,3);
-        enchants.put(EnchantType.SPEED,3);
-        enchants.put(EnchantType.JUMP_BOOST,3);
-        enchants.put(EnchantType.NIGHT_VISION,1);
-        enchants.put(EnchantType.FORTUNE,5);
+        if (disabledEnchants == null) {
+            this.disabledEnchants = new HashSet<>();
+        } else {
+            this.disabledEnchants = disabledEnchants;
+        }
         this.blocksBroken = blocksBroken;
     }
 
     public PyrexPickaxe(UUID player) {
-        this(player,new HashMap<>(),0);
+        this(player,null,null,0);
     }
 
     public ItemStack getItemStack() {
@@ -82,6 +94,10 @@ public class PyrexPickaxe {
 
     public Map<EnchantType, Integer> getEnchants() {
         return enchants;
+    }
+
+    public Set<EnchantType> getDisabledEnchants() {
+        return disabledEnchants;
     }
 
     public void setBlocksBroken(long blocksBroken) {

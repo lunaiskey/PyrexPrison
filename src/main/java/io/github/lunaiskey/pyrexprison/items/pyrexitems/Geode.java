@@ -1,19 +1,25 @@
 package io.github.lunaiskey.pyrexprison.items.pyrexitems;
 
+import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.items.ItemID;
 import io.github.lunaiskey.pyrexprison.items.PyrexItem;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
+import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class Geode extends PyrexItem {
@@ -55,6 +61,36 @@ public class Geode extends PyrexItem {
 
     @Override
     public void onInteract(PlayerInteractEvent e) {
-        e.getPlayer().sendMessage(StringUtil.color("&cThis feature is currently unavailable."));
+        Player p = e.getPlayer();
+        Random rand = PyrexPrison.getPlugin().getRand();
+        PyrexPlayer pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId());
+        switch (getItemID()) {
+            case COMMON_GEODE -> {
+                pyrexPlayer.giveTokens(BigInteger.valueOf(5000));
+                pyrexPlayer.giveGems(50);
+                p.sendMessage(ChatColor.AQUA+"You found 5000 tokens and 50 gems from the geode.");
+            }
+            case UNCOMMON_GEODE -> {
+                pyrexPlayer.giveTokens(BigInteger.valueOf(10000));
+                pyrexPlayer.giveGems(75);
+                p.sendMessage(ChatColor.AQUA+"You found 10000 tokens and 75 gems from the geode.");
+            }
+            case RARE_GEODE -> {
+                pyrexPlayer.giveTokens(BigInteger.valueOf(15000));
+                pyrexPlayer.giveGems(100);
+                p.sendMessage(ChatColor.AQUA+"You found 15000 tokens and 100 gems from the geode.");
+            }
+            case EPIC_GEODE -> {
+                pyrexPlayer.giveTokens(BigInteger.valueOf(20000));
+                pyrexPlayer.giveGems(125);
+                p.sendMessage(ChatColor.AQUA+"You found 20000 tokens and 125 gems from the geode.");
+            }
+            case LEGENDARY_GEODE -> {
+                pyrexPlayer.giveTokens(BigInteger.valueOf(30000));
+                pyrexPlayer.giveGems(150);
+                p.sendMessage(ChatColor.AQUA+"You found 30000 tokens and 150 gems from the geode.");
+            }
+        }
+        e.getItem().setAmount(e.getItem().getAmount()-1);
     }
 }

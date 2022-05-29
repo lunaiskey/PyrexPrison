@@ -1,8 +1,9 @@
 package io.github.lunaiskey.pyrexprison.player.armor;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
+import io.github.lunaiskey.pyrexprison.items.ItemID;
+import io.github.lunaiskey.pyrexprison.items.pyrexitems.GemStone;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
-import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStoneType;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.Ability;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.AbilityType;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.EnchantmentProc;
@@ -60,7 +61,7 @@ public class Armor {
         if (tier == 0) {
             meta.setDisplayName(StringUtil.color("&fStarter "+type.getName()));
         } else {
-            meta.setDisplayName(PyrexPrison.getPlugin().getPlayerManager().getGemstonesMap().get(getGemstone(tier)).getName()+" "+type.getName());
+            meta.setDisplayName(PyrexPrison.getPlugin().getItemManager().getItemMap().get(getGemstone(tier)).getName()+" "+type.getName());
         }
         List<String> lore = new ArrayList<>();
         lore.add(" ");
@@ -84,7 +85,11 @@ public class Armor {
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE,ItemFlag.HIDE_ATTRIBUTES,ItemFlag.HIDE_DYE);
         if (meta instanceof LeatherArmorMeta) {
             LeatherArmorMeta leatherMeta = (LeatherArmorMeta) meta;
-            leatherMeta.setColor(getTierColor(tier));
+            if (customColor != null) {
+                leatherMeta.setColor(getCustomColor());
+            } else {
+                leatherMeta.setColor(getTierColor(tier));
+            }
             item.setItemMeta(leatherMeta);
         } else {
             item.setItemMeta(meta);
@@ -104,40 +109,36 @@ public class Armor {
         return mat;
     }
 
-    public GemStoneType getGemstone(int tier) {
-        GemStoneType type;
-        switch (tier) {
-            case 1 -> type = GemStoneType.AMETHYST;
-            case 2 -> type = GemStoneType.JASPER;
-            case 3 -> type = GemStoneType.OPAL;
-            case 4 -> type = GemStoneType.JADE;
-            case 5 -> type = GemStoneType.TOPAZ;
-            case 6 -> type = GemStoneType.AMBER;
-            case 7 -> type = GemStoneType.SAPPHIRE;
-            case 8 -> type = GemStoneType.EMERALD;
-            case 9 -> type = GemStoneType.RUBY;
-            case 10 -> type = GemStoneType.DIAMOND;
+    public ItemID getGemstone(int tier) {
+        return switch (tier) {
+            case 1 -> ItemID.AMETHYST_GEMSTONE;
+            case 2 -> ItemID.JASPER_GEMSTONE;
+            case 3 -> ItemID.OPAL_GEMSTONE;
+            case 4 -> ItemID.JADE_GEMSTONE;
+            case 5 -> ItemID.TOPAZ_GEMSTONE;
+            case 6 -> ItemID.AMBER_GEMSTONE;
+            case 7 -> ItemID.SAPPHIRE_GEMSTONE;
+            case 8 -> ItemID.EMERALD_GEMSTONE;
+            case 9 -> ItemID.RUBY_GEMSTONE;
+            case 10 -> ItemID.DIAMOND_GEMSTONE;
             default -> throw new IllegalStateException("Unexpected value: " + tier);
-        }
-        return type;
+        };
     }
 
     public int getCostAmount(int tier) {
-        int cost;
-        switch(tier) {
-            case 1 -> cost = 64;
-            case 2 -> cost = 96;
-            case 3 -> cost = 128;
-            case 4 -> cost = 192;
-            case 5 -> cost = 256;
-            case 6 -> cost = 384;
-            case 7 -> cost = 512;
-            case 8 -> cost = 768;
-            case 9 -> cost = 1024;
-            case 10 -> cost = 1536;
+        return switch(tier) {
+            case 1 -> 64;
+            case 2 -> 96;
+            case 3 -> 128;
+            case 4 -> 192;
+            case 5 -> 256;
+            case 6 -> 384;
+            case 7 -> 512;
+            case 8 -> 768;
+            case 9 -> 1024;
+            case 10 -> 1536;
             default -> throw new IllegalStateException("Unexpected value: " + tier);
-        }
-        return cost;
+        };
     }
 
     public int getTier() {
@@ -146,6 +147,10 @@ public class Armor {
 
     public void setTier(int tier) {
         this.tier = tier;
+    }
+
+    public void setCustomColor(Color customColor) {
+        this.customColor = customColor;
     }
 
     public int getTierMax() {
@@ -164,7 +169,7 @@ public class Armor {
         if (tier == 0) {
             return Color.WHITE;
         } else if (tier <= getTierMax()) {
-            return Color.fromRGB(PyrexPrison.getPlugin().getPlayerManager().getGemstonesMap().get(getGemstone(tier)).getIntFromHex());
+            return Color.fromRGB(((GemStone) PyrexPrison.getPlugin().getItemManager().getItemMap().get(getGemstone(tier))).getIntFromHex());
         } else {
             return Color.BLACK;
         }

@@ -3,13 +3,13 @@ package io.github.lunaiskey.pyrexprison.player.inventories;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInventory;
+import io.github.lunaiskey.pyrexprison.items.ItemID;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.player.armor.Armor;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorPyrexHolder;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
-import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStone;
-import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStoneType;
+import io.github.lunaiskey.pyrexprison.items.pyrexitems.GemStone;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.Ability;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.AbilityType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
@@ -19,16 +19,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class ArmorUpgradeGUI implements PyrexInventory {
 
@@ -39,6 +36,7 @@ public class ArmorUpgradeGUI implements PyrexInventory {
     private final Inventory inv;
     private ArmorType type;
     private Map<Integer,AbilityType> abilitySlots = new HashMap<>();
+    private static Map<UUID,ArmorType> customColorMap = new HashMap<>();
 
     public ArmorUpgradeGUI(Player player, ArmorType type) {
         this.player = player;
@@ -76,14 +74,15 @@ public class ArmorUpgradeGUI implements PyrexInventory {
     public void onClick(InventoryClickEvent e) {
         e.setCancelled(true);
         Player p = (Player) e.getWhoClicked();
+        Inventory inv = e.getClickedInventory();
         Armor armor = pyrexPlayer.getArmor().get(type);
         switch (e.getRawSlot()) {
             case 21,22,23 -> {
                 Ability ability = armor.getAbilties().get(abilitySlots.get(e.getRawSlot()));
                 if (ability.getLevel() < ability.getMaxLevel()) {
-                    if (pyrexPlayer.getGems() >= ability.getNextCost()) {
+                    if (pyrexPlayer.getGems() >= ability.getCost()) {
+                        pyrexPlayer.takeGems(ability.getCost());
                         ability.setLevel(ability.getLevel()+1);
-                        pyrexPlayer.takeGems(ability.getNextCost());
                         player.sendMessage(StringUtil.color("&aUpgraded "+abilitySlots.get(e.getRawSlot()).name()+" to level "+ability.getLevel()+"."));
                         p.getInventory().setItem(type.getSlot(),armor.getItemStack());
                         Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()-> player.openInventory(new ArmorUpgradeGUI(player,type).getInv()));
@@ -92,13 +91,12 @@ public class ArmorUpgradeGUI implements PyrexInventory {
                     }
                 }
             }
-            //case 22,23,24 -> e.getWhoClicked().sendMessage(StringUtil.color("&cThis upgrade isn't implemented yet, try again later."));
             case 11 -> {
                 if (armor.getTier() < armor.getTierMax()) {
                     int cost = armor.getCostAmount(armor.getTier()+1);
-                    GemStoneType gemStoneType = armor.getGemstone(armor.getTier()+1);
-                    if (PyrexPrison.getPlugin().getPlayerManager().getGemstoneCount(player,gemStoneType) >= cost) {
-                        PyrexPrison.getPlugin().getPlayerManager().removeGemstones(player,gemStoneType,cost);
+                    ItemID gemStoneType = armor.getGemstone(armor.getTier()+1);
+                    if (PyrexPrison.getPlugin().getPlayerManager().getPyrexItemCount(player,gemStoneType) >= cost) {
+                        PyrexPrison.getPlugin().getPlayerManager().removePyrexItem(player,gemStoneType,cost);
                         armor.setTier(armor.getTier()+1);
                         player.sendMessage(StringUtil.color("&aSuccessfully upgraded armor to Tier "+armor.getTier()+"."));
                         p.getInventory().setItem(type.getSlot(),armor.getItemStack());
@@ -108,30 +106,33 @@ public class ArmorUpgradeGUI implements PyrexInventory {
                     }
                 }
             }
+            case 15 -> {
+                switch (e.getClick()) {
+                    case LEFT,SHIFT_LEFT -> {
+                        Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), p::closeInventory);
+                        p.sendMessage("Type in the hex code you want for your piece.");
+                        customColorMap.put(p.getUniqueId(),type);
+                    }
+                    case RIGHT,SHIFT_RIGHT -> {
+                        if (armor.getCustomColor() != null) {
+                            armor.setCustomColor(null);
+                            p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                            inv.setItem(e.getRawSlot(),getColorButton());
+                            inv.setItem(13,armor.getItemStack());
+                        }
+                    }
+                }
+            }
         }
     }
 
     private ItemStack getUpgradeButton(AbilityType abilityType) {
-        Material mat = Material.IRON_BARS;
-        String name = "Set the name in getUpgradeButton stupid...";
+        Material mat = abilityType.getUpgradeMaterial();
+        String name = abilityType.getUpgradeName();
         Armor armor = pyrexPlayer.getArmor().get(type);
         int level = armor.getAbilties().get(abilityType).getLevel();
         int maxLevel = armor.getAbilties().get(abilityType).getMaxLevel();
         long cost = armor.getAbilties().get(abilityType).getCost();
-        switch (abilityType) {
-            case SALES_BOOST -> {
-                mat = Material.SUNFLOWER;
-                name = "&eSales Boost";
-            }
-            case ENCHANTMENT_PROC -> {
-                mat = Material.NETHER_STAR;
-                name = "&eEnchantment Proc";
-            }
-            case XP_BOOST -> {
-                mat = Material.EXPERIENCE_BOTTLE;
-                name = "&eXP Boost";
-            }
-        }
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         String levelStr = level > 0 ? ""+level : "";
@@ -166,7 +167,7 @@ public class ArmorUpgradeGUI implements PyrexInventory {
         lore.add(StringUtil.color("&7Armor Piece's Tier."));
         lore.add(" ");
         if (armor.getTier() < armor.getTierMax()) {
-            GemStone gemStone = PyrexPrison.getPlugin().getPlayerManager().getGemstonesMap().get(armor.getGemstone(armor.getTier()+1));
+            GemStone gemStone = (GemStone) PyrexPrison.getPlugin().getItemManager().getItemMap().get(armor.getGemstone(armor.getTier()+1));
             lore.add(StringUtil.color("&7Cost:"));
             lore.add(StringUtil.color("&8- "+gemStone.getName()+" &7x")+armor.getCostAmount(armor.getTier()+1));
             lore.add(" ");
@@ -191,9 +192,14 @@ public class ArmorUpgradeGUI implements PyrexInventory {
         lore.add(" ");
         lore.add(StringUtil.color("&7Current Color: [#")+ChatColor.of(color)+Integer.toHexString(color.getRGB()).substring(2).toUpperCase()+ChatColor.GRAY+"]");
         lore.add(" ");
-        lore.add(StringUtil.color("&eClick to change!"));
+        lore.add(StringUtil.color("&eL-Click to change!"));
+        lore.add(StringUtil.color("&eR-Click to reset!"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
+    }
+
+    public static Map<UUID,ArmorType> getCustomColorMap() {
+        return customColorMap;
     }
 }

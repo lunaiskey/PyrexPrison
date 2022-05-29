@@ -16,7 +16,7 @@ public class Fortune extends PyrexEnchant {
 
 
     public Fortune() {
-        super("Fortune", List.of("Increases blocks received while mining"),  250, CurrencyType.TOKENS,  true);
+        super("Fortune", List.of("Increases blocks received while mining"),  1000, CurrencyType.TOKENS,  true);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class Fortune extends PyrexEnchant {
 
     @Override
     public BigInteger getEquation(int n) {
-        return BigInteger.valueOf(5000L+(5000L*(n-5)));
+        return BigInteger.valueOf(125000L+(125000L*(n-5)));
     }
 
 }

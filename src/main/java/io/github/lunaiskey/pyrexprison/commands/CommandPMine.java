@@ -3,7 +3,7 @@ package io.github.lunaiskey.pyrexprison.commands;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.mines.PMineManager;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
-import io.github.lunaiskey.pyrexprison.mines.PMineInv;
+import io.github.lunaiskey.pyrexprison.mines.inventories.PMineGUI;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import io.github.lunaiskey.pyrexprison.util.TimeUtil;
@@ -13,14 +13,15 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
-public class CommandPMine implements CommandExecutor {
+public class CommandPMine implements CommandExecutor, TabCompleter {
 
     private PyrexPrison plugin;
     private Logger log;
@@ -36,12 +37,12 @@ public class CommandPMine implements CommandExecutor {
     public boolean onCommand(CommandSender sender,  Command command,  String label,  String[] args) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
+            PMine mine = PyrexPrison.getPlugin().getPmineManager().getPMine(p.getUniqueId());
             if (args.length == 0) {
-                p.openInventory(new PMineInv().getInv());
+                p.openInventory(new PMineGUI(p).getInv());
                 return true;
             }
             if (args[0].equalsIgnoreCase("reset")) {
-                PMine mine = PMineManager.getPMine(p.getUniqueId());
                 if (p.hasPermission("pyrex.resetcooldown.bypass") || !resetCooldown.containsKey(p.getUniqueId()) || System.currentTimeMillis() >= resetCooldown.get(p.getUniqueId())+300000) {
                     if (mine != null) {
                         p.sendMessage("PMine resetting...");
@@ -71,7 +72,7 @@ public class CommandPMine implements CommandExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("tp")) {
-                p.teleport(PMineManager.getPMine(p.getUniqueId()).getCenter().add(0.5,1,0.5));
+                p.teleport(PyrexPrison.getPlugin().getPmineManager().getPMine(p.getUniqueId()).getCenter().add(0.5,1,0.5));
                 p.sendMessage("Teleporting to mine...");
                 return true;
             }
@@ -80,13 +81,18 @@ public class CommandPMine implements CommandExecutor {
                         "| /pmine reset",
                         "| /pmine tp",
                         "| /pmine fly",
-                        "| /pmine menu");
+                        "| /pmine checkmineblocks");
                 if (p.hasPermission("pyrex.debug")) {
                     p.sendMessage("| /pmine debug getposition",
                             "| /pmine debug getgridposition"
                             //"| /pmine debug genbedrock (DOESNT NEED TO RUN.)"
                     );
                 }
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("checkmineblocks")) {
+                mine.checkMineBlocks();
+                p.sendMessage(StringUtil.color("&aChecked your blocks. You have "+mine.getComposition().size()+" Available blocks."));
                 return true;
             }
             if (p.hasPermission("pyrex.debug")) {
@@ -100,7 +106,7 @@ public class CommandPMine implements CommandExecutor {
                         if (args[1].equalsIgnoreCase("getgridposition")) {
                             Location l = p.getLocation().clone();
                             Pair<Integer, Integer> loc = new PMineManager().getGridLocation(l);
-                            PMine pMine = PMineManager.getPMine(loc.getLeft(), loc.getRight());
+                            PMine pMine = PyrexPrison.getPlugin().getPmineManager().getPMine(loc.getLeft(), loc.getRight());
                             if (pMine != null && l.getWorld().getName().equalsIgnoreCase("mines")) {
                                 p.sendMessage("Owner: " + Bukkit.getOfflinePlayer(pMine.getOwner()).getName());
                             } else {
@@ -113,7 +119,7 @@ public class CommandPMine implements CommandExecutor {
                             if (debug) {
                                 Location l = p.getLocation().clone();
                                 Pair<Integer, Integer> loc = new PMineManager().getGridLocation(l);
-                                PMine pMine = PMineManager.getPMine(loc.getLeft(), loc.getRight());
+                                PMine pMine = PyrexPrison.getPlugin().getPmineManager().getPMine(loc.getLeft(), loc.getRight());
                                 pMine.genBedrock();
                             }
                             return true;
@@ -131,7 +137,36 @@ public class CommandPMine implements CommandExecutor {
         return true;
     }
 
+
+
     public static Map<UUID, Long> getResetCooldown() {
         return resetCooldown;
+    }
+
+    @Nullable
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        final List<String> completions = new ArrayList<>();
+        if (args.length == 1) {
+            completions.add("help");
+            completions.add("reset");
+            completions.add("tp");
+            completions.add("fly");
+            completions.add("checkmineblocks");
+            if (sender.hasPermission("pyrex.debug")) {
+                completions.add("debug");
+            }
+            return completions;
+        }
+        if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("debug")) {
+                if (sender.hasPermission("pyrex.debug")) {
+                    completions.add("getposition");
+                    completions.add("getgridposition");
+                    return completions;
+                }
+            }
+        }
+        return null;
     }
 }

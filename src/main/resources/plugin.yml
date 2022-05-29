@@ -34,6 +34,11 @@ commands:
     permission: pyrex.admin.pitem
   viewplayer:
     usage: /<command>
+  rank:
+    usage: /<command>
+  resetpickaxe:
+    usage: /<command>
+
 permissions:
   pyrex.*:
     description: Gives access to every command.

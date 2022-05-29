@@ -2,7 +2,14 @@ package io.github.lunaiskey.pyrexprison.mines;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import io.github.lunaiskey.pyrexprison.mines.upgrades.PMineUpgrade;
+import io.github.lunaiskey.pyrexprison.mines.upgrades.PMineUpgradeType;
+import io.github.lunaiskey.pyrexprison.mines.upgrades.upgrades.MaxPlayers;
+import io.github.lunaiskey.pyrexprison.mines.upgrades.upgrades.SellPrice;
+import io.github.lunaiskey.pyrexprison.mines.upgrades.upgrades.Size;
 import io.github.lunaiskey.pyrexprison.nms.NMSBlockChange;
+import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,51 +36,80 @@ public class PMine {
     private Location center;
     private Location min;
     private Location max;
-    private int mineSize;
+    private int mineRadius;
     private long maxMineBlocks;
     private long blocksBroken = 0;
     private BukkitTask resetTask = null;
     private int resetTime = 10; // in minutes
-    private float resetPercentage = 0.90F;
-    private int sizeUpgradeTier;
+    private float resetPercentage = 0.70F;
     private Map<Material,Double> composition;
+    private Set<Material> disabledBlocks;
+    private Map<PMineUpgradeType,Integer> upgradeMap;
 
-    public PMine(UUID owner, int chunkX, int chunkZ, int mineSize, Map<Material,Double> comp) {
+    private boolean isPublic;
+    private double mineTax;
+    private Set<UUID> playerSet;
+
+    public PMine(UUID owner, int chunkX, int chunkZ, int mineRadius, boolean isPublic, double mineTax,Set<Material> disabledBlocks, Map<Material,Double> comp, Set<UUID> playerSet, Map<PMineUpgradeType,Integer> upgradeMap) {
         this.owner = owner;
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
         this.world = Bukkit.getWorld(PMineWorld.getWorldName());
         this.center = new Location(world, (225 * chunkX), 100, (225 * chunkZ));
-        this.min = new Location(center.getWorld(), center.getBlockX() - mineSize, 51, center.getBlockZ() - mineSize);
-        this.max = new Location(center.getWorld(), center.getBlockX() + mineSize, 100, center.getBlockZ() + mineSize);
-        this.maxMineBlocks = (mineSize* 2L +1)*(mineSize* 2L +1)*(max.getBlockY()-min.getBlockY()+1);
-        checkBlocksBroken();
+        this.upgradeMap = Objects.requireNonNullElseGet(upgradeMap, HashMap::new);
+        for (PMineUpgradeType upgradeType : PMineUpgradeType.values()) {
+            this.upgradeMap.putIfAbsent(upgradeType, 0);
+        }
+        this.mineRadius = mineRadius+this.upgradeMap.get(PMineUpgradeType.SIZE);
+        this.min = new Location(center.getWorld(), center.getBlockX() - this.mineRadius, 51, center.getBlockZ() - this.mineRadius);
+        this.max = new Location(center.getWorld(), center.getBlockX() + this.mineRadius, 100, center.getBlockZ() + this.mineRadius);
+        this.maxMineBlocks = (this.mineRadius * 2L +1)*(this.mineRadius * 2L +1)*(max.getBlockY()-min.getBlockY()+1);
         Player p = Bukkit.getPlayer(owner);
         if (p != null) {
-            if (new Location(center.getWorld(),center.getBlockX()+mineSize+1,max.getBlockY(),center.getBlockZ()+mineSize+1).getBlock().getType() != Material.BEDROCK) {
+            if (new Location(center.getWorld(),center.getBlockX()+ this.mineRadius +1,max.getBlockY(),center.getBlockZ()+ this.mineRadius +1).getBlock().getType() != Material.BEDROCK) {
                 genBedrock();
                 reset();
             }
         }
-        if (comp == null || comp.isEmpty()) {
-            this.composition = new LinkedHashMap<>();
-            this.composition.put(Material.COBBLESTONE,1D);
-            this.composition.put(Material.STONE,1D);
-            this.composition.put(Material.GRANITE,1D);
-            this.composition.put(Material.POLISHED_GRANITE,1D);
-            this.composition.put(Material.DIORITE,1D);
-            this.composition.put(Material.POLISHED_DIORITE,1D);
-            this.composition.put(Material.ANDESITE,1D);
-            this.composition.put(Material.POLISHED_ANDESITE,1D);
+        if (disabledBlocks == null) {
+            this.disabledBlocks = new HashSet<>();
         } else {
-            this.composition = comp;
+            this.disabledBlocks = disabledBlocks;
         }
+        this.composition = Objects.requireNonNullElseGet(comp, LinkedHashMap::new);
+        Map<Material,Integer> sortedBlocks = PMineManager.getBlockRankMap();
+        PyrexPlayer pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(owner);
+        for(Material mat : sortedBlocks.keySet()) {
+            if (pyrexPlayer.getRank() >= sortedBlocks.get(mat)) {
+                this.composition.putIfAbsent(mat,1D);
+            } else {
+                this.composition.remove(mat);
+            }
+        }
+        this.playerSet = Objects.requireNonNullElseGet(playerSet, HashSet::new);
+        this.isPublic = isPublic;
+        this.mineTax = mineTax;
+
+        checkBlocksBroken();
     }
 
     public PMine(UUID owner, int chunkX, int chunkZ) {
-        this(owner,chunkX,chunkZ,12,null);
+        this(owner,chunkX,chunkZ,12,false,10F,null,null,null,null);
     }
 
+    public void checkMineBlocks() {
+        Map<Material,Integer> sortedBlocks = PMineManager.getBlockRankMap();
+        PyrexPlayer pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(owner);
+        Map<Material,Double> replaceMap = new LinkedHashMap<>();
+        for (Material mat : sortedBlocks.keySet()) {
+            if (pyrexPlayer.getRank() >= sortedBlocks.get(mat)) {
+                replaceMap.put(mat, composition.getOrDefault(mat, 1D));
+            } else {
+                break;
+            }
+        }
+        this.composition = replaceMap;
+    }
 
     public UUID getOwner() {
         return owner;
@@ -103,13 +139,50 @@ public class PMine {
         return composition;
     }
 
+    public Map<PMineUpgradeType, Integer> getUpgradeMap() {
+        return upgradeMap;
+    }
+
+    public double getMineTax() {
+        return mineTax;
+    }
+
+    public double getSellPrice() {
+        PyrexPlayer pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(owner);
+        return 1+(pyrexPlayer.getRank()*0.005);
+    }
+
+    public void setMineTax(double mineTax) {
+        this.mineTax = mineTax;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+        if (isPublic) {
+            PyrexPrison.getPlugin().getPmineManager().getPublicMines().add(owner);
+        } else {
+            PyrexPrison.getPlugin().getPmineManager().getPublicMines().remove(owner);
+        }
+    }
+
     public void save() {
         File file = new File(PyrexPrison.getPlugin().getDataFolder() + "/pmines/" + owner + ".yml");
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("chunkX", chunkX);
         map.put("chunkZ", chunkZ);
+        map.put("isPublic",isPublic);
+        map.put("tax",mineTax);
         data.createSection("mine", map);
+        Map<String,Object> upgradeMap = new LinkedHashMap<>();
+        for (PMineUpgradeType upgradeType : this.upgradeMap.keySet()) {
+            upgradeMap.put(upgradeType.name(),this.upgradeMap.get(upgradeType));
+        }
+        data.createSection("upgrades",upgradeMap);
         if (composition != null) {
             data.createSection("blocks", this.composition);
         }
@@ -126,8 +199,7 @@ public class PMine {
     public boolean reset() {
         if (resetting) {
             return false;
-        }
-        if (!resetting) {
+        } else {
             resetting = true;
         }
 
@@ -206,7 +278,7 @@ public class PMine {
     }
 
     public boolean isInMineRegion(Location loc) {
-        return (loc.getBlockY() >= min.getBlockY() && loc.getBlockY() <= max.getBlockY() && loc.getBlockX() >= min.getBlockX() && loc.getBlockX() <= max.getBlockX() && loc.getBlockZ() >= min.getBlockZ() && loc.getBlockZ() <= max.getBlockZ());
+        return (loc.getBlockY() >= min.getBlockY() && loc.getBlockY() <= max.getBlockY() && loc.getBlockX() >= min.getBlockX() && loc.getBlockX() <= max.getBlockX() && loc.getBlockZ() >= min.getBlockZ() && loc.getBlockZ() <= max.getBlockZ() && loc.getWorld().getName().equals(PMineWorld.getWorldName()));
     }
 
     public boolean isInMineRegion(Player p) {
@@ -214,13 +286,47 @@ public class PMine {
         return isInMineRegion(loc);
     }
 
-    public void increaseSize(int amount) {
+    public boolean isInMineIsland(Player p) {
+        return isInMineIsland(p.getLocation());
+    }
+
+
+    public boolean isInMineIsland(Location loc) {
+        Pair<Integer,Integer> pair = PyrexPrison.getPlugin().getPmineManager().getGridLocation(loc);
+        return pair.getLeft() == chunkX && pair.getRight() == chunkZ && loc.getWorld().getName().equals(PMineWorld.getWorldName());
+    }
+
+    public void increaseRadius(int amount) {
         if (amount <= 0) {
             return;
         }
-        mineSize += amount;
-        genBedrock();
-        reset();
+        setRadius(getSize()+amount);
+    }
+
+    public void decreaseRadius(int amount) {
+        if (amount <= 0) {
+            return;
+        }
+        setRadius(getSize()-amount);
+    }
+
+    public void setRadius(int amount) {
+        if (amount <= 0) {
+            mineRadius = 0;
+        } else {
+            mineRadius = amount;
+        }
+        updateSize();
+    }
+
+    public void updateSize() {
+        this.min = new Location(center.getWorld(), center.getBlockX() - mineRadius, 51, center.getBlockZ() - mineRadius);
+        this.max = new Location(center.getWorld(), center.getBlockX() + mineRadius, 100, center.getBlockZ() + mineRadius);
+        this.maxMineBlocks = (mineRadius * 2L +1)*(mineRadius * 2L +1)*(max.getBlockY()-min.getBlockY()+1);
+    }
+
+    public int getSize() {
+        return mineRadius;
     }
 
     public long getBlocksBroken() {
@@ -268,7 +374,6 @@ public class PMine {
         blocksBroken = blocks;
     }
 
-    //TAKEN FROM MINERESETLITE BY TEAM-VK
     public static class CompositionEntry {
         private Material block;
         private double chance;
@@ -287,7 +392,6 @@ public class PMine {
         }
     }
 
-    //TAKEN FROM MINERESETLITE BY TEAM-VK
     private static List<CompositionEntry> mapComposition(Map<Material, Double> compositionIn) {
         List<CompositionEntry> probabilityMap = new ArrayList<>();
         Map<Material, Double> comp = new HashMap<>();
@@ -309,5 +413,9 @@ public class PMine {
             probabilityMap.add(new CompositionEntry(entry.getKey(), i));
         }
         return probabilityMap;
+    }
+
+    public long getArea() {
+        return ((long) max.getBlockX()-min.getBlockX()+1) * ((long) max.getBlockZ()-min.getBlockZ()+1) * ((long) max.getBlockY()-min.getBlockY()+1);
     }
 }

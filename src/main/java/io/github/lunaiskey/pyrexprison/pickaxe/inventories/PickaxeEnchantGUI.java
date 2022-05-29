@@ -1,11 +1,14 @@
-package io.github.lunaiskey.pyrexprison.pickaxe;
+package io.github.lunaiskey.pyrexprison.pickaxe.inventories;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
-import io.github.lunaiskey.pyrexprison.pickaxe.enchants.XPBoost;
+import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
+import io.github.lunaiskey.pyrexprison.pickaxe.PyrexPickaxe;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
+import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,16 +23,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EnchantInv {
+public class PickaxeEnchantGUI {
 
     private String name = "Enchantments";
     private int size = 54;
     private Player p;
-    private Inventory inv = new PyrexHolder(name,size, PyrexInvType.ENCHANTS).getInventory();
+    private Inventory inv = new PyrexHolder(name,size, PyrexInvType.PICKAXE_ENCHANTS).getInventory();
     private PyrexPickaxe pickaxe;
-    private Map<Integer,EnchantType> enchantLocation = new HashMap<>();
+    private Map<Integer, EnchantType> enchantLocation = new HashMap<>();
 
-    public EnchantInv(Player p) {
+    public PickaxeEnchantGUI(Player p) {
         this.p = p;
         pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId()).getPickaxe();
         enchantLocation.put(20,EnchantType.FORTUNE);
@@ -54,6 +57,7 @@ public class EnchantInv {
                         inv.setItem(i, ItemBuilder.createItem("&c&lTBA", Material.BARRIER,null));
                     }
                 }
+                case 11 -> inv.setItem(i,getEnchantToggleIcon());
                 case 13 -> inv.setItem(i, pickaxe.getItemStack());
                 default -> inv.setItem(i, ItemBuilder.createItem(" ", Material.BLACK_STAINED_GLASS_PANE,null));
             }
@@ -65,10 +69,22 @@ public class EnchantInv {
         return inv;
     }
 
+    private ItemStack getEnchantToggleIcon() {
+        String name = "&aToggle Enchants";
+        Material mat = Material.GREEN_DYE;
+        List<String> lore = new ArrayList<>();
+        lore.add(StringUtil.color("&eClick to view!"));
+        return ItemBuilder.createItem(name,mat,lore);
+    }
+
     private ItemStack getEnchantPlaceholder(EnchantType type) {
-        ItemStack item = new ItemStack(Material.ENCHANTED_BOOK);
-        ItemMeta meta = item.getItemMeta();
         PyrexEnchant enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type);
+        Material mat = Material.ENCHANTED_BOOK;
+        if (!enchant.isEnabled()) {
+            mat = Material.IRON_BARS;
+        }
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
         CurrencyType currencyType = enchant.getCurrencyType();
         int level = pickaxe.getEnchants().getOrDefault(type, 0);
         meta.setDisplayName(StringUtil.color("&b"+enchant.getName()+" &8[&7"+level+" -> "+(level+1)+"&8]"));
@@ -79,19 +95,20 @@ public class EnchantInv {
             }
         }
         lore.add(" ");
-
-
-        if (level >= enchant.getMaxLevel()) {
-            lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
-            lore.add(" ");
-            lore.add(StringUtil.color("&7Enchant is max level!"));
+        if (enchant.isEnabled()) {
+            if (level >= enchant.getMaxLevel()) {
+                lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
+                lore.add(" ");
+                lore.add(StringUtil.color("&7Enchant is max level!"));
+            } else {
+                lore.add(StringUtil.color("&7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+ Numbers.formattedNumber(enchant.getCostBetweenLevels(level,level+1))));
+                lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
+                lore.add(" ");
+                lore.add(StringUtil.color("&eL-Click to purchase levels."));
+            }
         } else {
-            lore.add(StringUtil.color("&7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+enchant.getCostBetweenLevels(level,level+1)));
-            lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
-            lore.add(" ");
-            lore.add(StringUtil.color("&eL-Click to purchase levels."));
+            lore.add(StringUtil.color("&cEnchantment is currently disabled."));
         }
-
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -100,12 +117,17 @@ public class EnchantInv {
     public void onClick(InventoryClickEvent e) {
         e.setCancelled(true);
         Player p = (Player) e.getWhoClicked();
-        if (enchantLocation.containsKey(e.getRawSlot())) {
-            PyrexEnchant enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(enchantLocation.get(e.getRawSlot()));
-            int level = pickaxe.getEnchants().getOrDefault(enchantLocation.get(e.getRawSlot()), 0);
+        int slot = e.getRawSlot();
+        if (slot == 11) {
+            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->p.openInventory(new PickaxeEnchantToggleGUI(p).getInv()));
+            return;
+        }
+        if (enchantLocation.containsKey(slot)) {
+            PyrexEnchant enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(enchantLocation.get(slot));
+            int level = pickaxe.getEnchants().getOrDefault(enchantLocation.get(slot), 0);
             if (enchant.isEnabled()) {
                 if (level < enchant.getMaxLevel()) {
-                    Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->p.openInventory(new AddLevelsInv(p,enchantLocation.get(e.getRawSlot())).getInv()));
+                    Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->p.openInventory(new PickaxeAddLevelsGUI(p,enchantLocation.get(slot)).getInv()));
                 } else {
                     p.sendMessage(StringUtil.color("&cYou have maxed out this enchantment."));
                 }

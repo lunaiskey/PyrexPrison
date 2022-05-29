@@ -24,14 +24,13 @@ public class Strike extends PyrexEnchant {
 
     @Override
     public void onBlockBreak(BlockBreakEvent e, int level) {
-        double chance = 0.02*level;
+        double chance = 0.01D*level;
         Player p = e.getPlayer();
-        if (PyrexPrison.getPlugin().getRand().nextDouble()*100 <= chance*level) {
+        if (PyrexPrison.getPlugin().getRand().nextDouble()*100 <= chance) {
             long blocksBroken = 0;
             Pair<Integer,Integer> gridLoc = PyrexPrison.getPlugin().getPmineManager().getGridLocation(e.getBlock().getLocation());
-            PMine mine = PMineManager.getPMine(gridLoc.getLeft(),gridLoc.getRight());
-            e.getBlock().getWorld().strikeLightningEffect(e.getBlock().getLocation());
-            for (Location loc : ShapeUtil.generateSphere(e.getBlock().getLocation(),5+(Math.floorDiv(level,100)))) {
+            PMine mine = PyrexPrison.getPlugin().getPmineManager().getPMine(gridLoc.getLeft(),gridLoc.getRight());
+            for (Location loc : ShapeUtil.generateSphere(e.getBlock().getLocation(),5+(Math.floorDiv(level,getMaxLevel()/10)))) {
                 if (mine.isInMineRegion(loc)) {
                     if (loc.getBlock().getType() != Material.AIR) {
                         blocksBroken++;
@@ -40,7 +39,7 @@ public class Strike extends PyrexEnchant {
                 }
             }
             mine.addMineBlocks(blocksBroken);
-            PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).payForBlocks(blocksBroken);
+            PyrexPrison.getPlugin().getPlayerManager().payForBlocks(e.getPlayer(),blocksBroken);
         }
     }
 
@@ -56,6 +55,6 @@ public class Strike extends PyrexEnchant {
 
     @Override
     public BigInteger getEquation(int n) {
-        return BigInteger.valueOf(3000+(5000L*n));
+        return BigInteger.valueOf(8000+(25000L*n));
     }
 }

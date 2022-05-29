@@ -65,4 +65,8 @@ public class Numbers {
         }
     }
 
+    public static int hexToInt(String hex) throws NumberFormatException {
+        return Integer.parseInt(hex.toUpperCase(),16);
+    }
+
 }

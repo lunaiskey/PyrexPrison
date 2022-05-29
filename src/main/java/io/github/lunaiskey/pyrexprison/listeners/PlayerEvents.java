@@ -7,24 +7,27 @@ import io.github.lunaiskey.pyrexprison.items.ItemID;
 import io.github.lunaiskey.pyrexprison.items.pyrexitems.Voucher;
 import io.github.lunaiskey.pyrexprison.mines.*;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
+import io.github.lunaiskey.pyrexprison.mines.inventories.*;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
 import io.github.lunaiskey.pyrexprison.pickaxe.*;
+import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeAddLevelsGUI;
+import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeEnchantGUI;
+import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeEnchantToggleGUI;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.player.ViewPlayerHolder;
+import io.github.lunaiskey.pyrexprison.player.armor.Armor;
+import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
 import io.github.lunaiskey.pyrexprison.player.inventories.ArmorGUI;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorPyrexHolder;
 import io.github.lunaiskey.pyrexprison.player.inventories.ArmorUpgradeGUI;
 import io.github.lunaiskey.pyrexprison.player.inventories.GemStoneGUI;
-import io.github.lunaiskey.pyrexprison.player.armor.gemstones.GemStoneType;
 import io.github.lunaiskey.pyrexprison.player.inventories.ViewPlayerGUI;
+import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.apache.commons.lang3.tuple.*;
 
@@ -37,6 +40,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
@@ -69,7 +74,7 @@ public class PlayerEvents implements Listener {
         }
         if (block.getLocation().getWorld().getName().equals(PMineWorld.getWorldName())) {
             Pair<Integer,Integer> gridLoc = pMineManager.getGridLocation(block.getLocation());
-            PMine pMine = PMineManager.getPMine(gridLoc.getLeft(), gridLoc.getRight());
+            PMine pMine = PyrexPrison.getPlugin().getPmineManager().getPMine(gridLoc.getLeft(), gridLoc.getRight());
             if (pMine != null) {
                 if (pMine.isInMineRegion(block.getLocation())) {
                     e.setDropItems(false);
@@ -80,9 +85,17 @@ public class PlayerEvents implements Listener {
                         // is custom pickaxe
                         if (pyrexDataMap.getString("id").equals(PickaxeHandler.getId())) {
                             for (EnchantType type : pickaxe.getEnchants().keySet()) {
-                                PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onBlockBreak(e,pickaxe.getEnchants().get(type));
+                                PyrexEnchant enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type);
+                                if (enchant.isEnabled()) {
+                                    if (!pickaxe.getDisabledEnchants().contains(type)) {
+                                        enchant.onBlockBreak(e,pickaxe.getEnchants().get(type));
+                                    }
+                                }
                             }
-                            PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).payForBlocks(1);
+                            PyrexPlayer player = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId());
+                            PyrexPrison.getPlugin().getPlayerManager().payForBlocks(e.getPlayer(),1);
+                            p.giveExp(1+player.getXPBoostTotal());
+                            PyrexPrison.getPlugin().getPlayerManager().tickGemstoneCount(p);
                             pickaxe.setBlocksBroken(pickaxe.getBlocksBroken()+1);
                             PyrexPrison.getPlugin().getPickaxeHandler().updateInventoryPickaxe(p);
                         }
@@ -107,14 +120,6 @@ public class PlayerEvents implements Listener {
         CompoundTag tag = NBTTags.getPyrexDataMap(e.getItemInHand());
         if (tag.contains("id")) {
             String id = tag.getString("id");
-            String[] idArray = id.split("_");
-            if (idArray.length == 2 && idArray[1].equals("GEMSTONE")) {
-                try {
-                    PyrexPrison.getPlugin().getPlayerManager().getGemstonesMap().get(GemStoneType.valueOf(idArray[0])).onPlace(e);
-                } catch (Exception ignored){
-                    e.setCancelled(true);
-                }
-            }
             try {
                 ItemID itemID = ItemID.valueOf(id);
                 if (PyrexPrison.getPlugin().getItemManager().getItemMap().containsKey(itemID)) {
@@ -131,15 +136,15 @@ public class PlayerEvents implements Listener {
             p.setAllowFlight(true);
             p.setFlying(true);
         }
-        PMine mine = PMineManager.getPMine(p.getUniqueId());
+        Map<UUID, PyrexPlayer> playerMap = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap();
+        if (!playerMap.containsKey(p.getUniqueId())) {
+            PyrexPrison.getPlugin().getPlayerManager().createPyrexPlayer(p.getUniqueId());
+        }
+        PMine mine = PyrexPrison.getPlugin().getPmineManager().getPMine(p.getUniqueId());
         if (mine == null) {
             PyrexPrison.getPlugin().getPmineManager().newPMine(p.getUniqueId());
         } else {
             mine.scheduleReset();
-        }
-        Map<UUID, PyrexPlayer> playerMap = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap();
-        if (!playerMap.containsKey(p.getUniqueId())) {
-            PyrexPrison.getPlugin().getPlayerManager().createPyrexPlayer(p.getUniqueId());
         }
         PyrexPrison.getPlugin().getPickaxeHandler().updateInventoryPickaxe(p);
         PyrexPrison.getPlugin().getPickaxeHandler().hasOrGivePickaxe(p);
@@ -172,17 +177,18 @@ public class PlayerEvents implements Listener {
             if (inv.getHolder() instanceof PyrexHolder) {
                 PyrexHolder holder = (PyrexHolder) inv.getHolder();
                 switch(holder.getInvType()) {
-                    case PMINE_MAIN -> new PMineInv().onClick(e);
-                    case PMINE_BLOCKS -> new PMineInvBlocks(p).onClick(e);
-                    case ENCHANTS -> new EnchantInv(p).onClick(e);
-                    case ADD_LEVELS -> {
+                    case PMINE_MAIN -> new PMineGUI(p).onClick(e);
+                    case PMINE_BLOCKS -> new PMineBlocksGUI(p).onClick(e);
+                    case PICKAXE_ENCHANTS -> new PickaxeEnchantGUI(p).onClick(e);
+                    case PICKAXE_ENCHANTS_ADD_LEVELS -> {
                         if (holder instanceof EnchantPyrexHolder) {
                             EnchantPyrexHolder enchantHolder = (EnchantPyrexHolder) holder;
-                            new AddLevelsInv(p,enchantHolder.getType()).onClick(e);
+                            new PickaxeAddLevelsGUI(p,enchantHolder.getType()).onClick(e);
                         } else {
                             e.setCancelled(true);
                         }
                     }
+                    case PICKAXE_ENCHANTS_TOGGLE -> new PickaxeEnchantToggleGUI(p).onClick(e);
                     case ARMOR -> new ArmorGUI(p).onClick(e);
                     case ARMOR_UPGRADES -> {
                         if (holder instanceof ArmorPyrexHolder) {
@@ -192,7 +198,7 @@ public class PlayerEvents implements Listener {
                             e.setCancelled(true);
                         }
                     }
-                    case GEMSTONES -> new GemStoneGUI().onClick(e);
+                    case GEMSTONES -> new GemStoneGUI(p).onClick(e);
                     case VIEW_PLAYER -> {
                         if (holder instanceof ViewPlayerHolder) {
                             ViewPlayerHolder viewPlayerHolder = (ViewPlayerHolder) holder;
@@ -201,6 +207,9 @@ public class PlayerEvents implements Listener {
                             e.setCancelled(true);
                         }
                     }
+                    case PMINE_UPGRADES -> new PMineUpgradesGUI(p).onClick(e);
+                    case PMINE_PUBLIC_MINES -> new PMinePublicGUI().onClick(e);
+                    case PMINE_SETTINGS -> new PMineSettingsGUI(p).onClick(e);
                 }
             }
             if (e.getView().getType() == InventoryType.CRAFTING) {
@@ -213,6 +222,33 @@ public class PlayerEvents implements Listener {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onClose(InventoryCloseEvent e) {
+        Player p = (Player) e.getPlayer();
+        Inventory inv = e.getInventory();
+        if (inv.getHolder() instanceof PyrexHolder) {
+            PyrexHolder holder = (PyrexHolder) inv.getHolder();
+            switch(holder.getInvType()) {
+                case PMINE_PUBLIC_MINES -> new PMinePublicGUI().onClose(e);
+                case PMINE_UPGRADES -> new PMineUpgradesGUI(p).onClose(e);
+                case PMINE_BLOCKS -> new PMineBlocksGUI(p).onClose(e);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onOpen(InventoryOpenEvent e) {
+        Player p = (Player) e.getPlayer();
+        Inventory inv = e.getInventory();
+        if (inv.getHolder() instanceof PyrexHolder) {
+            PyrexHolder holder = (PyrexHolder) inv.getHolder();
+            switch(holder.getInvType()) {
+                case PMINE_PUBLIC_MINES -> new PMinePublicGUI().onOpen(e);
+                case PMINE_BLOCKS -> new PMineBlocksGUI(p).onOpen(e);
             }
         }
     }
@@ -231,7 +267,7 @@ public class PlayerEvents implements Listener {
             // is custom pickaxe
             if (pyrexDataMap.getString("id").equals(PickaxeHandler.getId())) {
                 if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                    p.openInventory(new EnchantInv(p).getInv());
+                    p.openInventory(new PickaxeEnchantGUI(p).getInv());
                 }
             }
             try {
@@ -246,9 +282,11 @@ public class PlayerEvents implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         Player p = e.getPlayer();
-        if (PMineInvBlocks.getEditMap().containsKey(p.getUniqueId())) {
+        PyrexPlayer pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId());
+        String strippedMessage = ChatColor.stripColor(e.getMessage());
+        if (PMineBlocksGUI.getEditMap().containsKey(p.getUniqueId())) {
             try {
-                double percentage = Double.parseDouble(ChatColor.stripColor(e.getMessage()));
+                double percentage = Double.parseDouble(strippedMessage);
                 if (percentage < 0) {
                     percentage = 0;
                 }
@@ -257,11 +295,78 @@ public class PlayerEvents implements Listener {
                 }
                 double newValue = (Math.floor(percentage)/100);
                 PMine mine = pMineManager.getPMine(p.getUniqueId());
-                mine.getComposition().put(PMineInvBlocks.getEditMap().get(p.getUniqueId()),newValue);
+                mine.getComposition().put(PMineBlocksGUI.getEditMap().get(p.getUniqueId()),newValue);
             } catch (NumberFormatException ignored) {}
             e.setCancelled(true);
-            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineInvBlocks(p).getInv()));
-            PMineInvBlocks.getEditMap().remove(p.getUniqueId());
+            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineBlocksGUI(p).getInv()));
+            PMineBlocksGUI.getEditMap().remove(p.getUniqueId());
+        } else if (ArmorUpgradeGUI.getCustomColorMap().containsKey(p.getUniqueId())) {
+            Map<UUID, ArmorType> map = ArmorUpgradeGUI.getCustomColorMap();
+            ArmorType type = map.get(p.getUniqueId());
+            try {
+                Armor armor = pyrexPlayer.getArmor().get(type);
+                int color = Numbers.hexToInt(strippedMessage);
+                if (color <= 0xFFFFFF && color >= 0) {
+                    armor.setCustomColor(Color.fromRGB(color));
+                    p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                } else {
+                    p.sendMessage(StringUtil.color("&cInvalid Color Code."));
+                }
+            } catch (Exception ignored) {
+                p.sendMessage(StringUtil.color("&cInvalid Color Code."));
+            }
+            e.setCancelled(true);
+            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new ArmorUpgradeGUI(p,type).getInv()));
+            ArmorUpgradeGUI.getCustomColorMap().remove(p.getUniqueId());
+        } else if (PMineSettingsGUI.getTaxEditSet().contains(p.getUniqueId())) {
+            e.setCancelled(true);
+            try {
+                PMine mine = pMineManager.getPMine(p.getUniqueId());
+                double tax = Double.parseDouble(strippedMessage);
+                if (tax > 100) {
+                    tax = 100;
+                } else if (tax < 0) {
+                    tax = 0;
+                } else {
+                    if (tax%1 != 0) {
+                        double mid = (Math.floor(tax)+0.5);
+                        if (tax > mid) {
+                            tax = Math.ceil(tax);
+                        } else if (tax < mid){
+                            tax = Math.floor(tax);
+                        } else {
+                            tax = mid;
+                        }
+                    }
+                }
+                mine.setMineTax(tax);
+                Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineSettingsGUI(p).getInv()));
+            } catch (NumberFormatException ignored) {
+                p.sendMessage(StringUtil.color("&cInvalid Number."));
+
+            }
+            PMineSettingsGUI.getTaxEditSet().remove(p.getUniqueId());
+        } else if (PMineSettingsGUI.getKickPlayerSet().contains(p.getUniqueId())) {
+            Player kickPlayer = Bukkit.getPlayer(strippedMessage);
+            e.setCancelled(true);
+            if (kickPlayer != null) {
+                if (kickPlayer.getUniqueId() != p.getUniqueId()) {
+                    PMine mine = PyrexPrison.getPlugin().getPmineManager().getPMine(p.getUniqueId());
+                    if (mine.isInMineIsland(kickPlayer)) {
+                        Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->PyrexPrison.getPlugin().getPmineManager().getPMine(kickPlayer.getUniqueId()).teleportToCenter(kickPlayer,false,true));
+                        kickPlayer.sendMessage(StringUtil.color("&eYou've been kicked from "+p.getName()+"'s mine. teleporting to your mine."));
+                        p.sendMessage(StringUtil.color("&aSuccessfully kicked &f"+kickPlayer.getName()+" &afrom your mine."));
+                    } else {
+                        p.sendMessage(StringUtil.color("Player "+kickPlayer.getName()+" isn't in your mine."));
+                    }
+                } else {
+                    p.sendMessage(StringUtil.color("&cYou can't kick yourself."));
+                }
+            } else {
+                p.sendMessage(StringUtil.color("&cPlayer "+strippedMessage+" isn't online."));
+            }
+            PMineSettingsGUI.getKickPlayerSet().remove(p.getUniqueId());
+            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new PMineSettingsGUI(p).getInv()));
         }
     }
 
@@ -310,7 +415,9 @@ public class PlayerEvents implements Listener {
             // is custom pickaxe
             if (newMap.getString("id").equals(PickaxeHandler.getId())) {
                 for (EnchantType type : pickaxe.getEnchants().keySet()) {
-                    PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onEquip(p,newItem,pickaxe.getEnchants().get(type));
+                    if (!pickaxe.getDisabledEnchants().contains(type)) {
+                        PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onEquip(p,newItem,pickaxe.getEnchants().get(type));
+                    }
                 }
             }
         }

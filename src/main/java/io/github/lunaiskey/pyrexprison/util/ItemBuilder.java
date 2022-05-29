@@ -3,6 +3,8 @@ package io.github.lunaiskey.pyrexprison.util;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -62,6 +64,30 @@ public class ItemBuilder {
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
+    }
+
+    public static ItemStack getPlayerSkull(Player player) {
+        return getPlayerSkull((OfflinePlayer) player);
+    }
+
+    public static ItemStack getPlayerSkull(OfflinePlayer player) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
+        skullMeta.setOwningPlayer(player);
+        item.setItemMeta(skullMeta);
+        return item;
+    }
+
+    public static ItemStack getGoBack() {
+        return ItemBuilder.createItem("&aGo Back",Material.ARROW,List.of(StringUtil.color("&eClick to return!")));
+    }
+
+    public static ItemStack getPreviousPage(int page) {
+        return ItemBuilder.createItem(StringUtil.color("&aPrevious Page"),Material.ARROW,List.of(StringUtil.color("&7Page "+page)));
+    }
+
+    public static ItemStack getNextPage(int page) {
+        return ItemBuilder.createItem(StringUtil.color("&aNext Page"),Material.ARROW,List.of(StringUtil.color("&7Page "+page)));
     }
 
 }
