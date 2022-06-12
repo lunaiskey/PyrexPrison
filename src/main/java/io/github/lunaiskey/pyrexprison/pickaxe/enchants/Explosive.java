@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
@@ -53,6 +54,11 @@ public class Explosive extends PyrexEnchant {
             PyrexPrison.getPlugin().getPlayerManager().payForBlocks(e.getPlayer(),blocks);
             mine.addMineBlocks(blocks);
         }
+    }
+
+    @Override
+    public void onDrop(PlayerDropItemEvent e, int level) {
+
     }
 
     @Override

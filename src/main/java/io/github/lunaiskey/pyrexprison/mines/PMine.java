@@ -48,7 +48,7 @@ public class PMine {
 
     private boolean isPublic;
     private double mineTax;
-    private Set<UUID> playerSet;
+    private Set<UUID> playersAllowSet;
 
     public PMine(UUID owner, int chunkX, int chunkZ, int mineRadius, boolean isPublic, double mineTax,Set<Material> disabledBlocks, Map<Material,Double> comp, Set<UUID> playerSet, Map<PMineUpgradeType,Integer> upgradeMap) {
         this.owner = owner;
@@ -71,11 +71,7 @@ public class PMine {
                 reset();
             }
         }
-        if (disabledBlocks == null) {
-            this.disabledBlocks = new HashSet<>();
-        } else {
-            this.disabledBlocks = disabledBlocks;
-        }
+        this.disabledBlocks = Objects.requireNonNullElseGet(disabledBlocks, HashSet::new);
         this.composition = Objects.requireNonNullElseGet(comp, LinkedHashMap::new);
         Map<Material,Integer> sortedBlocks = PMineManager.getBlockRankMap();
         PyrexPlayer pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(owner);
@@ -86,7 +82,7 @@ public class PMine {
                 this.composition.remove(mat);
             }
         }
-        this.playerSet = Objects.requireNonNullElseGet(playerSet, HashSet::new);
+        this.playersAllowSet = Objects.requireNonNullElseGet(playerSet, HashSet::new);
         this.isPublic = isPublic;
         this.mineTax = mineTax;
 
@@ -152,6 +148,10 @@ public class PMine {
         return 1+(pyrexPlayer.getRank()*0.005);
     }
 
+    public Set<Material> getDisabledBlocks() {
+        return disabledBlocks;
+    }
+
     public void setMineTax(double mineTax) {
         this.mineTax = mineTax;
     }
@@ -186,6 +186,11 @@ public class PMine {
         if (composition != null) {
             data.createSection("blocks", this.composition);
         }
+        List<String> disabledBlocksList = new ArrayList<>();
+        for (Material mat : disabledBlocks) {
+            disabledBlocksList.add(mat.name());
+        }
+        data.set("disabledBlocks",disabledBlocksList);
         try {
             data.save(file);
         } catch (IOException e) {
@@ -207,7 +212,7 @@ public class PMine {
         Player p = Bukkit.getPlayer(owner);
         teleportToCenter(true,true);
         NMSBlockChange NMSBlockChange = new NMSBlockChange(world, ((CraftWorld) world).getHandle());
-        List<CompositionEntry> probabilityMap = mapComposition(composition);
+        List<CompositionEntry> probabilityMap = mapComposition(composition,disabledBlocks);
         for (int x = min.getBlockX(); x <= max.getBlockX(); ++x) {
             for (int y = min.getBlockY(); y <= max.getBlockY(); ++y) {
                 for (int z = min.getBlockZ(); z <= max.getBlockZ(); ++z) {
@@ -392,11 +397,15 @@ public class PMine {
         }
     }
 
-    private static List<CompositionEntry> mapComposition(Map<Material, Double> compositionIn) {
+    private static List<CompositionEntry> mapComposition(Map<Material, Double> compositionIn, Set<Material> disabledBlocks) {
         List<CompositionEntry> probabilityMap = new ArrayList<>();
         Map<Material, Double> comp = new HashMap<>();
         if (compositionIn != null && !compositionIn.isEmpty()) {
-            comp.putAll(compositionIn);
+            for (Material mat : compositionIn.keySet()) {
+                if (!disabledBlocks.contains(mat)) {
+                    comp.put(mat,compositionIn.get(mat));
+                }
+            }
         }
         double max = 0;
         for (Map.Entry<Material, Double> entry : comp.entrySet()) {

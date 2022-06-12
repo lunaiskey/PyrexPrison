@@ -39,11 +39,12 @@ public class PickaxeEnchantGUI {
         enchantLocation.put(21,EnchantType.JACK_HAMMER);
         enchantLocation.put(22,EnchantType.STRIKE);
         enchantLocation.put(23,EnchantType.EXPLOSIVE);
-        enchantLocation.put(24,EnchantType.NUKE);
-        enchantLocation.put(29,EnchantType.GEM_FINDER);
-        enchantLocation.put(30,EnchantType.KEY_FINDER);
-        enchantLocation.put(31,EnchantType.LOOT_FINDER);
-        enchantLocation.put(32,EnchantType.XP_BOOST);
+        enchantLocation.put(24,EnchantType.MINE_BOMB);
+        enchantLocation.put(29,EnchantType.NUKE);
+        enchantLocation.put(30,EnchantType.GEM_FINDER);
+        enchantLocation.put(31,EnchantType.KEY_FINDER);
+        enchantLocation.put(32,EnchantType.LOOT_FINDER);
+        enchantLocation.put(33,EnchantType.XP_BOOST);
 
     }
 
@@ -54,7 +55,7 @@ public class PickaxeEnchantGUI {
                     if (enchantLocation.containsKey(i)) {
                         inv.setItem(i,getEnchantPlaceholder(enchantLocation.get(i)));
                     } else {
-                        inv.setItem(i, ItemBuilder.createItem("&c&lTBA", Material.BARRIER,null));
+                        inv.setItem(i, ItemBuilder.createItem("&c&lCOMING SOON", Material.BEDROCK,null));
                     }
                 }
                 case 11 -> inv.setItem(i,getEnchantToggleIcon());
@@ -81,7 +82,7 @@ public class PickaxeEnchantGUI {
         PyrexEnchant enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type);
         Material mat = Material.ENCHANTED_BOOK;
         if (!enchant.isEnabled()) {
-            mat = Material.IRON_BARS;
+            mat = Material.BARRIER;
         }
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();

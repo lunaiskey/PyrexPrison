@@ -26,8 +26,9 @@ public class PMinePublicGUI implements PyrexInventory {
     private final String title = "Public P-Mines";
     private final int size = 54;
     private final List<UUID> sortedList = PyrexPrison.getPlugin().getPmineManager().getPublicSortedByRankList();
+    private final int totalPages = (((sortedList.size() - sortedList.size()%28)/28)+1);
 
-    private static final Map<UUID,Information> informationMap = new HashMap<>();
+    private static final Map<UUID,Integer> pageMap = new HashMap<>();
 
     private Inventory inv = new PyrexHolder(title,size, PyrexInvType.PMINE_PUBLIC_MINES).getInventory();
 
@@ -37,7 +38,14 @@ public class PMinePublicGUI implements PyrexInventory {
             switch (i) {
                 case 1,2,3,4,5,6,7,45,46,47,48,49,50,51,52,53,9,18,27,36,17,26,35,44 -> inv.setItem(i, ItemBuilder.createItem(" ", Material.BLACK_STAINED_GLASS_PANE,null));
                 case 0 -> inv.setItem(i,getPreviousPage(0));
-                case 8 -> inv.setItem(i,getNextPage(2));
+                case 8 -> {
+                    int page = 2;
+                    if (page > totalPages) {
+                        inv.setItem(i,ItemBuilder.createItem(" ",Material.BLACK_STAINED_GLASS_PANE,null));
+                    } else {
+                        inv.setItem(i,getNextPage(2));
+                    }
+                }
                 default ->  {
                     int place = getPlace(i);
                     if (place <= sortedList.size()-1) {
@@ -59,12 +67,13 @@ public class PMinePublicGUI implements PyrexInventory {
     public void onClick(InventoryClickEvent e) {
         e.setCancelled(true);
         Player p = (Player) e.getWhoClicked();
-        Information info = informationMap.get(p.getUniqueId());
+        UUID uuid = p.getUniqueId();
+        int page = pageMap.get(p.getUniqueId());
         int slot = e.getRawSlot();
         Inventory inv = e.getClickedInventory();
         switch (slot) {
             case 10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43 -> {
-                int place = getPlace(slot) + (28 * informationMap.get(p.getUniqueId()).getPage());
+                int place = getPlace(slot) + (28 * pageMap.get(p.getUniqueId()));
                 if (place < sortedList.size()) {
                     PMine mine = PyrexPrison.getPlugin().getPmineManager().getPMine(sortedList.get(place));
                     mine.teleportToCenter(p,false,false);
@@ -72,41 +81,45 @@ public class PMinePublicGUI implements PyrexInventory {
                 }
             }
             case 0 -> {
-                if (info.getPage() > 0) {
-                    info.setPage(info.getPage()-1);
+                if (page > 0) {
+                    pageMap.put(uuid,page-1);
                     updateGUI(p);
-                    inv.setItem(0,getPreviousPage(info.getPage()));
-                    inv.setItem(8,getNextPage(info.getPage()+2));
+                    inv.setItem(0,getPreviousPage(page));
+                    inv.setItem(8,getNextPage(page+2));
+                } else {
+                    Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->p.openInventory(new PMineGUI(p).getInv()));
                 }
             }
             case 8 -> {
-                info.setPage(info.getPage()+1);
-                updateGUI(p);
-                inv.setItem(0,getPreviousPage(info.getPage()));
-                inv.setItem(8,getNextPage(info.getPage()+2));
+                if (totalPages-1 > page) {
+                    pageMap.put(uuid,page+1);
+                    updateGUI(p);
+                    inv.setItem(0,getPreviousPage(page));
+                    inv.setItem(8,getNextPage(page+2));
+                }
             }
         }
     }
 
     public void onOpen(InventoryOpenEvent e) {
-        informationMap.put(e.getPlayer().getUniqueId(), new Information(0));
+        pageMap.put(e.getPlayer().getUniqueId(), 0);
     }
 
     public void onClose(InventoryCloseEvent e) {
-        informationMap.remove(e.getPlayer().getUniqueId());
+        pageMap.remove(e.getPlayer().getUniqueId());
     }
 
-    public static Map<UUID, Information> getInformationMap() {
-        return Collections.unmodifiableMap(informationMap);
+    public static Map<UUID, Integer> getPageMap() {
+        return Collections.unmodifiableMap(pageMap);
     }
 
     public void updateGUI(Player p) {
         Inventory inv = p.getOpenInventory().getTopInventory();
-        Information info = informationMap.get(p.getUniqueId());
+        int page = pageMap.get(p.getUniqueId());
         for (int i = 0;i<28;i++) {
             int slot = getSlot(i);
-            if (i + info.getPage()*28 <= sortedList.size()-1) {
-                inv.setItem(slot, getMineIcon(sortedList.get(i + (info.getPage()*28))));
+            if (i + page*28 <= sortedList.size()-1) {
+                inv.setItem(slot, getMineIcon(sortedList.get(i + (page*28))));
             } else {
                 inv.setItem(slot,new ItemStack(Material.AIR));
             }
@@ -133,30 +146,16 @@ public class PMinePublicGUI implements PyrexInventory {
         return item;
     }
 
-    private ItemStack getPreviousPage(int page) {
-        return ItemBuilder.createItem(StringUtil.color("&aPrevious Page"),Material.ARROW,List.of(StringUtil.color("&7Page "+page)));
+    private ItemStack getPreviousPage(int slot) {
+        return slot <= 0 ? ItemBuilder.getGoBack() : ItemBuilder.getPreviousPage(slot);
     }
 
-    private ItemStack getNextPage(int page) {
-        return ItemBuilder.createItem(StringUtil.color("&aNext Page"),Material.ARROW,List.of(StringUtil.color("&7Page "+page)));
-    }
-
-
-    public static class Information {
-        private int page;
-
-        public Information(int page) {
-            this.page = page;
+    private ItemStack getNextPage(int slot) {
+        if (slot > totalPages) {
+            return ItemBuilder.createItem(" ",Material.BLACK_STAINED_GLASS_PANE,null);
+        } else {
+            return ItemBuilder.getNextPage(slot);
         }
-
-        public int getPage() {
-            return page;
-        }
-
-        public void setPage(int page) {
-            this.page = page;
-        }
-
     }
 
     private int getPlace(int slot) {

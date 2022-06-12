@@ -3,11 +3,13 @@ package io.github.lunaiskey.pyrexprison.items.pyrexitems;
 import io.github.lunaiskey.pyrexprison.items.ItemID;
 import io.github.lunaiskey.pyrexprison.items.PyrexItem;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
+import io.github.lunaiskey.pyrexprison.player.inventories.GemStoneGUI;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -24,13 +26,13 @@ public class GemStone extends PyrexItem {
     }
 
     public ItemStack getItemStack() {
-        ItemStack item = ItemBuilder.getSkull(StringUtil.color("&f" + getName() + " Gemstone"),getDescription(),getSkullTexture(),getSkullUUID());
+        ItemStack item = ItemBuilder.getSkull(StringUtil.color("&f" + getName() + " Gemstone"), getLore(),getSkullTexture(),getSkullUUID());
         item = NBTTags.addPyrexData(item,"id",getItemID().name());
         return item;
     }
 
     @Override
-    public List<String> getDescription() {
+    public List<String> getLore() {
         List<String> desc = new ArrayList<>();
         desc.add(StringUtil.color("&7This Gemstone is used to upgrade"));
         desc.add(StringUtil.color("&7your Armor to Tier "+getTier()));
@@ -49,7 +51,8 @@ public class GemStone extends PyrexItem {
 
     @Override
     public void onInteract(PlayerInteractEvent e) {
-
+        Player p = e.getPlayer();
+        p.openInventory(new GemStoneGUI(p).getInv());
     }
 
     public int getTier() {

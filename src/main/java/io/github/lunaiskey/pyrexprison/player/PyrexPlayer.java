@@ -10,6 +10,8 @@ import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.AbilityType;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.SalesBoost;
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.XPBoost;
+import io.github.lunaiskey.pyrexprison.player.boosters.Booster;
+import io.github.lunaiskey.pyrexprison.player.boosters.BoosterType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,20 +23,22 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class PyrexPlayer {
-
     private BigInteger tokens;
     private long gems;
     private long pyrexPoints;
     private int rank;
     private final UUID pUUID;
     private PyrexPickaxe pickaxe;
-    private final Map<ArmorType,Armor> armor = new HashMap<>();
+    private final Map<ArmorType,Armor> armor;
     private boolean isArmorEquiped;
     private ItemID selectedGemstone;
     private int gemstoneCount;
 
+    private List<Booster> boosters;
 
-    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped, Map<ArmorType,Armor> armor,ItemID selectedGemstone,int gemstoneCount) {
+    private Map<BoosterType,Integer> maxBooster;
+
+    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped, Map<ArmorType,Armor> armor,ItemID selectedGemstone,int gemstoneCount, List<Booster> boosters) {
         this.pUUID = pUUID;
         this.tokens = tokens;
         this.gems = gems;
@@ -43,24 +47,18 @@ public class PyrexPlayer {
         this.pickaxe = pickaxe;
         this.isArmorEquiped = isArmorEquiped;
         this.gemstoneCount = gemstoneCount;
-        if (armor == null || armor.isEmpty()) {
-            this.armor.put(ArmorType.HELMET,new Armor(ArmorType.HELMET));
-            this.armor.put(ArmorType.CHESTPLATE,new Armor(ArmorType.CHESTPLATE));
-            this.armor.put(ArmorType.LEGGINGS,new Armor(ArmorType.LEGGINGS));
-            this.armor.put(ArmorType.BOOTS,new Armor(ArmorType.BOOTS));
-        } else {
-            this.armor.putAll(armor);
-        }
-        if (selectedGemstone != null) {
-            this.selectedGemstone = selectedGemstone;
-        } else {
-            this.selectedGemstone = ItemID.AMETHYST_GEMSTONE;
-        }
+        this.armor = Objects.requireNonNullElseGet(armor, HashMap::new);
+        this.armor.putIfAbsent(ArmorType.HELMET,new Armor(ArmorType.HELMET));
+        this.armor.putIfAbsent(ArmorType.CHESTPLATE,new Armor(ArmorType.CHESTPLATE));
+        this.armor.putIfAbsent(ArmorType.LEGGINGS,new Armor(ArmorType.LEGGINGS));
+        this.armor.putIfAbsent(ArmorType.BOOTS,new Armor(ArmorType.BOOTS));
+        this.selectedGemstone = Objects.requireNonNullElse(selectedGemstone, ItemID.AMETHYST_GEMSTONE);
+        this.boosters = Objects.requireNonNullElseGet(boosters, ArrayList::new);
         save();
     }
 
     public PyrexPlayer(UUID pUUID) {
-        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false,null,ItemID.AMETHYST_GEMSTONE,0);
+        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false,null,ItemID.AMETHYST_GEMSTONE,0,null);
     }
 
     public long getGems() {
@@ -115,6 +113,10 @@ public class PyrexPlayer {
 
     public Armor getBoots() {
         return armor.get(ArmorType.BOOTS);
+    }
+
+    public List<Booster> getBoosters() {
+        return boosters;
     }
 
     public boolean isArmorEquiped() {
@@ -210,6 +212,19 @@ public class PyrexPlayer {
         return multiplier;
     }
 
+    public double getBoosterMultiplier() {
+        double multiplier = 0;
+        for (Booster booster : boosters) {
+            if (booster.getType() != BoosterType.SALES) {
+                continue;
+            }
+            if (booster.getMultiplier() > multiplier) {
+                multiplier = booster.getMultiplier();
+            }
+        }
+        return multiplier;
+    }
+
     public int getXPBoostTotal() {
         int total = 0;
         for (Armor armor : getArmor().values()) {
@@ -224,7 +239,7 @@ public class PyrexPlayer {
      * @return Total Multiplier, can be 0.
      */
     public double getTotalMultiplier() {
-        return getBaseMultiplier()+getRankMultiplier()+getArmorMultiplier();
+        return getBaseMultiplier()+getRankMultiplier()+getArmorMultiplier()+getBoosterMultiplier();
     }
 
     public ItemID getSelectedGemstone() {

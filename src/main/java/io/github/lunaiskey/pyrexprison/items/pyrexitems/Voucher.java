@@ -5,6 +5,7 @@ import io.github.lunaiskey.pyrexprison.items.PyrexItem;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
 import io.github.lunaiskey.pyrexprison.player.Currency;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
+import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.Material;
@@ -23,30 +24,27 @@ public class Voucher extends PyrexItem {
 
     private BigInteger amount;
     private CurrencyType type;
+    private String playerName;
 
-    public Voucher(BigInteger amount, CurrencyType type) {
+    public Voucher(BigInteger amount, CurrencyType type, String playerName) {
         super(ItemID.VOUCHER, "   &7- &6&lBank Note &7-", null, Material.PAPER);
         this.amount = amount;
         this.type = type;
     }
 
-    public Voucher(Long amount, CurrencyType type) {
-        this(BigInteger.valueOf(amount),type);
+    public Voucher(BigInteger amount, CurrencyType type) {
+        this(amount,type,null);
+    }
+
+    public Voucher(Long amount, CurrencyType type, String playerName) {
+        this(BigInteger.valueOf(amount),type,playerName);
     }
 
     @Override
     public ItemStack getItemStack() {
-        ItemStack item = new ItemStack(getMaterial());
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(StringUtil.color(getName()));
-        List<String> lore = new ArrayList<>(List.of(
-                " ",
-                "&7• Type: %type%",
-                "&7• Amount: %amount%",
-                " ",
-                "&eRight Click to redeem!"));
-        String strType = "&7Unknown";
-        String strAmount = CurrencyType.getUnicode(type)+ Numbers.formattedNumber(amount);
+        String name = StringUtil.color(getName());
+        String strType = "INVALID";
+        String strAmount = "INVALID";
         switch (type) {
             case TOKENS -> {
                 strType = "&eTokens";
@@ -61,18 +59,13 @@ public class Voucher extends PyrexItem {
                 strAmount = "&d"+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount);
             }
         }
-        for (int i = 0;i<lore.size();i++) {
-            String line = lore.get(i);
-            if (line.contains("%type%")) {
-                line = line.replace("%type%",strType);
-            }
-            if (line.contains("%amount%")) {
-                line = line.replace("%amount%",strAmount);
-            }
-            lore.set(i,StringUtil.color(line));
-        }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
+        List<String> lore = new ArrayList<>();
+        lore.add(" ");
+        lore.add(StringUtil.color("&7• Type: "+strType));
+        lore.add(StringUtil.color("&7• Amount: "+strAmount));
+        lore.add(" ");
+        lore.add(StringUtil.color("&eRight Click to redeem!"));
+        ItemStack item = ItemBuilder.createItem(name,getMaterial(),lore);
         item = NBTTags.setCurrencyVoucherTags(item,amount,type);
         return item;
 

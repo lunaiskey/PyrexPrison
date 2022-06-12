@@ -117,7 +117,7 @@ public class PlayerManager {
                 } catch (Exception ignored) {}
             }
             //Finished Loading
-            getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,tokens,gems,pyrexPoints,rank,pickaxe,isArmorEquiped,armorMap,selectedGemstone,gemstoneCount));
+            getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,tokens,gems,pyrexPoints,rank,pickaxe,isArmorEquiped,armorMap,selectedGemstone,gemstoneCount,null));
         }
     }
 
@@ -207,7 +207,7 @@ public class PlayerManager {
         double multiplier = pyrexPlayer.getTotalMultiplier();
         int fortune = Math.max(pickaxe.getEnchants().getOrDefault(EnchantType.FORTUNE,5),5);
 
-        BigDecimal newAmount = BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(mine.getSellPrice())).multiply(BigDecimal.valueOf(fortune).multiply(BigDecimal.valueOf(25)));
+        BigDecimal newAmount = BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(mine.getSellPrice())).multiply(BigDecimal.valueOf(fortune).multiply(BigDecimal.valueOf(40)));
         BigInteger tokens = newAmount.multiply(BigDecimal.valueOf(multiplier+1)).toBigInteger();
 
         if (mine.getOwner() == pyrexPlayer.getpUUID()) {

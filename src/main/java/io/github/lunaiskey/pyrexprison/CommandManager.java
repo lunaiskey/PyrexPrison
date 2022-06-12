@@ -2,6 +2,7 @@ package io.github.lunaiskey.pyrexprison;
 
 import io.github.lunaiskey.pyrexprison.commands.*;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
+import io.github.lunaiskey.pyrexprison.player.boosters.Booster;
 import org.bukkit.Bukkit;
 
 public class CommandManager {
@@ -26,7 +27,11 @@ public class CommandManager {
         Bukkit.getPluginCommand("getpickaxe").setExecutor(new CommandGetPickaxe());
         Bukkit.getPluginCommand("multiplier").setExecutor(new CommandMultiplier(plug));
         Bukkit.getPluginCommand("gemstones").setExecutor(new CommandGemstones());
+        Bukkit.getPluginCommand("booster").setExecutor(new CommandBooster());
+
         Bukkit.getPluginCommand("pitem").setExecutor(new CommandPItem());
+        Bukkit.getPluginCommand("pitem").setExecutor(new CommandPItem());
+
         Bukkit.getPluginCommand("viewplayer").setExecutor(new CommandViewPlayer());
         Bukkit.getPluginCommand("rank").setExecutor(new CommandRank());
         Bukkit.getPluginCommand("resetpickaxe").setExecutor(new CommandResetPickaxe());

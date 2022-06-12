@@ -44,21 +44,25 @@ public class PyrexExpansion extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer player, String params) {
         PyrexPlayer pyrexPlayer = plugin.getPlayerManager().getPlayerMap().get(player.getUniqueId());
-        return switch(params.toLowerCase()) {
-            case "tokens" -> Numbers.formattedNumber(pyrexPlayer.getTokens());
-            case "gems" -> Numbers.formattedNumber(pyrexPlayer.getGems());
-            case "points" -> Numbers.formattedNumber(pyrexPlayer.getPyrexPoints());
-            case "unicode_tokens" -> CurrencyType.getUnicode(CurrencyType.TOKENS);
-            case "unicode_gems" -> CurrencyType.getUnicode(CurrencyType.GEMS);
-            case "unicode_points" -> CurrencyType.getUnicode(CurrencyType.PYREX_POINTS);
-            case "rank" -> String.valueOf(pyrexPlayer.getRank());
-            case "rank_next" -> String.valueOf(Math.min(pyrexPlayer.getRank() + 1, Rankup.getMaxRankup()));
-            case "rank_percentage" -> Numbers.formatDouble(Rankup.getRankUpPercentage(Objects.requireNonNull(player.getPlayer())));
-            case "rank_progressbar" -> Rankup.getRankUpProgressBar(Objects.requireNonNull(player.getPlayer()));
-            case "gemstone_progress" -> String.valueOf(pyrexPlayer.getGemstoneCount());
-            case "gemstone_max" -> String.valueOf(PyrexPrison.getPlugin().getPlayerManager().getGemstoneCountMax((Player) player));
-            default -> "NULL";
-        };
+        if (pyrexPlayer != null) {
+            return switch(params.toLowerCase()) {
+                case "tokens" -> Numbers.formattedNumber(pyrexPlayer.getTokens());
+                case "gems" -> Numbers.formattedNumber(pyrexPlayer.getGems());
+                case "points" -> Numbers.formattedNumber(pyrexPlayer.getPyrexPoints());
+                case "unicode_tokens" -> CurrencyType.getUnicode(CurrencyType.TOKENS);
+                case "unicode_gems" -> CurrencyType.getUnicode(CurrencyType.GEMS);
+                case "unicode_points" -> CurrencyType.getUnicode(CurrencyType.PYREX_POINTS);
+                case "rank" -> String.valueOf(pyrexPlayer.getRank());
+                case "rank_next" -> String.valueOf(Math.min(pyrexPlayer.getRank() + 1, Rankup.getMaxRankup()));
+                case "rank_percentage" -> Numbers.formatDouble(Rankup.getRankUpPercentage(Objects.requireNonNull(player.getPlayer())));
+                case "rank_progressbar" -> Rankup.getRankUpProgressBar(Objects.requireNonNull(player.getPlayer()));
+                case "gemstone_progress" -> String.valueOf(pyrexPlayer.getGemstoneCount());
+                case "gemstone_max" -> String.valueOf(PyrexPrison.getPlugin().getPlayerManager().getGemstoneCountMax((Player) player));
+                default -> null;
+            };
+        } else {
+            return null;
+        }
     }
 
 }

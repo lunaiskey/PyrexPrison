@@ -58,7 +58,14 @@ public class PMineManager {
                     upgradesMap.put(PMineUpgradeType.valueOf(str), (Integer) upgradesMapRaw.get(str));
                 }
             }
-            newPMine(owner,chunkX,chunkZ,isPublic,tax,blocksMap,upgradesMap);
+            Set<Material> disabledBlocks = new HashSet<>();
+            List<String> disabledBlocksRaw = fileConf.getStringList("disabledBlocks");
+            for (String str : disabledBlocksRaw) {
+                try {
+                    disabledBlocks.add(Material.valueOf(str));
+                } catch (Exception ignored) {}
+            }
+            newPMine(owner,chunkX,chunkZ,isPublic,tax,disabledBlocks,blocksMap,upgradesMap);
             if (Bukkit.getPlayer(owner) != null) {
                 getPMine(owner).reset();
             }
@@ -70,7 +77,7 @@ public class PMineManager {
     public void ScheduleSortPublic() {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(PyrexPrison.getPlugin(),()-> {
             boolean anyone = false;
-            for (UUID uuid : PMinePublicGUI.getInformationMap().keySet()) {
+            for (UUID uuid : PMinePublicGUI.getPageMap().keySet()) {
                 Player player = Bukkit.getPlayer(uuid);
                 if (player != null) {
                     if (player.getOpenInventory().getTopInventory().getHolder() instanceof PyrexHolder) {
@@ -84,7 +91,7 @@ public class PMineManager {
             }
             if (anyone) {
                 sortedList = getSortedPublicByRank();
-                for (UUID uuid : PMinePublicGUI.getInformationMap().keySet()) {
+                for (UUID uuid : PMinePublicGUI.getPageMap().keySet()) {
                     Player player = Bukkit.getPlayer(uuid);
                     if (player != null) {
                         if (player.getOpenInventory().getTopInventory().getHolder() instanceof PyrexHolder) {
@@ -132,8 +139,8 @@ public class PMineManager {
         return new ImmutablePair<>((int) x,(int) z);
     }
 
-    public void newPMine(UUID owner, int chunkX, int chunkZ,boolean isPublic,double tax,Map<Material,Double> composition,Map<PMineUpgradeType,Integer> upgradeMap) {
-        PMine mine = new PMine(owner, chunkX, chunkZ,12,isPublic,tax,null,composition,null,upgradeMap);
+    public void newPMine(UUID owner, int chunkX, int chunkZ,boolean isPublic,double tax,Set<Material> disabledBlocks,Map<Material,Double> composition,Map<PMineUpgradeType,Integer> upgradeMap) {
+        PMine mine = new PMine(owner, chunkX, chunkZ,12,isPublic,tax,disabledBlocks,composition,null,upgradeMap);
         Pair<Integer,Integer> pair = new ImmutablePair<>(chunkX,chunkZ);
         pMines.put(pair,mine);
         ownerPMines.put(owner,pair);
@@ -144,7 +151,7 @@ public class PMineManager {
     }
 
     public void newPMine(UUID owner, int chunkX, int chunkZ) {
-        newPMine(owner,chunkX,chunkZ,false,10,null,null);
+        newPMine(owner,chunkX,chunkZ,false,10,null,null,null);
     }
 
     public void newPMine(UUID owner) {

@@ -40,6 +40,7 @@ public class PickaxeHandler {
         enchantments.put(EnchantType.NUKE,new Nuke());
         enchantments.put(EnchantType.XP_BOOST,new XPBoost());
         enchantments.put(EnchantType.NIGHT_VISION,new NightVision());
+        enchantments.put(EnchantType.MINE_BOMB,new MineBomb());
     }
 
     public Map<EnchantType, PyrexEnchant> getEnchantments() {

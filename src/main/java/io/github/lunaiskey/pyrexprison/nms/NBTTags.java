@@ -103,6 +103,13 @@ public class NBTTags {
         if (value instanceof UUID) {
             pyrexDataTag.putUUID(identifier,(UUID) value);
         }
+        if (value instanceof Tag) {
+            if (value instanceof CompoundTag) {
+                pyrexDataTag.put(identifier,(CompoundTag) value);
+            } else {
+                pyrexDataTag.put(identifier, (Tag) value);
+            }
+        }
         itemTag.put("PyrexData",pyrexDataTag);
         nmsStack.setTag(itemTag);
         return CraftItemStack.asBukkitCopy(nmsStack);

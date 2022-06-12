@@ -10,6 +10,7 @@ import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
@@ -36,6 +37,11 @@ public class Nuke extends PyrexEnchant {
     }
 
     @Override
+    public void onDrop(PlayerDropItemEvent e, int level) {
+
+    }
+
+    @Override
     public void onEquip(Player player, ItemStack pickaxe, int level) {
 
     }
@@ -51,6 +57,6 @@ public class Nuke extends PyrexEnchant {
     }
 
     private double getChance(int level) {
-        return 0.00002D*level;
+        return 0.000002D*level;
     }
 }

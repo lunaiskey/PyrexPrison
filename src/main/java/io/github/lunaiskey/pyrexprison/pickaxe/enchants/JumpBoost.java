@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -15,13 +16,17 @@ import java.util.List;
 
 public class JumpBoost extends PyrexEnchant {
 
-
     public JumpBoost() {
         super("Jump Boost", List.of("Gives you permanent Jump Boost", "while holding your pickaxe."), 3, CurrencyType.TOKENS,   true);
     }
 
     @Override
     public void onBlockBreak(BlockBreakEvent e, int level) {
+
+    }
+
+    @Override
+    public void onDrop(PlayerDropItemEvent e, int level) {
 
     }
 

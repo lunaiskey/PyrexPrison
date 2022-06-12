@@ -35,11 +35,17 @@ public enum ItemID {
     RARE_TOKEN_POUCH,
     EPIC_TOKEN_POUCH,
     LEGENDARY_TOKEN_POUCH,
+
     COMMON_GEM_POUCH,
     UNCOMMON_GEM_POUCH,
     RARE_GEM_POUCH,
     EPIC_GEM_POUCH,
     LEGENDARY_GEM_POUCH,
+
+    KEY_SACK(false),
+    RENAME_TAG(false),
+    SEX_ITEM,
+    BOOSTER,
     ;
 
     ItemID() {

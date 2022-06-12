@@ -6,16 +6,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-public class Haste extends PyrexEnchant {
-
-    public Haste() {
-        super("Haste", List.of("Gives you permanent Haste ","while holding your pickaxe."), 3, CurrencyType.TOKENS,  true);
+public class MineBomb extends PyrexEnchant {
+    public MineBomb() {
+        super("Mine Bomb", List.of("&c[WIP]"), 2000, CurrencyType.TOKENS, true);
     }
 
     @Override
@@ -30,20 +28,16 @@ public class Haste extends PyrexEnchant {
 
     @Override
     public void onEquip(Player player, ItemStack pickaxe, int level) {
-        if (level <= 0) {
-            this.onUnEquip(player, pickaxe, level);
-            return;
-        }
-        player.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, Integer.MAX_VALUE, level-1, true, true));
+
     }
 
     @Override
     public void onUnEquip(Player player, ItemStack pickaxe, int level) {
-        player.removePotionEffect(PotionEffectType.FAST_DIGGING);
+
     }
 
     @Override
     public BigInteger getEquation(int n) {
-        return BigInteger.ZERO;
+        return BigInteger.valueOf(5000L).add(BigInteger.valueOf(2500L).multiply(BigInteger.valueOf(n)));
     }
 }

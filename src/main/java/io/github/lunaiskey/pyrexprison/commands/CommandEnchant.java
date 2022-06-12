@@ -20,8 +20,15 @@ public class CommandEnchant implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
-            CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(p.getInventory().getItemInMainHand());
-            if (p.getName().equals("Lunaiskey")) {
+            //CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(p.getInventory().getItemInMainHand());
+            if (p.hasPermission("pyrex.enchant")) {
+                if (args.length == 0) {
+                    p.sendMessage(
+                        StringUtil.color("&bEnchant Commands:"),
+                        StringUtil.color("&b|&f /enchant <player> <id> <level> "),
+                        StringUtil.color("&b|&f /enchant <id> <level>")
+                    );
+                }
                 if (args.length == 3) {
                     PyrexPlayer pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId());
                     PyrexPickaxe pickaxe = pyrexPlayer.getPickaxe();
@@ -54,7 +61,7 @@ public class CommandEnchant implements CommandExecutor {
                     }
                 }
             } else {
-                p.sendMessage(StringUtil.color("&cThis feature is currently unavailable."));
+                p.sendMessage(StringUtil.color("&cNo Permission."));
             }
         }
         return true;

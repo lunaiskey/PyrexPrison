@@ -10,6 +10,7 @@ import org.bukkit.block.Block;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
@@ -47,6 +48,11 @@ public class JackHammer extends PyrexEnchant {
             PyrexPrison.getPlugin().getPlayerManager().payForBlocks(e.getPlayer(),counter);
             //p.sendMessage("JackHammer Triggered");
         }
+    }
+
+    @Override
+    public void onDrop(PlayerDropItemEvent e, int level) {
+
     }
 
     @Override

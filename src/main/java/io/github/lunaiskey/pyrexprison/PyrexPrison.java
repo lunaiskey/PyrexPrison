@@ -1,11 +1,14 @@
 package io.github.lunaiskey.pyrexprison;
 
+import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.items.ItemManager;
 import io.github.lunaiskey.pyrexprison.listeners.PlayerEvents;
 import io.github.lunaiskey.pyrexprison.mines.PMineManager;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.pickaxe.PickaxeHandler;
 import io.github.lunaiskey.pyrexprison.player.PlayerManager;
+import io.github.lunaiskey.pyrexprison.player.boosters.Boosters;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -46,6 +49,7 @@ public final class PyrexPrison extends JavaPlugin {
         pmineManager.loadPMines();
         itemManager.registerItems();
         new CommandManager().registerCommands();
+        new Boosters().scheduleTask();
 
         checkPlayerData();
         buffSave();
@@ -63,12 +67,21 @@ public final class PyrexPrison extends JavaPlugin {
     @Override
     public void onDisable() {
         Bukkit.getScheduler().cancelTask(saveTaskID);
+        closeAllPyrexInvs();
         saveAll();
         this.getLogger().info("Saved "+savePending.size()+" Players.");
     }
 
     public static PyrexPrison getPlugin() {
         return plugin;
+    }
+
+    private void closeAllPyrexInvs() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof PyrexHolder) {
+                player.closeInventory();
+            }
+        }
     }
 
     public void buffSave() {

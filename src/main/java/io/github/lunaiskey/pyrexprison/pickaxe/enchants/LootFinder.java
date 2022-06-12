@@ -9,6 +9,7 @@ import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
@@ -32,6 +33,11 @@ public class LootFinder extends PyrexEnchant {
             int bound = (((level-1) - ((level-1)%50))/50)+1;
             p.getInventory().addItem(getGeode(rand.nextInt(bound)));
         }
+    }
+
+    @Override
+    public void onDrop(PlayerDropItemEvent e, int level) {
+
     }
 
     @Override

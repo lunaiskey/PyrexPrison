@@ -14,6 +14,7 @@ public enum EnchantType {
     SPEED,
     NIGHT_VISION,
     JUMP_BOOST,
+    MINE_BOMB,
     JACK_HAMMER,
     GEM_FINDER,
     KEY_FINDER,
@@ -34,6 +35,7 @@ public enum EnchantType {
         type.add(SPEED);
         type.add(JUMP_BOOST);
         type.add(NIGHT_VISION);
+        type.add(MINE_BOMB);
         type.add(JACK_HAMMER);
         type.add(STRIKE);
         type.add(EXPLOSIVE);
@@ -50,7 +52,7 @@ public enum EnchantType {
     public static Map<EnchantType,Integer> getDefaultMap() {
         Map<EnchantType,Integer> map = new HashMap<>();
         map.put(EnchantType.EFFICIENCY, 100);
-        map.put(EnchantType.HASTE,3);
+        map.put(EnchantType.HASTE,6);
         map.put(EnchantType.SPEED,3);
         map.put(EnchantType.JUMP_BOOST,3);
         map.putIfAbsent(EnchantType.NIGHT_VISION,1);

@@ -4,6 +4,7 @@ import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.commands.CommandPMine;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.items.ItemID;
+import io.github.lunaiskey.pyrexprison.items.pyrexitems.BoosterItem;
 import io.github.lunaiskey.pyrexprison.items.pyrexitems.Voucher;
 import io.github.lunaiskey.pyrexprison.mines.*;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
@@ -19,11 +20,8 @@ import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.player.ViewPlayerHolder;
 import io.github.lunaiskey.pyrexprison.player.armor.Armor;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
-import io.github.lunaiskey.pyrexprison.player.inventories.ArmorGUI;
+import io.github.lunaiskey.pyrexprison.player.inventories.*;
 import io.github.lunaiskey.pyrexprison.player.armor.ArmorPyrexHolder;
-import io.github.lunaiskey.pyrexprison.player.inventories.ArmorUpgradeGUI;
-import io.github.lunaiskey.pyrexprison.player.inventories.GemStoneGUI;
-import io.github.lunaiskey.pyrexprison.player.inventories.ViewPlayerGUI;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -110,6 +108,9 @@ public class PlayerEvents implements Listener {
                 if (PyrexPrison.getPlugin().getItemManager().getItemMap().containsKey(itemID)) {
                     PyrexPrison.getPlugin().getItemManager().getItemMap().get(itemID).onBlockBreak(e);
                 }
+                if (itemID == ItemID.BOOSTER) {
+                    new BoosterItem(mainHand).onBlockBreak(e);
+                }
             } catch (Exception ignored) {}
         }
     }
@@ -124,6 +125,9 @@ public class PlayerEvents implements Listener {
                 ItemID itemID = ItemID.valueOf(id);
                 if (PyrexPrison.getPlugin().getItemManager().getItemMap().containsKey(itemID)) {
                     PyrexPrison.getPlugin().getItemManager().getItemMap().get(itemID).onBlockPlace(e);
+                }
+                if (itemID == ItemID.BOOSTER) {
+                    new BoosterItem(e.getItemInHand()).onBlockPlace(e);
                 }
             } catch (Exception ignored) {}
         }
@@ -159,12 +163,20 @@ public class PlayerEvents implements Listener {
         CommandPMine.getResetCooldown().remove(e.getPlayer().getUniqueId());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onTeleport(PlayerTeleportEvent e) {
-        if (e.getTo().getWorld() != null && e.getTo().getWorld().getName().equals(PMineWorld.getWorldName())) {
-            if (e.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN && e.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND) {
-                e.getPlayer().setAllowFlight(true);
-                e.getPlayer().setFlying(true);
+        Location to = e.getTo();
+        Location from = e.getFrom();
+        Player player = e.getPlayer();
+        //player.sendMessage(to.getWorld().getName() +" "+ from.getWorld().getName() + " " + e.getCause().name());
+        if (to.getWorld() != null) {
+            if (to.getWorld().getName().equals(PMineWorld.getWorldName())) {
+                if (e.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN || e.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND) {
+                    Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()-> {
+                        player.setAllowFlight(true);
+                        player.setFlying(true);
+                    });
+                }
             }
         }
     }
@@ -207,9 +219,11 @@ public class PlayerEvents implements Listener {
                             e.setCancelled(true);
                         }
                     }
+                    case PERSONAL_BOOSTER -> new PersonalBoosterGUI(p).onClick(e);
                     case PMINE_UPGRADES -> new PMineUpgradesGUI(p).onClick(e);
                     case PMINE_PUBLIC_MINES -> new PMinePublicGUI().onClick(e);
                     case PMINE_SETTINGS -> new PMineSettingsGUI(p).onClick(e);
+                    case PLAYER_MENU -> new PlayerMenuGUI().onClick(e);
                 }
             }
             if (e.getView().getType() == InventoryType.CRAFTING) {
@@ -236,6 +250,7 @@ public class PlayerEvents implements Listener {
                 case PMINE_PUBLIC_MINES -> new PMinePublicGUI().onClose(e);
                 case PMINE_UPGRADES -> new PMineUpgradesGUI(p).onClose(e);
                 case PMINE_BLOCKS -> new PMineBlocksGUI(p).onClose(e);
+                case PERSONAL_BOOSTER -> new PersonalBoosterGUI(p).onClose(e);
             }
         }
     }
@@ -249,6 +264,7 @@ public class PlayerEvents implements Listener {
             switch(holder.getInvType()) {
                 case PMINE_PUBLIC_MINES -> new PMinePublicGUI().onOpen(e);
                 case PMINE_BLOCKS -> new PMineBlocksGUI(p).onOpen(e);
+                case PERSONAL_BOOSTER -> new PersonalBoosterGUI(p).onOpen(e);
             }
         }
     }
@@ -274,8 +290,34 @@ public class PlayerEvents implements Listener {
                 ItemID itemID = ItemID.valueOf(pyrexDataMap.getString("id"));
                 if (PyrexPrison.getPlugin().getItemManager().getItemMap().containsKey(itemID)) {
                     PyrexPrison.getPlugin().getItemManager().getItemMap().get(itemID).onInteract(e);
+                    return;
+                }
+                CompoundTag tag = NBTTags.getPyrexDataMap(e.getItem());
+                if (itemID == ItemID.BOOSTER) {
+                    new BoosterItem(e.getItem()).onInteract(e);
                 }
             } catch (Exception ignored) {}
+        }
+    }
+
+    @EventHandler
+    public void onDrop(PlayerDropItemEvent e) {
+        Player p = e.getPlayer();
+        ItemStack item = e.getItemDrop().getItemStack();
+        CompoundTag pyrexData = NBTTags.getPyrexDataMap(item);
+        if (pyrexData.contains("id")) {
+            if (pyrexData.getString("id").equalsIgnoreCase(PickaxeHandler.getId())) {
+                e.setCancelled(true);
+                PyrexPickaxe pickaxe = plugin.getPlayerManager().getPlayerMap().get(p.getUniqueId()).getPickaxe();
+                for (EnchantType enchantType : pickaxe.getEnchants().keySet()) {
+                    if (!pickaxe.getDisabledEnchants().contains(enchantType)) {
+                        PyrexEnchant enchant = plugin.getPickaxeHandler().getEnchantments().get(enchantType);
+                        if (enchant.isEnabled()) {
+                            enchant.onDrop(e,pickaxe.getEnchants().get(enchantType));
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -303,12 +345,15 @@ public class PlayerEvents implements Listener {
         } else if (ArmorUpgradeGUI.getCustomColorMap().containsKey(p.getUniqueId())) {
             Map<UUID, ArmorType> map = ArmorUpgradeGUI.getCustomColorMap();
             ArmorType type = map.get(p.getUniqueId());
+            boolean equipped = pyrexPlayer.isArmorEquiped();
             try {
                 Armor armor = pyrexPlayer.getArmor().get(type);
                 int color = Numbers.hexToInt(strippedMessage);
                 if (color <= 0xFFFFFF && color >= 0) {
                     armor.setCustomColor(Color.fromRGB(color));
-                    p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                    if (equipped) {
+                        p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                    }
                 } else {
                     p.sendMessage(StringUtil.color("&cInvalid Color Code."));
                 }

@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
@@ -41,6 +42,11 @@ public class Strike extends PyrexEnchant {
             mine.addMineBlocks(blocksBroken);
             PyrexPrison.getPlugin().getPlayerManager().payForBlocks(e.getPlayer(),blocksBroken);
         }
+    }
+
+    @Override
+    public void onDrop(PlayerDropItemEvent e, int level) {
+
     }
 
     @Override

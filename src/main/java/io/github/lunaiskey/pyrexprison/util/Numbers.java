@@ -17,6 +17,8 @@ public class Numbers {
         return df.format(number);
     }
 
+
+
     public static String formattedNumber(long number) {
         if (number < 1000) {
             return number+"";
@@ -38,30 +40,30 @@ public class Numbers {
         if (number.compareTo(BigDecimal.valueOf(1000L))<0) {
             return number+"";
         } else if (number.compareTo(BigDecimal.valueOf(1000000L))<0) {
-            return number.divide(BigDecimal.valueOf(1000L),2,RoundingMode.FLOOR)+"K";
+            return number.divide(BigDecimal.valueOf(1000L),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"K";
         } else if (number.compareTo(BigDecimal.valueOf(1000000000L))<0) {
-            return number.divide(BigDecimal.valueOf(1000000L),2,RoundingMode.FLOOR)+"M";
+            return number.divide(BigDecimal.valueOf(1000000L),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"M";
         } else if (number.compareTo(BigDecimal.valueOf(1000000000000L))<0) {
-            return number.divide(BigDecimal.valueOf(1000000000L),2,RoundingMode.FLOOR)+"B";
+            return number.divide(BigDecimal.valueOf(1000000000L),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"B";
         } else if (number.compareTo(BigDecimal.valueOf(1000000000000000L))<0) {
-            return number.divide(BigDecimal.valueOf(1000000000000L),2,RoundingMode.FLOOR)+"T";
+            return number.divide(BigDecimal.valueOf(1000000000000L),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"T";
         } else if (number.compareTo(BigDecimal.valueOf(1000000000000000000L))<0) {
-            return number.divide(BigDecimal.valueOf(1000000000000000L),2,RoundingMode.FLOOR)+"Q";
+            return number.divide(BigDecimal.valueOf(1000000000000000L),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"Q";
         } else if (number.compareTo(new BigDecimal("1000000000000000000000"))<0) {
-            return number.divide(new BigDecimal("1000000000000000000"),2,RoundingMode.FLOOR)+"QN";
+            return number.divide(new BigDecimal("1000000000000000000"),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"QN";
         } else if (number.compareTo(new BigDecimal("1000000000000000000000000"))<0) {
-            return number.divide(new BigDecimal("1000000000000000000000"),2,RoundingMode.FLOOR)+"S";
+            return number.divide(new BigDecimal("1000000000000000000000"),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"S";
         } else if (number.compareTo(new BigDecimal("1000000000000000000000000000"))<0) {
-            return number.divide(new BigDecimal("1000000000000000000000000"),2,RoundingMode.FLOOR)+"SP";
+            return number.divide(new BigDecimal("1000000000000000000000000"),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"SP";
         } else if (number.compareTo(new BigDecimal("1000000000000000000000000000000"))<0) {
-            return number.divide(new BigDecimal("1000000000000000000000000000"),2,RoundingMode.FLOOR)+"O";
+            return number.divide(new BigDecimal("1000000000000000000000000000"),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"O";
         } else if (number.compareTo(new BigDecimal("1000000000000000000000000000000000"))<0) {
-            return number.divide(new BigDecimal("1000000000000000000000000000000"),2,RoundingMode.FLOOR)+"N";
+            return number.divide(new BigDecimal("1000000000000000000000000000000"),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"N";
         } else if (number.compareTo(new BigDecimal("1000000000000000000000000000000000000"))<0) {
-            return number.divide(new BigDecimal("1000000000000000000000000000000000"),2,RoundingMode.FLOOR) + "D";
+            return number.divide(new BigDecimal("1000000000000000000000000000000000"),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString() + "D";
         } else {
         //} else if (number.compareTo(new BigDecimal("1000000000000000000000000000000000000000"))<0) {
-            return number.divide(new BigDecimal("1000000000000000000000000000000000000"),2,RoundingMode.FLOOR)+"DD";
+            return number.divide(new BigDecimal("1000000000000000000000000000000000000"),2,RoundingMode.FLOOR).stripTrailingZeros().toPlainString()+"DD";
         }
     }
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Size extends PMineUpgrade {
     public Size() {
-        super("Size", List.of("Increases the size of your mine."), 37);
+        super("Size", List.of("Increases the size of your mine."), 38);
     }
 
     @Override

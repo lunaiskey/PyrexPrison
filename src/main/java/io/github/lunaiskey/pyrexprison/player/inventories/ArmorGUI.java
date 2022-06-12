@@ -61,42 +61,42 @@ public class ArmorGUI implements PyrexInventory {
         Player p = (Player) e.getWhoClicked();
         PyrexPlayer pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId());
         boolean armorEquiped = pyrexPlayer.isArmorEquiped();
-        if (e.getRawSlot() == 16) {
-            if (armorEquiped) {
-                p.getInventory().setHelmet(null);
-                p.getInventory().setChestplate(null);
-                p.getInventory().setLeggings(null);
-                p.getInventory().setBoots(null);
-                pyrexPlayer.setArmorEquiped(false);
-                e.getInventory().setItem(16,getToggleButton(false));
-            } else {
-                boolean allSlotsEmpty = true;
-                for (ItemStack item : p.getInventory().getArmorContents()) {
-                    if (item != null) {
-                        if (NBTTags.getPyrexDataMap(item).get("id") != null) {
-                            if (!NBTTags.getPyrexDataMap(item).get("id").getAsString().contains("PYREX_ARMOR_")) {
-                                allSlotsEmpty = false;
-                            }
-                        } else {
-                            allSlotsEmpty = false;
-                        }
-                        break;
-                    }
-                }
-                if (allSlotsEmpty) {
-                    p.getInventory().setHelmet(pyrexPlayer.getHelmet().getItemStack());
-                    p.getInventory().setChestplate(pyrexPlayer.getChestplate().getItemStack());
-                    p.getInventory().setLeggings(pyrexPlayer.getLeggings().getItemStack());
-                    p.getInventory().setBoots(pyrexPlayer.getBoots().getItemStack());
-                    pyrexPlayer.setArmorEquiped(true);
-                    e.getInventory().setItem(16,getToggleButton(true));
-                } else {
-                    p.sendMessage(StringUtil.color("&cPlease remove all items from your armor slots before trying to equip your armor."));
-                }
-            }
-        }
         switch (e.getRawSlot()) {
             case 10,11,12,13 -> Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),() -> p.openInventory(new ArmorUpgradeGUI(p,armorSlots.get(e.getRawSlot())).getInv()));
+            case 16 -> {
+                if (armorEquiped) {
+                    p.getInventory().setHelmet(null);
+                    p.getInventory().setChestplate(null);
+                    p.getInventory().setLeggings(null);
+                    p.getInventory().setBoots(null);
+                    pyrexPlayer.setArmorEquiped(false);
+                    e.getInventory().setItem(16,getToggleButton(false));
+                } else {
+                    boolean allSlotsEmpty = true;
+                    for (ItemStack item : p.getInventory().getArmorContents()) {
+                        if (item != null) {
+                            if (NBTTags.getPyrexDataMap(item).get("id") != null) {
+                                if (!NBTTags.getPyrexDataMap(item).get("id").getAsString().contains("PYREX_ARMOR_")) {
+                                    allSlotsEmpty = false;
+                                }
+                            } else {
+                                allSlotsEmpty = false;
+                            }
+                            break;
+                        }
+                    }
+                    if (allSlotsEmpty) {
+                        p.getInventory().setHelmet(pyrexPlayer.getHelmet().getItemStack());
+                        p.getInventory().setChestplate(pyrexPlayer.getChestplate().getItemStack());
+                        p.getInventory().setLeggings(pyrexPlayer.getLeggings().getItemStack());
+                        p.getInventory().setBoots(pyrexPlayer.getBoots().getItemStack());
+                        pyrexPlayer.setArmorEquiped(true);
+                        e.getInventory().setItem(16,getToggleButton(true));
+                    } else {
+                        p.sendMessage(StringUtil.color("&cPlease remove all items from your armor slots before trying to equip your armor."));
+                    }
+                }
+            }
         }
     }
 

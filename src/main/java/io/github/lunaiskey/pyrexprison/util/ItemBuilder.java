@@ -18,8 +18,12 @@ public class ItemBuilder {
     public static ItemStack createItem(String name, Material mat, List<String> lore) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(StringUtil.color(name));
-        meta.setLore(lore);
+        if (name != null) {
+            meta.setDisplayName(StringUtil.color(name));
+        }
+        if (lore != null) {
+            meta.setLore(lore);
+        }
         item.setItemMeta(meta);
         return item;
     }
@@ -88,6 +92,13 @@ public class ItemBuilder {
 
     public static ItemStack getNextPage(int page) {
         return ItemBuilder.createItem(StringUtil.color("&aNext Page"),Material.ARROW,List.of(StringUtil.color("&7Page "+page)));
+    }
+
+    /**
+     * @return A black stained glass pane, with an empty name and no lore.
+     */
+    public static ItemStack getDefaultFiller() {
+        return ItemBuilder.createItem(" ",Material.BLACK_STAINED_GLASS_PANE,null);
     }
 
 }

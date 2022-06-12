@@ -76,6 +76,7 @@ public class ArmorUpgradeGUI implements PyrexInventory {
         Player p = (Player) e.getWhoClicked();
         Inventory inv = e.getClickedInventory();
         Armor armor = pyrexPlayer.getArmor().get(type);
+        boolean isEquiped = pyrexPlayer.isArmorEquiped();
         switch (e.getRawSlot()) {
             case 21,22,23 -> {
                 Ability ability = armor.getAbilties().get(abilitySlots.get(e.getRawSlot()));
@@ -84,7 +85,10 @@ public class ArmorUpgradeGUI implements PyrexInventory {
                         pyrexPlayer.takeGems(ability.getCost());
                         ability.setLevel(ability.getLevel()+1);
                         player.sendMessage(StringUtil.color("&aUpgraded "+abilitySlots.get(e.getRawSlot()).name()+" to level "+ability.getLevel()+"."));
-                        p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                        if (isEquiped) {
+                            p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                        }
+
                         Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()-> player.openInventory(new ArmorUpgradeGUI(player,type).getInv()));
                     } else {
                         player.sendMessage(StringUtil.color("&cYou cannot afford this upgrade."));
@@ -99,7 +103,9 @@ public class ArmorUpgradeGUI implements PyrexInventory {
                         PyrexPrison.getPlugin().getPlayerManager().removePyrexItem(player,gemStoneType,cost);
                         armor.setTier(armor.getTier()+1);
                         player.sendMessage(StringUtil.color("&aSuccessfully upgraded armor to Tier "+armor.getTier()+"."));
-                        p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                        if (isEquiped) {
+                            p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                        }
                         Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->player.openInventory(new ArmorUpgradeGUI(player,type).getInv()));
                     } else {
                         player.sendMessage(StringUtil.color("&cYou don't have enough of this type of Gemstone."));
@@ -116,7 +122,9 @@ public class ArmorUpgradeGUI implements PyrexInventory {
                     case RIGHT,SHIFT_RIGHT -> {
                         if (armor.getCustomColor() != null) {
                             armor.setCustomColor(null);
-                            p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                            if (isEquiped) {
+                                p.getInventory().setItem(type.getSlot(),armor.getItemStack());
+                            }
                             inv.setItem(e.getRawSlot(),getColorButton());
                             inv.setItem(13,armor.getItemStack());
                         }

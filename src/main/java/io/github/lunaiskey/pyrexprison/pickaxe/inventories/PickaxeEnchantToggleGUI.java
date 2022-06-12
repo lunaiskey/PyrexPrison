@@ -46,18 +46,19 @@ public class PickaxeEnchantToggleGUI implements PyrexInventory {
         enchantLocation.put(21,EnchantType.JACK_HAMMER);
         enchantLocation.put(22,EnchantType.STRIKE);
         enchantLocation.put(23,EnchantType.EXPLOSIVE);
-        enchantLocation.put(24,EnchantType.NUKE);
-        enchantLocation.put(29,EnchantType.GEM_FINDER);
-        enchantLocation.put(30,EnchantType.KEY_FINDER);
-        enchantLocation.put(31,EnchantType.LOOT_FINDER);
-        enchantLocation.put(32,EnchantType.XP_BOOST);
+        enchantLocation.put(24,EnchantType.MINE_BOMB);
+        enchantLocation.put(29,EnchantType.NUKE);
+        enchantLocation.put(30,EnchantType.GEM_FINDER);
+        enchantLocation.put(31,EnchantType.KEY_FINDER);
+        enchantLocation.put(32,EnchantType.LOOT_FINDER);
+        enchantLocation.put(33,EnchantType.XP_BOOST);
     }
 
     @Override
     public void init() {
         for (int i = 0;i<size;i++) {
             switch (i) {
-                case 11,12,13,14,15,20,21,22,23,24,29,30,31,32 -> inv.setItem(i, getEnchantPlaceholder(enchantLocation.get(i)));
+                case 11,12,13,14,15,20,21,22,23,24,29,30,31,32,33 -> inv.setItem(i, getEnchantPlaceholder(enchantLocation.get(i)));
                 case 0 -> inv.setItem(i,ItemBuilder.getGoBack());
                 default -> inv.setItem(i, ItemBuilder.createItem(" ", Material.BLACK_STAINED_GLASS_PANE,null));
             }

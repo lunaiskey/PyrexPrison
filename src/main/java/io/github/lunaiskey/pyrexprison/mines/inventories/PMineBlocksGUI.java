@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -60,10 +61,10 @@ public class PMineBlocksGUI implements PyrexInventory {
                             inv.setItem(i,getNextPage(2));
                         }
                     }
-                    case 4 -> inv.setItem(i,ItemBuilder.createItem(StringUtil.color("&atotal: "+(((materialList.size() - materialList.size()%45)/45)+1)),Material.OBSIDIAN,null));
+                    case 4 -> inv.setItem(i,getMiddleButton());
                     default -> {
                         if (getIndex(i) < materialList.size()) {
-                            inv.setItem(i,getBlockItem(materialList.get(getIndex(i)),mineComposition.get(materialList.get(getIndex(i)))));
+                            inv.setItem(i,getBlockItem(materialList.get(getIndex(i))));
                         }
                     }
                 }
@@ -84,7 +85,7 @@ public class PMineBlocksGUI implements PyrexInventory {
         for (int i = 0;i<45;i++) {
             if (pageOffset+i < materialList.size()) {
                 Material mat = materialList.get(pageOffset+i);
-                inv.setItem(getSlot(i),getBlockItem(mat,mineComposition.get(mat)));
+                inv.setItem(getSlot(i),getBlockItem(mat));
             } else {
                 inv.setItem(getSlot(i),new ItemStack(Material.AIR));
             }
@@ -97,29 +98,61 @@ public class PMineBlocksGUI implements PyrexInventory {
     public void onClick(InventoryClickEvent e) {
         e.setCancelled(true);
         ItemStack item = e.getCurrentItem();
+        Inventory inv = e.getClickedInventory();
         int slot = e.getRawSlot();
         int page = pageMap.get(p.getUniqueId());
         int totalPages = ((materialList.size() - materialList.size()%45)/45)+1;
+        ClickType clickType = e.getClick();
         if (e.getClickedInventory() == e.getView().getTopInventory()) {
-            if (slot == 0) {
-                if (page > 0) {
-                    pageMap.put(p.getUniqueId(),page-1);
-                    updateGUI(p);
-                } else {
-                    Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->p.openInventory(new PMineGUI(p).getInv()));
+            switch (slot) {
+                case 0 -> {
+                    if (page > 0) {
+                        pageMap.put(p.getUniqueId(),page-1);
+                        updateGUI(p);
+                    } else {
+                        Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()->p.openInventory(new PMineGUI(p).getInv()));
+                    }
                 }
-            }
-            if (slot == 8) {
-                if (totalPages-1 > page) {
-                    pageMap.put(p.getUniqueId(),page+1);
-                    updateGUI(p);
+                case 4 -> {
+                    switch (clickType) {
+                        case LEFT,SHIFT_LEFT -> {
+                            if (!(mine.getDisabledBlocks().size() <= 0)) {
+                                mine.getDisabledBlocks().clear();
+                                updateGUI(p);
+                            }
+                        }
+                        case RIGHT,SHIFT_RIGHT -> {
+                            if (mine.getDisabledBlocks().size() != mineComposition.keySet().size()) {
+                                mine.getDisabledBlocks().addAll(mineComposition.keySet());
+                                updateGUI(p);
+                            }
+                        }
+                    }
                 }
-            }
-            if (slot >= 9) {
-                if (item != null && item.getType() != Material.AIR) {
-                    editMap.put(p.getUniqueId(),item.getType());
-                    Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),p::closeInventory);
-                    e.getWhoClicked().sendMessage("Type a number into chat to set the percentage.");
+                case 8 -> {
+                    if (totalPages-1 > page) {
+                        pageMap.put(p.getUniqueId(),page+1);
+                        updateGUI(p);
+                    }
+                }
+                default -> {
+                    if (slot >= 9) {
+                        if (item != null && item.getType() != Material.AIR) {
+                            if (clickType == ClickType.LEFT || clickType == ClickType.SHIFT_LEFT) {
+                                editMap.put(p.getUniqueId(),item.getType());
+                                Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),p::closeInventory);
+                                e.getWhoClicked().sendMessage("Type a number into chat to set the percentage.");
+                            } else if (clickType == ClickType.RIGHT || clickType == ClickType.SHIFT_RIGHT) {
+                                if (mine.getDisabledBlocks().contains(item.getType())) {
+                                    mine.getDisabledBlocks().remove(item.getType());
+                                    inv.setItem(slot,getBlockItem(item.getType()));
+                                } else {
+                                    mine.getDisabledBlocks().add(item.getType());
+                                    inv.setItem(slot,getBlockItem(item.getType()));
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -135,12 +168,28 @@ public class PMineBlocksGUI implements PyrexInventory {
         pageMap.remove(player.getUniqueId());
     }
 
-    private ItemStack getBlockItem(Material material, double chance) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setLore(List.of(ChatColor.GRAY + "Chance: " + ChatColor.LIGHT_PURPLE + chance*100 + "%"," ",ChatColor.YELLOW + "Click to modify!"));
-        item.setItemMeta(meta);
-        return item;
+    private ItemStack getBlockItem(Material material) {
+        double chance = mine.getComposition().get(material);
+        List<String> lore = new ArrayList<>();
+        String status = !mine.getDisabledBlocks().contains(material) ? "&aEnabled" : "&cDisabled";
+        lore.add(StringUtil.color("&7Chance: &d" + chance*100 + "%"));
+        lore.add(StringUtil.color("&7Status: "+status));
+        lore.add(" ");
+        lore.add(StringUtil.color("&eL-Click to modify!"));
+        if (!mine.getDisabledBlocks().contains(material)) {
+            lore.add(StringUtil.color("&aR-Click to disable!"));
+        } else {
+            lore.add(StringUtil.color("&bR-Click to enable!"));
+        }
+        return ItemBuilder.createItem(null,material,lore);
+    }
+
+    private ItemStack getMiddleButton() {
+        List<String> lore = new ArrayList<>();
+        lore.add(" ");
+        lore.add(StringUtil.color("&eL-Click to enable all"));
+        lore.add(StringUtil.color("&aR-Click to disable all"));
+        return ItemBuilder.createItem("&fMass toggle blocks",Material.OBSIDIAN,lore);
     }
 
     public static Map<UUID, Material> getEditMap() {

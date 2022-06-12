@@ -27,14 +27,16 @@ public class CommandMultiplier implements CommandExecutor {
             double baseMulti = pyrexPlayer.getBaseMultiplier();
             double rankMultiplier = pyrexPlayer.getRankMultiplier();
             double armorMultiplier = pyrexPlayer.getArmorMultiplier();
+            double boosterMultiplier = pyrexPlayer.getBoosterMultiplier();
+            double totalMultiplier = pyrexPlayer.getTotalMultiplier();
             p.sendMessage(
                     " ",
                     StringUtil.color("&f&lMultipliers:"),
                     StringUtil.color("&7- &eBase:&f "+(1+baseMulti)),
                     StringUtil.color("&7- &bRank:&f "+ Numbers.formatDouble(rankMultiplier)),
                     StringUtil.color("&7- &cArmor:&f "+Numbers.formatDouble(armorMultiplier)),
-                    StringUtil.color("&7- &dBooster:&f "+"N/A"),
-                    StringUtil.color("&7- &fTotal:&f "+Numbers.formatDouble(baseMulti+rankMultiplier+armorMultiplier+1))
+                    StringUtil.color("&7- &dBooster:&f "+ Numbers.formatDouble(boosterMultiplier)),
+                    StringUtil.color("&7- &fTotal:&f "+Numbers.formatDouble(totalMultiplier+1))
             );
         } else {
             sender.sendMessage("You need to be a player to run this command.");

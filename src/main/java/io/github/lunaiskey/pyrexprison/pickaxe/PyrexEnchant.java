@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
@@ -28,6 +29,7 @@ public abstract class PyrexEnchant {
     }
 
     public abstract void onBlockBreak(BlockBreakEvent e, int level);
+    public abstract void onDrop(PlayerDropItemEvent e, int level);
     public abstract void onEquip(Player player, ItemStack pickaxe, int level);
     public abstract void onUnEquip(Player player, ItemStack pickaxe, int level);
 

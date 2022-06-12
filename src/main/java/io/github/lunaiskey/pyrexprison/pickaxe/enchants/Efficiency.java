@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
@@ -20,6 +21,11 @@ public class Efficiency extends PyrexEnchant {
 
     @Override
     public void onBlockBreak(BlockBreakEvent e, int level) {
+    }
+
+    @Override
+    public void onDrop(PlayerDropItemEvent e, int level) {
+
     }
 
     @Override

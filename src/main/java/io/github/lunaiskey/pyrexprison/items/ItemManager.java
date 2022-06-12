@@ -1,15 +1,14 @@
 package io.github.lunaiskey.pyrexprison.items;
 
-import io.github.lunaiskey.pyrexprison.items.pyrexitems.GemStone;
-import io.github.lunaiskey.pyrexprison.items.pyrexitems.Geode;
-import io.github.lunaiskey.pyrexprison.items.pyrexitems.PlayerMenu;
+import io.github.lunaiskey.pyrexprison.items.pyrexitems.*;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ItemManager {
 
-    private Map<ItemID,PyrexItem> itemMap = new HashMap<>();
+    private Map<ItemID,PyrexItem> itemMap = new LinkedHashMap<>();
 
     public void registerItems() {
         itemMap.put(ItemID.COMMON_GEODE,new Geode(ItemID.COMMON_GEODE));
@@ -28,6 +27,20 @@ public class ItemManager {
         itemMap.put(ItemID.JASPER_GEMSTONE,new GemStone(ItemID.JASPER_GEMSTONE));
         itemMap.put(ItemID.AMETHYST_GEMSTONE,new GemStone(ItemID.AMETHYST_GEMSTONE));
         itemMap.put(ItemID.PLAYER_MENU,new PlayerMenu());
+
+        itemMap.put(ItemID.COMMON_TOKEN_POUCH,new TokenPouch(ItemID.COMMON_TOKEN_POUCH));
+        itemMap.put(ItemID.UNCOMMON_TOKEN_POUCH,new TokenPouch(ItemID.UNCOMMON_TOKEN_POUCH));
+        itemMap.put(ItemID.RARE_TOKEN_POUCH,new TokenPouch(ItemID.RARE_TOKEN_POUCH));
+        itemMap.put(ItemID.EPIC_TOKEN_POUCH,new TokenPouch(ItemID.EPIC_TOKEN_POUCH));
+        itemMap.put(ItemID.LEGENDARY_TOKEN_POUCH,new TokenPouch(ItemID.LEGENDARY_TOKEN_POUCH));
+
+        itemMap.put(ItemID.COMMON_GEM_POUCH,new GemPouch(ItemID.COMMON_GEM_POUCH));
+        itemMap.put(ItemID.UNCOMMON_GEM_POUCH,new GemPouch(ItemID.UNCOMMON_GEM_POUCH));
+        itemMap.put(ItemID.RARE_GEM_POUCH,new GemPouch(ItemID.RARE_GEM_POUCH));
+        itemMap.put(ItemID.EPIC_GEM_POUCH,new GemPouch(ItemID.EPIC_GEM_POUCH));
+        itemMap.put(ItemID.LEGENDARY_GEM_POUCH,new GemPouch(ItemID.LEGENDARY_GEM_POUCH));
+
+        //itemMap.put(ItemID.SEX_ITEM,new SexItem());
     }
 
     public Map<ItemID, PyrexItem> getItemMap() {

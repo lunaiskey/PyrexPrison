@@ -14,7 +14,7 @@ public enum CurrencyType {
             case TOKENS -> unicode = "⛁";
             case GEMS -> unicode = "❈";
             case PYREX_POINTS -> unicode = "☀";
-            default -> unicode = "$";
+            default -> unicode = "#";
         }
         return unicode;
     }
