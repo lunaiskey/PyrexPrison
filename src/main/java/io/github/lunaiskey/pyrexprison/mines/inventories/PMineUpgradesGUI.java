@@ -117,7 +117,7 @@ public class PMineUpgradesGUI implements PyrexInventory {
         }
         lore.add(" ");
         lore.add(StringUtil.color("&7Upgrade: &b"+upgrade.getUpgradeLore(level+1)));
-        lore.add(StringUtil.color("&7Cost: &a"+CurrencyType.getUnicode(currencyType)+"&f"+(upgrade.getCost(level+1))));
+        lore.add(StringUtil.color("&7Cost: &a"+currencyType.getUnicode()+"&f"+(upgrade.getCost(level+1))));
         lore.add(" ");
         lore.add(StringUtil.color("&eClick to upgrade!"));
         meta.setLore(lore);

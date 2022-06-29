@@ -105,7 +105,7 @@ public class CommandPItem implements CommandExecutor, TabCompleter {
                 return true;
             }
         } else {
-            sender.sendMessage(StringUtil.color("&cInvalid Arguments &xABCDEFtest"));
+            sender.sendMessage(StringUtil.color("&cInvalid Arguments."));
         }
         return true;
     }

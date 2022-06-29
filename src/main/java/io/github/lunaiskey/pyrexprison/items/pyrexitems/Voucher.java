@@ -8,6 +8,8 @@ import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
+import net.minecraft.nbt.CompoundTag;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -32,7 +34,7 @@ public class Voucher extends PyrexItem {
         this.type = type;
     }
 
-    public Voucher(BigInteger amount, CurrencyType type) {
+    public Voucher( CurrencyType type,BigInteger amount) {
         this(amount,type,null);
     }
 
@@ -48,15 +50,15 @@ public class Voucher extends PyrexItem {
         switch (type) {
             case TOKENS -> {
                 strType = "&eTokens";
-                strAmount = "&e"+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount);
+                strAmount = "&e"+type.getUnicode()+"&f"+Numbers.formattedNumber(amount);
             }
             case GEMS -> {
                 strType = "&aGems";
-                strAmount = "&a"+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount);
+                strAmount = "&a"+type.getUnicode()+"&f"+Numbers.formattedNumber(amount);
             }
             case PYREX_POINTS -> {
                 strType = "&dPyrex Points";
-                strAmount = "&d"+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount);
+                strAmount = "&d"+type.getUnicode()+"&f"+Numbers.formattedNumber(amount);
             }
         }
         List<String> lore = new ArrayList<>();
@@ -66,6 +68,7 @@ public class Voucher extends PyrexItem {
         lore.add(" ");
         lore.add(StringUtil.color("&eRight Click to redeem!"));
         ItemStack item = ItemBuilder.createItem(name,getMaterial(),lore);
+        item = NBTTags.addPyrexData(item,"id",getItemID().name());
         item = NBTTags.setCurrencyVoucherTags(item,amount,type);
         return item;
 
@@ -84,12 +87,17 @@ public class Voucher extends PyrexItem {
     @Override
     public void onInteract(PlayerInteractEvent e) {
         Player p = e.getPlayer();
-        Currency.giveCurrency(e.getPlayer().getUniqueId(), type,amount);
-        e.getItem().setAmount(e.getItem().getAmount()-1);
-        switch(type) {
-            case TOKENS -> p.sendMessage(StringUtil.color("&eRedeemed "+CurrencyType.getUnicode(type)+"&f"+ Numbers.formattedNumber(amount)+" &eTokens."));
-            case GEMS -> p.sendMessage(StringUtil.color("&aRedeemed "+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount)+" &aGems."));
-            case PYREX_POINTS -> p.sendMessage(StringUtil.color("&dRedeemed "+CurrencyType.getUnicode(type)+"&f"+Numbers.formattedNumber(amount)+" &dPyrex Points."));
+        if (type != null && amount != null) {
+            ItemStack item = e.getItem();
+            Currency.giveCurrency(e.getPlayer().getUniqueId(), type,amount);
+            item.setAmount(e.getItem().getAmount()-1);
+            switch(type) {
+                case TOKENS -> p.sendMessage(StringUtil.color("&eRedeemed "+type.getUnicode()+"&f"+ Numbers.formattedNumber(amount)+" &eTokens."));
+                case GEMS -> p.sendMessage(StringUtil.color("&aRedeemed "+type.getUnicode()+"&f"+Numbers.formattedNumber(amount)+" &aGems."));
+                case PYREX_POINTS -> p.sendMessage(StringUtil.color("&dRedeemed "+type.getUnicode()+"&f"+Numbers.formattedNumber(amount)+" &dPyrex Points."));
+            }
+        } else {
+            p.sendMessage(StringUtil.color("&cInvalid Voucher..."));
         }
     }
 }

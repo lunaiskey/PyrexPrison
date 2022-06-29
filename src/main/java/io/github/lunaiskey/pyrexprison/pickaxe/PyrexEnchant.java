@@ -33,7 +33,7 @@ public abstract class PyrexEnchant {
     public abstract void onEquip(Player player, ItemStack pickaxe, int level);
     public abstract void onUnEquip(Player player, ItemStack pickaxe, int level);
 
-    public abstract BigInteger getEquation(int n);
+    public abstract BigInteger getCost(int n);
 
     public String getName() {
         return name;
@@ -58,21 +58,21 @@ public abstract class PyrexEnchant {
     public BigInteger getTotalCost(int level) {
         BigInteger sum = BigInteger.ZERO;
         for (int n = 0;n<level;n++) {
-            sum = sum.add(getEquation(n));
+            sum = sum.add(getCost(n));
         }
         return sum;
     }
 
     public BigInteger getSingleLevelCost(int level) {
-        return getEquation(level);
+        return getCost(level);
     }
 
     public Pair<Integer,BigInteger> getMaxLevelFromAmount(int start, BigInteger amount) {
         BigInteger sum = BigInteger.ZERO;
         for (int n = start;n<getMaxLevel();n++) {
             //if (sum+getEquation(n) < amount) {
-            if (sum.add(getEquation(n)).compareTo(amount) < 0) {
-                sum = sum.add(getEquation(n));
+            if (sum.add(getCost(n)).compareTo(amount) < 0) {
+                sum = sum.add(getCost(n));
             } else {
                 return new ImmutablePair<>(n,sum);
             }
@@ -83,7 +83,7 @@ public abstract class PyrexEnchant {
     public BigInteger getCostBetweenLevels(int start, int end) {
         BigInteger sum = BigInteger.ZERO;
         for (int n = start;n<end;n++) {
-            sum = sum.add(getEquation(n));
+            sum = sum.add(getCost(n));
         }
         return sum;
     }

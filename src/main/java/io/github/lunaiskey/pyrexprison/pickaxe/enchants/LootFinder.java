@@ -4,7 +4,6 @@ import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.items.ItemID;
 import io.github.lunaiskey.pyrexprison.items.ItemManager;
 import io.github.lunaiskey.pyrexprison.items.PyrexItem;
-import io.github.lunaiskey.pyrexprison.items.pyrexitems.Geode;
 import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import org.bukkit.entity.Player;
@@ -30,7 +29,7 @@ public class LootFinder extends PyrexEnchant {
             if (level > getMaxLevel()) {
                 level = getMaxLevel();
             }
-            int bound = (((level-1) - ((level-1)%50))/50)+1;
+            int bound = (((level-1) - ((level-1)%(getMaxLevel()/5)))/(getMaxLevel()/5))+1;
             p.getInventory().addItem(getGeode(rand.nextInt(bound)));
         }
     }
@@ -51,13 +50,13 @@ public class LootFinder extends PyrexEnchant {
     }
 
     @Override
-    public BigInteger getEquation(int n) {
+    public BigInteger getCost(int n) {
         if (n <= 50) {
             return BigInteger.valueOf(12500+(12500L*(n)));
         } else if (n <= 100){
-            return getEquation(50).add(BigInteger.valueOf(25000+(25000L*(n-50))));
+            return getCost(50).add(BigInteger.valueOf(25000+(25000L*(n-50))));
         } else {
-            return getEquation(100).add(BigInteger.valueOf(50000+(50000L*(n-100))));
+            return getCost(100).add(BigInteger.valueOf(50000+(50000L*(n-100))));
         }
     }
 

@@ -43,7 +43,7 @@ public class NightVision extends PyrexEnchant {
     }
 
     @Override
-    public BigInteger getEquation(int n) {
-        return null;
+    public BigInteger getCost(int n) {
+        return BigInteger.ZERO;
     }
 }

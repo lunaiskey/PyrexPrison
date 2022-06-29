@@ -62,7 +62,7 @@ public class PMineManager {
             List<String> disabledBlocksRaw = fileConf.getStringList("disabledBlocks");
             for (String str : disabledBlocksRaw) {
                 try {
-                    disabledBlocks.add(Material.valueOf(str));
+                    disabledBlocks.add(Material.valueOf(str)); //works
                 } catch (Exception ignored) {}
             }
             newPMine(owner,chunkX,chunkZ,isPublic,tax,disabledBlocks,blocksMap,upgradesMap);

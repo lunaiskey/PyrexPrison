@@ -138,10 +138,10 @@ public class PickaxeAddLevelsGUI {
         List<String> lore = new ArrayList<>();
         if (level == Integer.MAX_VALUE) {
             Pair<Integer,BigInteger> pair = enchant.getMaxLevelFromAmount(start, player.getCurrency(currencyType));
-            lore.add(StringUtil.color("&a&l| &7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+Numbers.formattedNumber(pair.getRight())));
+            lore.add(StringUtil.color("&a&l| &7Cost: "+currencyType.getColorCode()+currencyType.getUnicode()+"&f"+Numbers.formattedNumber(pair.getRight())));
             lore.add(StringUtil.color("&a&l| &7New Level: &e"+pair.getLeft()));
         } else {
-            lore.add(StringUtil.color("&a&l| &7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+ Numbers.formattedNumber(enchant.getCostBetweenLevels(start,end))));
+            lore.add(StringUtil.color("&a&l| &7Cost: "+currencyType.getColorCode()+currencyType.getUnicode()+"&f"+ Numbers.formattedNumber(enchant.getCostBetweenLevels(start,end))));
             lore.add(StringUtil.color("&a&l| &7New Level: &e"+end));
         }
         meta.setLore(lore);

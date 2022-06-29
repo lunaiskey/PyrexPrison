@@ -12,6 +12,7 @@ import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.SalesBoost
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.XPBoost;
 import io.github.lunaiskey.pyrexprison.player.boosters.Booster;
 import io.github.lunaiskey.pyrexprison.player.boosters.BoosterType;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -28,6 +29,7 @@ public class PyrexPlayer {
     private long pyrexPoints;
     private int rank;
     private final UUID pUUID;
+    private final String name;
     private PyrexPickaxe pickaxe;
     private final Map<ArmorType,Armor> armor;
     private boolean isArmorEquiped;
@@ -38,8 +40,9 @@ public class PyrexPlayer {
 
     private Map<BoosterType,Integer> maxBooster;
 
-    public PyrexPlayer(UUID pUUID, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped, Map<ArmorType,Armor> armor,ItemID selectedGemstone,int gemstoneCount, List<Booster> boosters) {
+    public PyrexPlayer(UUID pUUID,String name, BigInteger tokens, long gems, long pyrexPoints, int rank, PyrexPickaxe pickaxe, boolean isArmorEquiped, Map<ArmorType,Armor> armor,ItemID selectedGemstone,int gemstoneCount, List<Booster> boosters) {
         this.pUUID = pUUID;
+        this.name = name;
         this.tokens = tokens;
         this.gems = gems;
         this.pyrexPoints = pyrexPoints;
@@ -57,8 +60,13 @@ public class PyrexPlayer {
         save();
     }
 
-    public PyrexPlayer(UUID pUUID) {
-        this(pUUID,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false,null,ItemID.AMETHYST_GEMSTONE,0,null);
+    public PyrexPlayer(UUID pUUID,String name) {
+
+        this(pUUID,name,BigInteger.ZERO,0,0,0,new PyrexPickaxe(pUUID),false,null,ItemID.AMETHYST_GEMSTONE,0,null);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public long getGems() {
@@ -275,6 +283,7 @@ public class PyrexPlayer {
         currencyMap.put("pyrexpoints", pyrexPoints);
         data.createSection("currencies", currencyMap);
         Map<String, Object> playerData = new LinkedHashMap<>();
+        playerData.put("name",name);
         playerData.put("rank",rank);
         playerData.put("selectedGemstone",selectedGemstone.name());
         playerData.put("gemstoneCount",gemstoneCount);

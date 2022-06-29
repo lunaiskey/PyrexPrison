@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.commands;
 
+import io.github.lunaiskey.pyrexprison.Messages;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.items.pyrexitems.Voucher;
 import io.github.lunaiskey.pyrexprison.player.Currency;
@@ -32,7 +33,7 @@ public class CommandCurrency implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
         this.playerManager = plugin.getPlayerManager();
         this.type = type;
-        this.unicode = CurrencyType.getUnicode(type);
+        this.unicode = type.getUnicode();
     }
 
     @Override
@@ -78,7 +79,7 @@ public class CommandCurrency implements CommandExecutor, TabCompleter {
                 }
                 return true;
             } else {
-                sender.sendMessage(StringUtil.color("&cNo Permission."));
+                sender.sendMessage(Messages.NO_PERMISSION.getText());
             }
         }
         if (args[0].equalsIgnoreCase("take")) {
@@ -113,7 +114,7 @@ public class CommandCurrency implements CommandExecutor, TabCompleter {
                 }
                 return true;
             } else {
-                sender.sendMessage(StringUtil.color("&cNo Permission."));
+                sender.sendMessage(Messages.NO_PERMISSION.getText());
             }
         }
         if (args[0].equalsIgnoreCase("set")) {
@@ -148,7 +149,7 @@ public class CommandCurrency implements CommandExecutor, TabCompleter {
                 }
                 return true;
             } else {
-                sender.sendMessage(StringUtil.color("&cNo Permission."));
+                sender.sendMessage(Messages.NO_PERMISSION.getText());
             }
         }
         if (sender instanceof Player) {
@@ -214,7 +215,7 @@ public class CommandCurrency implements CommandExecutor, TabCompleter {
                         p.sendMessage(StringUtil.color("&cAmount has to be more then 0."));
                         return true;
                     }
-                    if (!p.getInventory().addItem(new Voucher(amount, type).getItemStack()).isEmpty()) {
+                    if (!p.getInventory().addItem(new Voucher(type,amount).getItemStack()).isEmpty()) {
                         p.sendMessage(StringUtil.color("&cNot enough inventory space."));
                         return true;
                     }
@@ -281,13 +282,14 @@ public class CommandCurrency implements CommandExecutor, TabCompleter {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 completion.add(player.getName());
             }
-            return completion;
         }
         if (args[0].equalsIgnoreCase("give") || args[0].equalsIgnoreCase("take") || args[0].equalsIgnoreCase("set")) {
-            if (args.length == 3) {
-                return completion;
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                completion.add(player.getName());
             }
         }
-        return null;
+        List<String> finalCompletions = new ArrayList<>();
+        org.bukkit.util.StringUtil.copyPartialMatches(args[args.length-1],completion,finalCompletions);
+        return finalCompletions;
     }
 }

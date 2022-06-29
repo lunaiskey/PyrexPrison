@@ -49,9 +49,9 @@ public class PyrexExpansion extends PlaceholderExpansion {
                 case "tokens" -> Numbers.formattedNumber(pyrexPlayer.getTokens());
                 case "gems" -> Numbers.formattedNumber(pyrexPlayer.getGems());
                 case "points" -> Numbers.formattedNumber(pyrexPlayer.getPyrexPoints());
-                case "unicode_tokens" -> CurrencyType.getUnicode(CurrencyType.TOKENS);
-                case "unicode_gems" -> CurrencyType.getUnicode(CurrencyType.GEMS);
-                case "unicode_points" -> CurrencyType.getUnicode(CurrencyType.PYREX_POINTS);
+                case "unicode_tokens" -> CurrencyType.TOKENS.getUnicode();
+                case "unicode_gems" -> CurrencyType.GEMS.getUnicode();
+                case "unicode_points" -> CurrencyType.PYREX_POINTS.getUnicode();
                 case "rank" -> String.valueOf(pyrexPlayer.getRank());
                 case "rank_next" -> String.valueOf(Math.min(pyrexPlayer.getRank() + 1, Rankup.getMaxRankup()));
                 case "rank_percentage" -> Numbers.formatDouble(Rankup.getRankUpPercentage(Objects.requireNonNull(player.getPlayer())));

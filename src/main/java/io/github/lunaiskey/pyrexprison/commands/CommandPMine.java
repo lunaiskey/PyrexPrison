@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.commands;
 
+import io.github.lunaiskey.pyrexprison.Messages;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.mines.PMineManager;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
@@ -127,7 +128,7 @@ public class CommandPMine implements CommandExecutor, TabCompleter {
                     }
                 }
             } else {
-                p.sendMessage(StringUtil.color("&cNo Permission."));
+                p.sendMessage(Messages.NO_PERMISSION.getText());
                 return true;
             }
             p.sendMessage(StringUtil.color("Invalid Arguments."));
@@ -156,17 +157,17 @@ public class CommandPMine implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("pyrex.debug")) {
                 completions.add("debug");
             }
-            return completions;
         }
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("debug")) {
                 if (sender.hasPermission("pyrex.debug")) {
                     completions.add("getposition");
                     completions.add("getgridposition");
-                    return completions;
                 }
             }
         }
-        return null;
+        List<String> finalCompletions = new ArrayList<>();
+        org.bukkit.util.StringUtil.copyPartialMatches(args[args.length-1],completions,finalCompletions);
+        return finalCompletions;
     }
 }

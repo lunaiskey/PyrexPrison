@@ -38,23 +38,21 @@ public class NBTTags {
     }
 
     public static ItemStack setCurrencyVoucherTags(ItemStack item, BigInteger amount, CurrencyType type) {
-        net.minecraft.world.item.ItemStack nmsStack = CraftItemStack.asNMSCopy(item);
-        CompoundTag itemTag = nmsStack.getOrCreateTag();
         CompoundTag voucherTag = new CompoundTag();
-        voucherTag.putString(type.name(),amount.toString());
-        itemTag.put("voucher",voucherTag);
-        nmsStack.setTag(itemTag);
-        return CraftItemStack.asBukkitCopy(nmsStack);
+        voucherTag.putString("type",type.name());
+        voucherTag.putString("amount",amount.toString());
+        return addPyrexData(item,"voucher",voucherTag);
     }
 
     public static Pair<CurrencyType,BigInteger> getVoucherValue(ItemStack item) {
-        net.minecraft.world.item.ItemStack nmsStack = CraftItemStack.asNMSCopy(item);
-        CompoundTag itemTag = nmsStack.getOrCreateTag();
-        CompoundTag voucherTag = itemTag.getCompound("voucher");
-        if (voucherTag.getAllKeys().size() == 1) {
-            for (String str : voucherTag.getAllKeys()) {
-                return new ImmutablePair<>(CurrencyType.valueOf(str), new BigInteger(voucherTag.getString(str)));
-            }
+        CompoundTag itemTag = getPyrexDataMap(item);
+        CompoundTag voucherTag = itemTag.getCompound("voucherData");
+        try {
+            CurrencyType type = CurrencyType.valueOf(voucherTag.getString("type"));
+            BigInteger amount = new BigInteger(voucherTag.getString("amount"));
+            return new ImmutablePair<>(type,amount);
+        } catch (Exception ignored) {
+
         }
         return null;
     }

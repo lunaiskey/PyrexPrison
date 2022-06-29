@@ -17,6 +17,7 @@ import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.SalesBoost
 import io.github.lunaiskey.pyrexprison.player.armor.upgrades.abilitys.XPBoost;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -37,7 +38,13 @@ public class PlayerManager {
     }
 
     public void createPyrexPlayer(UUID pUUID) {
-        playerMap.put(pUUID,new PyrexPlayer(pUUID));
+        Player player = Bukkit.getPlayer(pUUID);
+        if (player != null) {
+            playerMap.put(pUUID,new PyrexPlayer(pUUID, player.getName()));
+        } else {
+            playerMap.put(pUUID,new PyrexPlayer(pUUID, Bukkit.getOfflinePlayer(pUUID).getName()));
+        }
+
     }
 
     public void loadPlayers() {
@@ -65,6 +72,7 @@ public class PlayerManager {
             try {
                 playerData = fileConf.getConfigurationSection("pyrexData").getValues(false);
             } catch (Exception ignored) {}
+            String cachedName = (String) playerData.getOrDefault("name","null");
             int rank = ((Number) playerData.getOrDefault("rank",0)).intValue();
             ItemID selectedGemstone = ItemID.valueOf((String) playerData.getOrDefault("selectedGemstone",ItemID.AMETHYST_GEMSTONE.name()));
             int gemstoneCount = ((Number) playerData.getOrDefault("gemstoneCount",0)).intValue();
@@ -117,7 +125,7 @@ public class PlayerManager {
                 } catch (Exception ignored) {}
             }
             //Finished Loading
-            getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,tokens,gems,pyrexPoints,rank,pickaxe,isArmorEquiped,armorMap,selectedGemstone,gemstoneCount,null));
+            getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,cachedName,tokens,gems,pyrexPoints,rank,pickaxe,isArmorEquiped,armorMap,selectedGemstone,gemstoneCount,null));
         }
     }
 

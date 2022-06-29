@@ -153,7 +153,7 @@ public class ArmorUpgradeGUI implements PyrexInventory {
         if (level < maxLevel) {
             lore.add(" ");
             lore.add(StringUtil.color("&7Upgrade: "+armor.getAbilties().get(abilityType).getLoreAddon() +" -> "+armor.getAbilties().get(abilityType).getLoreAddon(level+1)));
-            lore.add(StringUtil.color("&7Cost: &a"+ CurrencyType.getUnicode(CurrencyType.GEMS)+"&f"+cost));
+            lore.add(StringUtil.color("&7Cost: &a"+ CurrencyType.GEMS.getUnicode()+"&f"+cost));
             lore.add("");
             lore.add(StringUtil.color("&eClick to upgrade!"));
         } else {

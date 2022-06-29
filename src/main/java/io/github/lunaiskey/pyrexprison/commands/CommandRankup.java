@@ -23,6 +23,7 @@ public class CommandRankup implements CommandExecutor {
             Player p = (Player) sender;
             PyrexPlayer player = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId());
             Rankup rankup = new Rankup();
+            CurrencyType type = CurrencyType.TOKENS;
             if (args.length == 0) {
                 BigInteger cost = Rankup.getLevelCost(player.getRank()+1);
                 if (player.getRank() < Rankup.getMaxRankup()) {
@@ -33,7 +34,7 @@ public class CommandRankup implements CommandExecutor {
                         p.sendMessage(
                                 StringUtil.color("&b&lYou have ranked up to &f&l"+newLevel+"&b&l!"),
                                 StringUtil.color(" &3&l- &bNext Rankup: &f"+nextLevel),
-                                StringUtil.color(" &3&l- &bCost: "+CurrencyType.getColorCode(CurrencyType.TOKENS)+CurrencyType.getUnicode(CurrencyType.TOKENS)+"&f"+ Numbers.formattedNumber(Rankup.getLevelCost(nextLevel)))
+                                StringUtil.color(" &3&l- &bCost: "+type.getColorCode()+type.getUnicode()+"&f"+ Numbers.formattedNumber(Rankup.getLevelCost(nextLevel)))
                         );
                     } else {
                         p.sendMessage(StringUtil.color("&7You still need "+Numbers.formattedNumber(cost.subtract(player.getTokens()))+" to rankup."));
@@ -62,7 +63,7 @@ public class CommandRankup implements CommandExecutor {
                         p.sendMessage(
                                 StringUtil.color("&b&lYou have ranked up to &f&l"+player.getRank()+"&b&l!"),
                                 StringUtil.color(" &3&l- &bNext Rankup: &f"+(player.getRank()+1)),
-                                StringUtil.color(" &3&l- &bCost: "+CurrencyType.getColorCode(CurrencyType.TOKENS)+CurrencyType.getUnicode(CurrencyType.TOKENS)+"&f"+ Numbers.formattedNumber(Rankup.getLevelCost(player.getRank()+1)))
+                                StringUtil.color(" &3&l- &bCost: "+type.getColorCode()+type.getUnicode()+"&f"+ Numbers.formattedNumber(Rankup.getLevelCost(player.getRank()+1)))
                         );
                     } else {
                         p.sendMessage(StringUtil.color("&aYou've have maxed out your rank! Congratulations."));

@@ -102,7 +102,7 @@ public class PickaxeEnchantGUI {
                 lore.add(" ");
                 lore.add(StringUtil.color("&7Enchant is max level!"));
             } else {
-                lore.add(StringUtil.color("&7Cost: "+CurrencyType.getColorCode(currencyType)+ CurrencyType.getUnicode(currencyType)+"&f"+ Numbers.formattedNumber(enchant.getCostBetweenLevels(level,level+1))));
+                lore.add(StringUtil.color("&7Cost: "+currencyType.getColorCode()+currencyType.getUnicode()+"&f"+ Numbers.formattedNumber(enchant.getCostBetweenLevels(level,level+1))));
                 lore.add(StringUtil.color("&7Max Level: &f"+enchant.getMaxLevel()));
                 lore.add(" ");
                 lore.add(StringUtil.color("&eL-Click to purchase levels."));

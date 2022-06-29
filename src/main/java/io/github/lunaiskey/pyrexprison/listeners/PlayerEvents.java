@@ -11,6 +11,7 @@ import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.mines.inventories.*;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
 import io.github.lunaiskey.pyrexprison.pickaxe.*;
+import io.github.lunaiskey.pyrexprison.pickaxe.enchants.MineBomb;
 import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeAddLevelsGUI;
 import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeEnchantGUI;
 import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeEnchantToggleGUI;
@@ -161,6 +162,7 @@ public class PlayerEvents implements Listener {
         PyrexPrison.getPlugin().getSavePending().remove(e.getPlayer().getUniqueId());
         player.save();
         CommandPMine.getResetCooldown().remove(e.getPlayer().getUniqueId());
+        MineBomb.getCooldownMap().remove(e.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -272,31 +274,36 @@ public class PlayerEvents implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent e) {
         Player p = e.getPlayer();
-        if (e.getItem() != null && e.getItem().getType() != Material.AIR) {
-            if (NBTTags.hasCustomTagContainer(e.getItem(),"voucher")) {
-                Pair<CurrencyType, BigInteger> pair = NBTTags.getVoucherValue(e.getItem());
-                new Voucher(pair.getRight(),pair.getLeft()).onInteract(e);
+        ItemStack item = e.getItem();
+        if (item != null && item.getType() != Material.AIR) {
+            CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(e.getItem());
+            if (pyrexDataMap.contains("id")) {
+                // is custom pickaxe
+                if (pyrexDataMap.getString("id").equals(PickaxeHandler.getId())) {
+                    if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                        p.openInventory(new PickaxeEnchantGUI(p).getInv());
+                    }
+                }
+                try {
+                    ItemID itemID = ItemID.valueOf(pyrexDataMap.getString("id"));
+                    if (PyrexPrison.getPlugin().getItemManager().getItemMap().containsKey(itemID)) {
+                        PyrexPrison.getPlugin().getItemManager().getItemMap().get(itemID).onInteract(e);
+                        return;
+                    }
+                    //CompoundTag tag = NBTTags.getPyrexDataMap(e.getItem());
+                    switch (itemID) {
+                        case BOOSTER -> new BoosterItem(e.getItem()).onInteract(e);
+                        case VOUCHER -> {
+                            Pair<CurrencyType, BigInteger> pair = NBTTags.getVoucherValue(e.getItem());
+                            if (pair != null) {
+                                new Voucher(pair.getLeft(),pair.getRight()).onInteract(e);
+                            } else {
+                                new Voucher(null,null).onInteract(e);
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
             }
-        }
-        CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(e.getItem());
-        if (pyrexDataMap.contains("id")) {
-            // is custom pickaxe
-            if (pyrexDataMap.getString("id").equals(PickaxeHandler.getId())) {
-                if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                    p.openInventory(new PickaxeEnchantGUI(p).getInv());
-                }
-            }
-            try {
-                ItemID itemID = ItemID.valueOf(pyrexDataMap.getString("id"));
-                if (PyrexPrison.getPlugin().getItemManager().getItemMap().containsKey(itemID)) {
-                    PyrexPrison.getPlugin().getItemManager().getItemMap().get(itemID).onInteract(e);
-                    return;
-                }
-                CompoundTag tag = NBTTags.getPyrexDataMap(e.getItem());
-                if (itemID == ItemID.BOOSTER) {
-                    new BoosterItem(e.getItem()).onInteract(e);
-                }
-            } catch (Exception ignored) {}
         }
     }
 

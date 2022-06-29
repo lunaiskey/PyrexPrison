@@ -37,7 +37,7 @@ public class GemFinder extends PyrexEnchant {
     }
 
     @Override
-    public BigInteger getEquation(int n) {
+    public BigInteger getCost(int n) {
         return BigInteger.ZERO;
     }
 }

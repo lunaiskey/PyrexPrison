@@ -35,5 +35,6 @@ public class CommandManager {
         Bukkit.getPluginCommand("viewplayer").setExecutor(new CommandViewPlayer());
         Bukkit.getPluginCommand("rank").setExecutor(new CommandRank());
         Bukkit.getPluginCommand("resetpickaxe").setExecutor(new CommandResetPickaxe());
+        Bukkit.getPluginCommand("leaderboard").setExecutor(new CommandLeaderboard());
     }
 }

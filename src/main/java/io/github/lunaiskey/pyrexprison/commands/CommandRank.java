@@ -36,6 +36,10 @@ public class CommandRank implements CommandExecutor {
                         if (args.length >= 3) {
                             try {
                                 int rank = Integer.parseInt(args[2]);
+                                if (rank < 0) {
+                                    p.sendMessage(StringUtil.color("&cValue cannot be smaller then 0."));
+                                    return true;
+                                }
                                 PyrexPlayer otherPyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(otherPlayer.getUniqueId());
                                 otherPyrexPlayer.setRank(rank);
                                 p.sendMessage(StringUtil.color("&aSuccessfully set "+otherPlayer.getName()+"'s rank to "+rank+"."));

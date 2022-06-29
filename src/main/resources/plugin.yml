@@ -44,6 +44,11 @@ commands:
     usage: /<command>
     aliases:
       - boosters
+  leaderboard:
+    usage: /<command>
+    aliases:
+      - leaderboards
+      - lb
 permissions:
   pyrex.*:
     description: Gives access to every command.

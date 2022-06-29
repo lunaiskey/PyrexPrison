@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.commands;
 
+import io.github.lunaiskey.pyrexprison.Messages;
 import io.github.lunaiskey.pyrexprison.items.pyrexitems.BoosterItem;
 import io.github.lunaiskey.pyrexprison.player.boosters.BoosterType;
 import io.github.lunaiskey.pyrexprison.player.inventories.PersonalBoosterGUI;
@@ -76,7 +77,7 @@ public class CommandBooster implements CommandExecutor {
                     return true;
                 }
             } else {
-                sender.sendMessage(StringUtil.color("&cNo Permission."));
+                sender.sendMessage(Messages.NO_PERMISSION.getText());
             }
         }
         return true;

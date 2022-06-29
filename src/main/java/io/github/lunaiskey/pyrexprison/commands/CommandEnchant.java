@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.commands;
 
+import io.github.lunaiskey.pyrexprison.Messages;
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
 import io.github.lunaiskey.pyrexprison.pickaxe.EnchantType;
@@ -61,7 +62,7 @@ public class CommandEnchant implements CommandExecutor {
                     }
                 }
             } else {
-                p.sendMessage(StringUtil.color("&cNo Permission."));
+                p.sendMessage(Messages.NO_PERMISSION.getText());
             }
         }
         return true;

@@ -66,7 +66,7 @@ public class JackHammer extends PyrexEnchant {
     }
 
     @Override
-    public BigInteger getEquation(int n) {
+    public BigInteger getCost(int n) {
         //return BigInteger.valueOf(2000+(1500L*n));
         return BigInteger.valueOf(8000+(25000L*n));
     }

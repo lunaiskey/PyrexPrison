@@ -2,6 +2,7 @@ package io.github.lunaiskey.pyrexprison;
 
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.items.ItemManager;
+import io.github.lunaiskey.pyrexprison.leaderboards.LeaderboardStorage;
 import io.github.lunaiskey.pyrexprison.listeners.PlayerEvents;
 import io.github.lunaiskey.pyrexprison.mines.PMineManager;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
@@ -24,6 +25,7 @@ public final class PyrexPrison extends JavaPlugin {
     private PlayerManager playerManager;
     private PickaxeHandler pickaxeHandler;
     private ItemManager itemManager;
+    private LeaderboardStorage leaderboardStorage;
     private Random rand = new Random();
     private final Set<UUID> savePending = new HashSet<>();
 
@@ -44,6 +46,7 @@ public final class PyrexPrison extends JavaPlugin {
         playerManager = new PlayerManager();
         pickaxeHandler = new PickaxeHandler();
         itemManager = new ItemManager();
+        leaderboardStorage = new LeaderboardStorage();
 
         playerManager.loadPlayers();
         pmineManager.loadPMines();
@@ -52,6 +55,7 @@ public final class PyrexPrison extends JavaPlugin {
         new Boosters().scheduleTask();
 
         checkPlayerData();
+        leaderboardStorage.startTasks();
         buffSave();
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -60,7 +64,6 @@ public final class PyrexPrison extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PlayerEvents(this),this);
         this.getLogger().info("version " + getDescription().getVersion() + " enabled!");
-
 
     }
 
@@ -169,5 +172,7 @@ public final class PyrexPrison extends JavaPlugin {
         return savePending;
     }
 
-
+    public LeaderboardStorage getLeaderboardStorage() {
+        return leaderboardStorage;
+    }
 }

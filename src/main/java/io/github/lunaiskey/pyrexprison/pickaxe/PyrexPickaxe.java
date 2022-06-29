@@ -53,40 +53,9 @@ public class PyrexPickaxe {
 
     public ItemStack getItemStack() {
         ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
-        CompoundTag tag = NBTTags.getPyrexDataMap(item);
-        tag.putString("id","PYREX_PICKAXE");
-        item = NBTTags.addCustomTagContainer(item,"PyrexData",tag);
+        item = NBTTags.addPyrexData(item,"id",PickaxeHandler.getId());
         return PyrexPrison.getPlugin().getPickaxeHandler().updatePickaxe(item,player);
     }
-
-    /*
-    public ItemStack getItemStack() {
-        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
-        CompoundTag tag = NBTTags.getPyrexDataMap(item);
-        tag.putString("id",PickaxeHandler.getId());
-        item = NBTTags.addCustomTagContainer(item,"PyrexData",tag);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(StringUtil.color("&dYour Pickaxe"));
-        List<String> lore = new ArrayList<>();
-        lore.add(" ");
-        lore.add(StringUtil.color("&d&lEnchants"));
-        for (EnchantType enchantType : EnchantType.getSortedSet()) {
-            PyrexEnchant pyrexEnchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(enchantType);
-            if (enchants.containsKey(enchantType) && enchants.get(enchantType) > 0) {
-                lore.add(StringUtil.color("&d&l| &f"+pyrexEnchant.getName()+" "+enchants.get(enchantType)));
-                if (enchantType == EnchantType.EFFICIENCY) {
-                    meta.addEnchant(Enchantment.DIG_SPEED,enchants.get(enchantType),true);
-                }
-            }
-        }
-        meta.setLore(lore);
-        meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS,ItemFlag.HIDE_ATTRIBUTES,ItemFlag.HIDE_UNBREAKABLE);
-        item.setItemMeta(meta);
-        return item;
-    }
-
-     */
 
     public long getBlocksBroken() {
         return blocksBroken;

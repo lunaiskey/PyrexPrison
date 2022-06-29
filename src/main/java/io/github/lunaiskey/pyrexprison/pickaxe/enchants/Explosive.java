@@ -72,7 +72,7 @@ public class Explosive extends PyrexEnchant {
     }
 
     @Override
-    public BigInteger getEquation(int n) {
+    public BigInteger getCost(int n) {
         return BigInteger.valueOf(8000+(25000L*n));
     }
 

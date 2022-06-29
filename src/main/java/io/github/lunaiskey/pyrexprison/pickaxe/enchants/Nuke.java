@@ -32,7 +32,7 @@ public class Nuke extends PyrexEnchant {
             long blocks = mine.getArea()-mine.getBlocksBroken();
             PyrexPrison.getPlugin().getPlayerManager().payForBlocks(e.getPlayer(),blocks);
             mine.reset();
-            p.sendMessage(StringUtil.color("&b&lNuke has been activated the mine!"));
+            p.sendMessage(StringUtil.color("&b&lYou have activated nuke in this mine!"));
         }
     }
 
@@ -52,7 +52,7 @@ public class Nuke extends PyrexEnchant {
     }
 
     @Override
-    public BigInteger getEquation(int n) {
+    public BigInteger getCost(int n) {
         return BigInteger.valueOf(50000L+(75000L*n));
     }
 

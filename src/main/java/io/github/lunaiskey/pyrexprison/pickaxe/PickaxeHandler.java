@@ -19,7 +19,7 @@ import java.util.*;
 public class PickaxeHandler {
 
     private static final String id = "PYREX_PICKAXE";
-    private Map<EnchantType,PyrexEnchant> enchantments = new HashMap<>();
+    private final Map<EnchantType,PyrexEnchant> enchantments = new HashMap<>();
 
     public PickaxeHandler() {
         registerEnchants();
