@@ -29,7 +29,7 @@ public class PyrexPlayer {
     private long pyrexPoints;
     private int rank;
     private final UUID pUUID;
-    private final String name;
+    private String name;
     private PyrexPickaxe pickaxe;
     private final Map<ArmorType,Armor> armor;
     private boolean isArmorEquiped;
@@ -141,6 +141,10 @@ public class PyrexPlayer {
 
     public void setPyrexPoints(long pyrexPoints) {
         this.pyrexPoints = pyrexPoints;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setRank(int rank) {

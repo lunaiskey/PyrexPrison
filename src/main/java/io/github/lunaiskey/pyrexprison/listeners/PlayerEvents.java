@@ -6,6 +6,7 @@ import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.items.ItemID;
 import io.github.lunaiskey.pyrexprison.items.pyrexitems.BoosterItem;
 import io.github.lunaiskey.pyrexprison.items.pyrexitems.Voucher;
+import io.github.lunaiskey.pyrexprison.leaderboards.LeaderboardGUI;
 import io.github.lunaiskey.pyrexprison.mines.*;
 import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
 import io.github.lunaiskey.pyrexprison.mines.inventories.*;
@@ -144,6 +145,11 @@ public class PlayerEvents implements Listener {
         Map<UUID, PyrexPlayer> playerMap = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap();
         if (!playerMap.containsKey(p.getUniqueId())) {
             PyrexPrison.getPlugin().getPlayerManager().createPyrexPlayer(p.getUniqueId());
+        } else {
+            PyrexPlayer pyrexPlayer = playerMap.get(p.getUniqueId());
+            if (!pyrexPlayer.getName().equals(p.getName())) {
+                pyrexPlayer.setName(p.getName());
+            }
         }
         PMine mine = PyrexPrison.getPlugin().getPmineManager().getPMine(p.getUniqueId());
         if (mine == null) {
@@ -226,6 +232,7 @@ public class PlayerEvents implements Listener {
                     case PMINE_PUBLIC_MINES -> new PMinePublicGUI().onClick(e);
                     case PMINE_SETTINGS -> new PMineSettingsGUI(p).onClick(e);
                     case PLAYER_MENU -> new PlayerMenuGUI().onClick(e);
+                    case LEADERBOARD -> new LeaderboardGUI().onClick(e);
                 }
             }
             if (e.getView().getType() == InventoryType.CRAFTING) {

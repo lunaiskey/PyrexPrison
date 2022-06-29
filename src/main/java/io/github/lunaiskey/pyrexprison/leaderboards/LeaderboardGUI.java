@@ -30,9 +30,9 @@ public class LeaderboardGUI implements PyrexInventory {
     public void init() {
         for (int i = 0;i<size;i++) {
             switch (i) {
-                case 11 -> inv.setItem(i,getTokenTop());
-                case 12 -> inv.setItem(i,getGemsTop());
-                case 13 -> inv.setItem(i,getRankTop());
+                case 12 -> inv.setItem(i,getTokenTop());
+                case 13 -> inv.setItem(i,getGemsTop());
+                case 14 -> inv.setItem(i,getRankTop());
                 default -> inv.setItem(i, ItemBuilder.getDefaultFiller());
             }
         }
@@ -46,47 +46,47 @@ public class LeaderboardGUI implements PyrexInventory {
 
     @Override
     public void onClick(InventoryClickEvent e) {
-
+        e.setCancelled(true);
     }
 
     public ItemStack getTokenTop() {
         List<String> lore = new ArrayList<>();
-        for (int i = 1;i<6;i++) {
+        for (int i = 0;i<5;i++) {
             BigIntegerEntry entry;
             if (i < tokenTop.size()) {
                 entry = tokenTop.get(i);
             } else {
                 entry = new BigIntegerEntry(null,"Empty", BigInteger.ZERO);
             }
-            lore.add(StringUtil.color(i+". "+entry.getName()+" - "+ Numbers.formattedNumber(entry.getValue())));
+            lore.add(StringUtil.color("&7"+(i+1)+". &f"+entry.getName()+"&7 - &f"+ Numbers.formattedNumber(entry.getValue())));
         }
         return ItemBuilder.createItem("&eToken Top", Material.SUNFLOWER,lore);
     }
 
     public ItemStack getGemsTop() {
         List<String> lore = new ArrayList<>();
-        for (int i = 1;i<6;i++) {
+        for (int i = 0;i<5;i++) {
             LongEntry entry;
             if (i < gemsTop.size()) {
                 entry = gemsTop.get(i);
             } else {
                 entry = new LongEntry(null,"Empty", 0);
             }
-            lore.add(StringUtil.color(i+". "+entry.getName()+" - "+ Numbers.formattedNumber(entry.getValue())));
+            lore.add(StringUtil.color("&7"+(i+1)+". &f"+entry.getName()+"&7 - &f"+ Numbers.formattedNumber(entry.getValue())));
         }
         return ItemBuilder.createItem("&aGems Top", Material.EMERALD,lore);
     }
 
     public ItemStack getRankTop() {
         List<String> lore = new ArrayList<>();
-        for (int i = 1;i<6;i++) {
+        for (int i = 0;i<5;i++) {
             LongEntry entry;
             if (i < rankTop.size()) {
                 entry = rankTop.get(i);
             } else {
                 entry = new LongEntry(null,"Empty", 0);
             }
-            lore.add(StringUtil.color(i+". "+entry.getName()+" - "+ Numbers.formattedNumber(entry.getValue())));
+            lore.add(StringUtil.color("&7"+(i+1)+". &f"+entry.getName()+"&7 - &f"+ Numbers.formattedNumber(entry.getValue())));
         }
         return ItemBuilder.createItem("&bRank Top", Material.PAPER,lore);
     }
