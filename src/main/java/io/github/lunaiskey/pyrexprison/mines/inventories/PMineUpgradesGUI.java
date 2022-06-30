@@ -28,24 +28,25 @@ public class PMineUpgradesGUI implements PyrexInventory {
     private final Player player;
     private final String name = "Upgrades";
     private final int size = 36;
-    private final PyrexPlayer pyrexPlayer;
     private final PMine mine;
     private final Map<PMineUpgradeType,PMineUpgrade> upgradeMap = PMineUpgradeType.getUpgradeMap();
     private final Map<PMineUpgradeType,Integer> upgradeLevelMap;
     private static Set<UUID> pendingSizeReset = new HashSet<>();
 
-    private final Map<Integer, PMineUpgradeType> typeMap = new HashMap<>();
+    private static final Map<Integer, PMineUpgradeType> typeMap = new HashMap<>();
 
     private Inventory inv = new PyrexHolder(name,size, PyrexInvType.PMINE_UPGRADES).getInventory();
 
+    static {
+        typeMap.put(20,PMineUpgradeType.SIZE);
+        //typeMap.put(22,PMineUpgradeType.SELL_PRICE);
+        //typeMap.put(24,PMineUpgradeType.MAX_PLAYERS);
+    }
+
     public PMineUpgradesGUI(Player player) {
         this.player = player;
-        this.pyrexPlayer = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(player.getUniqueId());
         this.mine = PyrexPrison.getPlugin().getPmineManager().getPMine(player.getUniqueId());
         this.upgradeLevelMap = mine.getUpgradeMap();
-        typeMap.put(20,PMineUpgradeType.SIZE);
-        typeMap.put(22,PMineUpgradeType.SELL_PRICE);
-        typeMap.put(24,PMineUpgradeType.MAX_PLAYERS);
     }
 
     @Override
@@ -53,7 +54,13 @@ public class PMineUpgradesGUI implements PyrexInventory {
         for (int i = 0;i<size;i++) {
             switch (i) {
                 case 13 -> inv.setItem(i,getPlayerSkull(player));
-                case 20,22,24 -> inv.setItem(i,getUpgradeIcon(typeMap.get(i)));
+                case 20,22,24 -> {
+                    if (typeMap.containsKey(i)) {
+                        inv.setItem(i,getUpgradeIcon(typeMap.get(i)));
+                    } else {
+                        inv.setItem(i,getComingSoon());
+                    }
+                }
                 case 0,9,18,27,8,17,26,35 -> inv.setItem(i, ItemBuilder.createItem(" ",Material.PURPLE_STAINED_GLASS_PANE,null));
                 default -> inv.setItem(i, ItemBuilder.createItem(" ",Material.BLACK_STAINED_GLASS_PANE,null));
             }
@@ -96,53 +103,41 @@ public class PMineUpgradesGUI implements PyrexInventory {
                         p.sendMessage(StringUtil.color("You can't afford this upgrade."));
                     }
                 } else {
-                    p.sendMessage(StringUtil.color("You've already maxed out this upgrade."));
+                    //p.sendMessage(StringUtil.color("You've already maxed out this upgrade."));
                 }
             }
-            case 22,24 -> p.sendMessage(StringUtil.color("&cThis upgrade is currently unavailable."));
+            //case 22,24 -> p.sendMessage(StringUtil.color("&cThis upgrade is currently unavailable."));
         }
+    }
+
+    private ItemStack getComingSoon() {
+        return ItemBuilder.createItem("&c&lCOMING SOON",Material.BEDROCK,null);
     }
 
     private ItemStack getUpgradeIcon(PMineUpgradeType type) {
         CurrencyType currencyType = CurrencyType.GEMS;
-        ItemStack item = new ItemStack(getMaterial(type));
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(StringUtil.color(getName(type)));
-        List<String> lore = new ArrayList<>();
-
         PMineUpgrade upgrade = PMineUpgradeType.getUpgradeMap().get(type);
         int level = upgradeLevelMap.get(type);
+        List<String> lore = new ArrayList<>();
         for (String desc : upgrade.getDescription()) {
             lore.add(StringUtil.color("&7"+desc));
+            lore.add(" ");
         }
-        lore.add(" ");
-        lore.add(StringUtil.color("&7Upgrade: &b"+upgrade.getUpgradeLore(level+1)));
-        lore.add(StringUtil.color("&7Cost: &a"+currencyType.getUnicode()+"&f"+(upgrade.getCost(level+1))));
-        lore.add(" ");
-        lore.add(StringUtil.color("&eClick to upgrade!"));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
+        if (level < upgrade.getMaxLevel()) {
+            lore.add(StringUtil.color("&7Upgrade: &b"+upgrade.getUpgradeLore(level+1)));
+            lore.add(StringUtil.color("&7Cost: &a"+currencyType.getUnicode()+"&f"+(upgrade.getCost(level+1))));
+            lore.add(" ");
+            lore.add(StringUtil.color("&eClick to upgrade!"));
+        } else {
+            lore.add(StringUtil.color("&7Current: &b"+upgrade.getUpgradeLore(level)));
+            lore.add(" ");
+            lore.add(StringUtil.color("&cYou've maxed this upgrade!"));
+        }
+        return ItemBuilder.createItem(type.getName(),type.getMaterial(),lore);
     }
 
     private ItemStack getPlayerSkull(Player p) {
         ItemStack item = ItemBuilder.getPlayerSkull(p);
         return item;
-    }
-
-    private Material getMaterial(PMineUpgradeType type) {
-        return switch (type) {
-            case SIZE -> Material.CHEST;
-            case SELL_PRICE -> Material.SUNFLOWER;
-            case MAX_PLAYERS -> Material.PLAYER_HEAD;
-        };
-    }
-
-    private String getName(PMineUpgradeType type) {
-        return switch (type) {
-            case SIZE -> "&eSize";
-            case SELL_PRICE -> "&eSell Price";
-            case MAX_PLAYERS -> "&eMax Players";
-        };
     }
 }

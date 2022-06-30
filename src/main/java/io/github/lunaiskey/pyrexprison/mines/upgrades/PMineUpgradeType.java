@@ -3,6 +3,7 @@ package io.github.lunaiskey.pyrexprison.mines.upgrades;
 import io.github.lunaiskey.pyrexprison.mines.upgrades.upgrades.MaxPlayers;
 import io.github.lunaiskey.pyrexprison.mines.upgrades.upgrades.SellPrice;
 import io.github.lunaiskey.pyrexprison.mines.upgrades.upgrades.Size;
+import org.bukkit.Material;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,5 +24,21 @@ public enum PMineUpgradeType {
 
     public static Map<PMineUpgradeType, PMineUpgrade> getUpgradeMap() {
         return upgradeMap;
+    }
+
+    public Material getMaterial() {
+        return switch (this) {
+            case SIZE -> Material.CHEST;
+            case SELL_PRICE -> Material.SUNFLOWER;
+            case MAX_PLAYERS -> Material.PLAYER_HEAD;
+        };
+    }
+
+    public String getName() {
+        return switch (this) {
+            case SIZE -> "&eSize";
+            case SELL_PRICE -> "&eSell Price";
+            case MAX_PLAYERS -> "&eMax Players";
+        };
     }
 }

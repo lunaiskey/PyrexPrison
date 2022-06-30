@@ -41,7 +41,7 @@ public class NBTTags {
         CompoundTag voucherTag = new CompoundTag();
         voucherTag.putString("type",type.name());
         voucherTag.putString("amount",amount.toString());
-        return addPyrexData(item,"voucher",voucherTag);
+        return addPyrexData(item,"voucherData",voucherTag);
     }
 
     public static Pair<CurrencyType,BigInteger> getVoucherValue(ItemStack item) {

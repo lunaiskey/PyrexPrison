@@ -1,6 +1,7 @@
-package io.github.lunaiskey.pyrexprison.player;
+package io.github.lunaiskey.pyrexprison.player.rankup;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
+import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.entity.Player;
 
@@ -12,7 +13,6 @@ import java.util.List;
 
 public class Rankup {
 
-    private static final List<Long> cost = new ArrayList<>();
     private static final int maxRankup = 10000;
 
     public int rankup(Player p) {
@@ -34,7 +34,7 @@ public class Rankup {
         if (level <= 500) {
             return BigDecimal.valueOf(25000).multiply(BigDecimal.valueOf(Math.pow(1.025,level-1))).toBigInteger();
         } else {
-            return BigDecimal.valueOf(25000).multiply(BigDecimal.valueOf(Math.pow(1.01,level-1+750))).toBigInteger();
+            return BigDecimal.valueOf(25000).multiply(BigDecimal.valueOf(Math.pow(1.01,level-1+740))).toBigInteger();
         }
     }
 

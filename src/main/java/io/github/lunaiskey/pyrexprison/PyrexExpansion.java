@@ -1,11 +1,9 @@
 package io.github.lunaiskey.pyrexprison;
 
-import io.github.lunaiskey.pyrexprison.player.Currency;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
-import io.github.lunaiskey.pyrexprison.player.Rankup;
+import io.github.lunaiskey.pyrexprison.player.rankup.Rankup;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
-import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;

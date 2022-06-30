@@ -139,6 +139,8 @@ public final class PyrexPrison extends JavaPlugin {
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!playerManager.getPlayerMap().containsKey(p.getUniqueId())) {
                 playerManager.createPyrexPlayer(p.getUniqueId());
+            } else {
+                playerManager.getPlayerMap().get(p.getUniqueId()).setName(p.getName());
             }
             if (PyrexPrison.getPlugin().getPmineManager().getPMine(p.getUniqueId()) == null) {
                 pmineManager.newPMine(p.getUniqueId());

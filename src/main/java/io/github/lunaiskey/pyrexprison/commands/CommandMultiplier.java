@@ -2,7 +2,6 @@ package io.github.lunaiskey.pyrexprison.commands;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
-import io.github.lunaiskey.pyrexprison.player.Rankup;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.command.Command;

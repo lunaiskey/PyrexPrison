@@ -22,10 +22,6 @@ public class LeaderboardGUI implements PyrexInventory {
     private final int size = 27;
     private Inventory inv = new PyrexHolder(name,size, PyrexInvType.LEADERBOARD).getInventory();
 
-    private static ArrayList<BigIntegerEntry> tokenTop = new ArrayList<>(PyrexPrison.getPlugin().getLeaderboardStorage().getTokenTopCache().values());
-    private static ArrayList<LongEntry> gemsTop = new ArrayList<>(PyrexPrison.getPlugin().getLeaderboardStorage().getGemsTopCache().values());
-    private static ArrayList<LongEntry> rankTop = new ArrayList<>(PyrexPrison.getPlugin().getLeaderboardStorage().getRankTopCache().values());
-
     @Override
     public void init() {
         for (int i = 0;i<size;i++) {
@@ -50,6 +46,7 @@ public class LeaderboardGUI implements PyrexInventory {
     }
 
     public ItemStack getTokenTop() {
+        ArrayList<BigIntegerEntry> tokenTop = new ArrayList<>(PyrexPrison.getPlugin().getLeaderboardStorage().getTokenTopCache().values());
         List<String> lore = new ArrayList<>();
         for (int i = 0;i<5;i++) {
             BigIntegerEntry entry;
@@ -64,6 +61,7 @@ public class LeaderboardGUI implements PyrexInventory {
     }
 
     public ItemStack getGemsTop() {
+        ArrayList<LongEntry> gemsTop = new ArrayList<>(PyrexPrison.getPlugin().getLeaderboardStorage().getGemsTopCache().values());
         List<String> lore = new ArrayList<>();
         for (int i = 0;i<5;i++) {
             LongEntry entry;
@@ -78,6 +76,7 @@ public class LeaderboardGUI implements PyrexInventory {
     }
 
     public ItemStack getRankTop() {
+        ArrayList<LongEntry> rankTop = new ArrayList<>(PyrexPrison.getPlugin().getLeaderboardStorage().getRankTopCache().values());
         List<String> lore = new ArrayList<>();
         for (int i = 0;i<5;i++) {
             LongEntry entry;
