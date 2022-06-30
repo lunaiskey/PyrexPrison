@@ -3,6 +3,7 @@ package io.github.lunaiskey.pyrexprison.gui;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.jetbrains.annotations.NotNull;
 
 public class PyrexHolder implements InventoryHolder {
 
@@ -15,7 +16,7 @@ public class PyrexHolder implements InventoryHolder {
     }
 
     @Override
-    public Inventory getInventory() {
+    public @NotNull Inventory getInventory() {
         return inventory;
     }
 

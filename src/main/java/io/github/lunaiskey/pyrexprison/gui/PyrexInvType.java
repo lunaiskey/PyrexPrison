@@ -15,7 +15,7 @@ public enum PyrexInvType {
     GEMSTONES,
     VIEW_PLAYER,
     PLAYER_MENU,
-    LEADERBOARD,
+    LEADERBOARDS,
     ;
 
 }

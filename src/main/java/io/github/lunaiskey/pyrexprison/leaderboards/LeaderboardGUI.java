@@ -20,7 +20,7 @@ public class LeaderboardGUI implements PyrexInventory {
 
     private final String name = "Leaderboard";
     private final int size = 27;
-    private Inventory inv = new PyrexHolder(name,size, PyrexInvType.LEADERBOARD).getInventory();
+    private Inventory inv = new PyrexHolder(name,size, PyrexInvType.LEADERBOARDS).getInventory();
 
     @Override
     public void init() {

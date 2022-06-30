@@ -232,7 +232,7 @@ public class PlayerEvents implements Listener {
                     case PMINE_PUBLIC_MINES -> new PMinePublicGUI().onClick(e);
                     case PMINE_SETTINGS -> new PMineSettingsGUI(p).onClick(e);
                     case PLAYER_MENU -> new PlayerMenuGUI().onClick(e);
-                    case LEADERBOARD -> new LeaderboardGUI().onClick(e);
+                    case LEADERBOARDS -> new LeaderboardGUI().onClick(e);
                 }
             }
             if (e.getView().getType() == InventoryType.CRAFTING) {
