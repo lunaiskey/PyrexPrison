@@ -70,7 +70,6 @@ public class GemStone extends PyrexItem {
             default -> 0;
         };
     }
-
     @Override
     public String getName() {
         String name = WordUtils.capitalizeFully(getItemID().name().substring(0,getItemID().name().length()-9));
