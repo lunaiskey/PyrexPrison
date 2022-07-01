@@ -1,5 +1,7 @@
 package io.github.lunaiskey.pyrexprison;
 
+import io.github.lunaiskey.pyrexprison.gangs.Gang;
+import io.github.lunaiskey.pyrexprison.gangs.GangManager;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.items.ItemManager;
 import io.github.lunaiskey.pyrexprison.leaderboards.LeaderboardStorage;
@@ -22,6 +24,7 @@ public final class PyrexPrison extends JavaPlugin {
 
     private static PyrexPrison plugin;
     private PMineManager pmineManager;
+    private GangManager gangManager;
     private PlayerManager playerManager;
     private PickaxeHandler pickaxeHandler;
     private ItemManager itemManager;
@@ -50,6 +53,7 @@ public final class PyrexPrison extends JavaPlugin {
 
         playerManager.loadPlayers();
         pmineManager.loadPMines();
+        gangManager.loadGangs();
         itemManager.registerItems();
         new CommandManager().registerCommands();
         new Boosters().scheduleTask();
@@ -153,6 +157,8 @@ public final class PyrexPrison extends JavaPlugin {
     public PMineManager getPmineManager() {
         return pmineManager;
     }
+
+    public GangManager getGangManager() { return gangManager;}
 
     public PlayerManager getPlayerManager() {
         return playerManager;
