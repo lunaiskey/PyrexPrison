@@ -17,7 +17,7 @@ public class CommandGang implements CommandExecutor {
 
     private PyrexPrison plugin;
     private Logger log;
-    private final boolean debug = false;
+    //private final boolean debug = false; //
 
     public CommandGang(PyrexPrison plugin) {
         this.plugin = plugin;
@@ -28,22 +28,6 @@ public class CommandGang implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
-            if (args.length == 2){
-                switch (args[0].toLowerCase()){
-                    //gang create <name>
-                    case "create":
-                        if (!GangManager.getGangsMap().containsKey(p.getUniqueId())) {
-                            if (!args[1].contains(" ")) {
-                                    GangManager.newGang(p.getUniqueId(), args[1]);
-                            }
-                        }
-                    case "delete":
-                        if (GangManager.getGangsMap().containsKey(p.getUniqueId())){
-
-                        }
-
-                }
-            }
         }
         return true;
     }

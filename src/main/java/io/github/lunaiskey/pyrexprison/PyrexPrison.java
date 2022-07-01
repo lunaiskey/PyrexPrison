@@ -24,10 +24,10 @@ public final class PyrexPrison extends JavaPlugin {
 
     private static PyrexPrison plugin;
     private PMineManager pmineManager;
-    private GangManager gangManager;
     private PlayerManager playerManager;
     private PickaxeHandler pickaxeHandler;
     private ItemManager itemManager;
+    private GangManager gangManager;
     private LeaderboardStorage leaderboardStorage;
     private Random rand = new Random();
     private final Set<UUID> savePending = new HashSet<>();
@@ -50,6 +50,7 @@ public final class PyrexPrison extends JavaPlugin {
         pickaxeHandler = new PickaxeHandler();
         itemManager = new ItemManager();
         leaderboardStorage = new LeaderboardStorage();
+        gangManager = new GangManager();
 
         playerManager.loadPlayers();
         pmineManager.loadPMines();

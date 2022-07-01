@@ -15,71 +15,54 @@ import java.util.*;
 
 public class GangManager {
 
-    private static Map<UUID, Gang> gangsMap = new HashMap<>();
-    private List<Gang> trophyTop = new ArrayList<>();
-    private static Set<Gang> activeGangs = new HashSet<>();
+    private Map<UUID, Gang> gangsMap = new HashMap<>();
+    private Map<String, UUID> gangNameMap = new HashMap<>();
 
-    //This isn't done
+    private Map<UUID, UUID> playerGangMap = new HashMap<>();
+    private List<Gang> trophyTop = new ArrayList<>();
+
     public void loadGangs(){
-        File[] gangFiles = new File(PyrexPrison.getPlugin().getDataFolder(), "gangs").listFiles(new GangManager.IsGangFile());
+        File[] gangFiles = new File(PyrexPrison.getPlugin().getDataFolder(), "gangs").listFiles(new IsGangFile());
         assert gangFiles != null;
 
         for (File file : gangFiles){
             FileConfiguration fileConf = YamlConfiguration.loadConfiguration(file);
-            Map<String,Object> gangMap = fileConf.getConfigurationSection("gang").getValues(false);
-            int ID = Integer.parseInt(file.getName().replace(".yml", ""));
-            UUID owner = UUID.fromString(String.valueOf(gangMap.get("owner")));
-            String name = gangMap.get("name").toString();
-            Set<UUID> coOwners = Collections.singleton(UUID.fromString(String.valueOf(gangMap.get("coOwners"))));
-            Set<UUID> mods = Collections.singleton(UUID.fromString(String.valueOf(gangMap.get("mods"))));
-            Set<UUID> members = Collections.singleton(UUID.fromString(String.valueOf(gangMap.get("members"))));
-            BigInteger trophies = (BigInteger) gangMap.get("trophies");
+            Map<String,Object> gangMap = fileConf.getConfigurationSection("gangData").getValues(false);
+            Map<String,Object> rawMemberMap = fileConf.getConfigurationSection("members").getValues(false);
+            Map<UUID,GangRankType> memberMap = new LinkedHashMap<>();
 
-            newGang(owner, name, coOwners, mods, members, trophies, ID);
+            UUID gangUUID = UUID.fromString(file.getName().replace(".yml",""));
+            UUID owner = UUID.fromString((String) gangMap.get("uuid"));
+            String name = (String) gangMap.get("name");
+
+            for (String str : rawMemberMap.keySet()) {
+                try {
+                    UUID memberUUID = UUID.fromString(str);
+                    GangRankType rankType = GangRankType.valueOf((String) rawMemberMap.get(str));
+                    memberMap.put(memberUUID,rankType);
+                } catch (Exception ignored) {}
+            }
+
+            long trophies = (long) gangMap.get("trophies");
+            new Gang(gangUUID, owner, name, memberMap, trophies);
         }
         trophyTop = getTrophyTop();
     }
 
-    public static Map<UUID, Gang> getGangsMap(){
-        return gangsMap;
-    }
-    public static Set<Gang> getActiveGangs(){
-        return activeGangs;
-    }
-
-
-    //This might work?
-    public static List<Gang> getTrophyTop(){
-        Map<UUID, PyrexPlayer> playerMap = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap();
-        List<Gang> sortedList = new ArrayList<>(activeGangs);
-        sortedList.sort(Collections.reverseOrder(Comparator.comparing(o -> gangsMap.get(o).getTrophies())));
+    public List<Gang> getTrophyTop(){
+        List<Gang> sortedList = new ArrayList<>(gangsMap.values());
+        sortedList.sort(Collections.reverseOrder(Comparator.comparingLong(Gang::getTrophies)));
         return sortedList;
     }
 
-
-    public static void newGang(UUID owner, String name ){
-        if (!gangsMap.containsKey(owner)){
-            Gang nGang = new Gang(owner, name);
-            gangsMap.put(owner, nGang);
-            activeGangs.add(nGang);
-        }
-    }
-    public static void newGang(UUID owner, String name, Set<UUID> gCoOwners, Set<UUID> gMods,
-                        Set<UUID> gMembers, BigInteger gTrophies, int gID){
-        if (!gangsMap.containsKey(owner)){
-            Gang nGang = new Gang(owner, name, gCoOwners, gMods, gMembers, gTrophies, gID);
-            gangsMap.put(owner, nGang);
-            activeGangs.add(nGang);
-        }
-
+    public void addGang(UUID uuid, UUID owner, String name, Map<UUID,GangRankType> members, long trophies) {
+        gangsMap.put(uuid,new Gang(uuid,owner,name,members,trophies));
+        gangNameMap.put(name,uuid);
     }
 
-
-    public void deleteGang(UUID owner){
-        gangsMap.remove(owner);
-        activeGangs.remove(gangsMap.get(owner));
+    public void addGang(UUID uuid, UUID owner, String name) {
+        addGang(uuid,owner,name,new LinkedHashMap<>(),0);
     }
-
     public static class IsGangFile implements FilenameFilter {
         public boolean accept(File file, String s) {
             return s.contains(".yml");
