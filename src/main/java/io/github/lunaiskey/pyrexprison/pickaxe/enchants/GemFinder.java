@@ -2,6 +2,7 @@ package io.github.lunaiskey.pyrexprison.pickaxe.enchants;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
 import io.github.lunaiskey.pyrexprison.items.ItemID;
+import io.github.lunaiskey.pyrexprison.items.PyrexItem;
 import io.github.lunaiskey.pyrexprison.items.pyrexitems.GemStone;
 import io.github.lunaiskey.pyrexprison.pickaxe.PyrexEnchant;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
@@ -26,11 +27,16 @@ public class GemFinder extends PyrexEnchant {
         Random rand = PyrexPrison.getPlugin().getRand();
         double roll = rand.nextDouble();
         if (roll*100 <= getChance(level)) {
-            int gemNum;
-            ItemID id;
-            gemNum = (int) (Math.random() * (level / 100)) + 1;
-            GemStone gem = getStone(gemNum);
-            player.getInventory().addItem(gem.getItemStack());
+            if (level > getMaxLevel()) {
+                level = getMaxLevel();
+            }
+            int j = getMaxLevel()/10;
+            int gemNum = rand.nextInt((((level-1)-((level-1) % j))/j)+1)+1;
+            //int gemNum = (int) (Math.random() * (level / 100)) + 1;
+            PyrexItem gemstone =  PyrexPrison.getPlugin().getItemManager().getItemMap().get(getGemstone(gemNum));
+            ItemStack gemstoneItem = gemstone.getItemStack();
+            player.getInventory().addItem(gemstoneItem);
+            //player.sendMessage("GEM_FINDER: "+gemstone.getItemID());
         }
         //PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).giveGems(0);
     }
@@ -56,28 +62,26 @@ public class GemFinder extends PyrexEnchant {
 
     @Override
     public BigInteger getCost(int n) {
-        if (n <= 50) {
+        if (n <= 500) {
             return BigInteger.valueOf(12500+(12500L*(n)));
-        } else if (n <= 100){
-            return getCost(50).add(BigInteger.valueOf(25000+(25000L*(n-50))));
         } else {
-            return getCost(100).add(BigInteger.valueOf(50000+(50000L*(n-100))));
+            return getCost(500).add(BigInteger.valueOf(25000+(25000L*(n-500))));
         }
     }
 
-    public GemStone getStone(int num){
+    public ItemID getGemstone(int num){
         return switch (num){
-            case 1 -> new GemStone(ItemID.AMETHYST_GEMSTONE);
-            case 2 -> new GemStone(ItemID.JASPER_GEMSTONE);
-            case 3 -> new GemStone(ItemID.OPAL_GEMSTONE);
-            case 4 -> new GemStone(ItemID.JADE_GEMSTONE);
-            case 5 -> new GemStone(ItemID.TOPAZ_GEMSTONE);
-            case 6 -> new GemStone(ItemID.AMBER_GEMSTONE);
-            case 7 -> new GemStone(ItemID.SAPPHIRE_GEMSTONE);
-            case 8 -> new GemStone(ItemID.EMERALD_GEMSTONE);
-            case 9 -> new GemStone(ItemID.RUBY_GEMSTONE);
-            case 10 -> new GemStone(ItemID.DIAMOND_GEMSTONE);
-            default -> new GemStone(ItemID.AMETHYST_GEMSTONE);
+            case 1 -> ItemID.AMETHYST_GEMSTONE;
+            case 2 -> ItemID.JASPER_GEMSTONE;
+            case 3 -> ItemID.OPAL_GEMSTONE;
+            case 4 -> ItemID.JADE_GEMSTONE;
+            case 5 -> ItemID.TOPAZ_GEMSTONE;
+            case 6 -> ItemID.AMBER_GEMSTONE;
+            case 7 -> ItemID.SAPPHIRE_GEMSTONE;
+            case 8 -> ItemID.EMERALD_GEMSTONE;
+            case 9 -> ItemID.RUBY_GEMSTONE;
+            case 10 -> ItemID.DIAMOND_GEMSTONE;
+            default -> ItemID.AMETHYST_GEMSTONE;
         };
     }
 }
