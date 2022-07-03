@@ -1,21 +1,16 @@
 package io.github.lunaiskey.pyrexprison.gangs;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
-import io.github.lunaiskey.pyrexprison.mines.upgrades.PMineUpgradeType;
-import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.math.BigInteger;
 import java.util.*;
 
 public class GangManager {
 
-    private Map<UUID, Gang> gangsMap = new HashMap<>();
+    private Map<UUID, Gang> gangMap = new HashMap<>();
     private Map<String, UUID> gangNameMap = new HashMap<>();
 
     private Map<UUID, UUID> playerGangMap = new HashMap<>();
@@ -44,24 +39,63 @@ public class GangManager {
             }
 
             long trophies = (long) gangMap.get("trophies");
-            new Gang(gangUUID, owner, name, memberMap, trophies);
+            addGang(gangUUID, owner, name, memberMap, trophies);
         }
         trophyTop = getTrophyTop();
     }
 
+    public Map<UUID, Gang> getGangMap() {
+        return gangMap;
+    }
+
+    public Map<String, UUID> getGangNameMap() {
+        return gangNameMap;
+    }
+
+    public Map<UUID, UUID> getPlayerGangMap() {
+        return playerGangMap;
+    }
+
     public List<Gang> getTrophyTop(){
-        List<Gang> sortedList = new ArrayList<>(gangsMap.values());
+        List<Gang> sortedList = new ArrayList<>(gangMap.values());
         sortedList.sort(Collections.reverseOrder(Comparator.comparingLong(Gang::getTrophies)));
         return sortedList;
     }
 
     public void addGang(UUID uuid, UUID owner, String name, Map<UUID,GangRankType> members, long trophies) {
-        gangsMap.put(uuid,new Gang(uuid,owner,name,members,trophies));
+        if (members == null) {
+            members = new LinkedHashMap<>();
+        }
+        members.put(owner,GangRankType.OWNER);
+        for (UUID member : members.keySet()) {
+            playerGangMap.put(member,uuid);
+        }
+        gangMap.put(uuid,new Gang(uuid,owner,name,members,trophies));
         gangNameMap.put(name,uuid);
     }
 
     public void addGang(UUID uuid, UUID owner, String name) {
         addGang(uuid,owner,name,new LinkedHashMap<>(),0);
+    }
+
+    public void createGang(UUID owner, String name) {
+        UUID newUUID;
+        do {
+            newUUID = UUID.randomUUID();
+        } while (gangMap.containsKey(newUUID));
+        addGang(newUUID,owner,name);
+    }
+
+    public boolean removeGang(UUID uuid) {
+        if (gangMap.containsKey(uuid)) {
+            Gang gang = gangMap.get(uuid);
+            String name = gang.getName();
+            gangMap.remove(uuid);
+            gangNameMap.remove(name);
+            return true;
+        } else {
+            return false;
+        }
     }
     public static class IsGangFile implements FilenameFilter {
         public boolean accept(File file, String s) {

@@ -20,6 +20,8 @@ public class Gang {
     private Map<UUID,GangRankType> members;
     private long trophies;
 
+    private final int maxMembers = 10;
+
     public Gang(UUID uuid, UUID owner, String name, Map<UUID,GangRankType> members, long trophies){
         this.uuid = uuid;
         this.owner = owner;
@@ -47,11 +49,44 @@ public class Gang {
         return members;
     }
 
+    public boolean removeMember(UUID uuid) {
+        if (owner != uuid) {
+            getMembers().remove(uuid);
+            PyrexPrison.getPlugin().getGangManager().getPlayerGangMap().remove(uuid);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean addMember(UUID uuid) {
+        if (!getMembers().containsKey(uuid)) {
+            getMembers().put(uuid,GangRankType.MEMBER);
+            PyrexPrison.getPlugin().getGangManager().getPlayerGangMap().put(uuid,this.uuid);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void setName(String name) {
+        PyrexPrison.getPlugin().getGangManager().getGangNameMap().remove(this.name);
+        this.name = name.replace(" ","");
+        PyrexPrison.getPlugin().getGangManager().getGangNameMap().put(this.name,this.uuid);
+    }
+
+    public boolean isFull() {
+        return getMembers().size() >= maxMembers;
+    }
+
+    public int getMaxMembers() {
+        return maxMembers;
+    }
+
     public long getTrophies() {
         return trophies;
     }
 
-    //Might not work?
     public void save() {
         File file = new File(PyrexPrison.getPlugin().getDataFolder() + "/gangs/" + uuid + ".yml");
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);

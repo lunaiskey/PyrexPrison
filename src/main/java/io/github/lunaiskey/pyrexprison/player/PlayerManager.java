@@ -23,6 +23,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -31,12 +32,17 @@ import java.util.*;
 
 public class PlayerManager {
 
-    private static Map<UUID, PyrexPlayer> playerMap = new HashMap<>();
+    private Map<UUID, PyrexPlayer> playerMap = new HashMap<>();
+    private Map<String, UUID> playerNameMap = new HashMap<>();
+
 
     public Map<UUID, PyrexPlayer> getPlayerMap() {
         return playerMap;
     }
 
+    public Map<String, UUID> getPlayerNameMap() {
+        return playerNameMap;
+    }
     public void createPyrexPlayer(UUID pUUID) {
         Player player = Bukkit.getPlayer(pUUID);
         if (player != null) {
@@ -44,7 +50,6 @@ public class PlayerManager {
         } else {
             playerMap.put(pUUID,new PyrexPlayer(pUUID, Bukkit.getOfflinePlayer(pUUID).getName()));
         }
-
     }
 
     public void loadPlayers() {
@@ -72,7 +77,10 @@ public class PlayerManager {
             try {
                 playerData = fileConf.getConfigurationSection("pyrexData").getValues(false);
             } catch (Exception ignored) {}
-            String cachedName = (String) playerData.getOrDefault("name","null");
+            String cachedName = (String) playerData.getOrDefault("name",Bukkit.getOfflinePlayer(pUUID).getName());
+            if (cachedName.equals("null")) {
+                cachedName = Bukkit.getOfflinePlayer(pUUID).getName();
+            }
             int rank = ((Number) playerData.getOrDefault("rank",0)).intValue();
             ItemID selectedGemstone = ItemID.valueOf((String) playerData.getOrDefault("selectedGemstone",ItemID.AMETHYST_GEMSTONE.name()));
             int gemstoneCount = ((Number) playerData.getOrDefault("gemstoneCount",0)).intValue();
@@ -126,6 +134,7 @@ public class PlayerManager {
             }
             //Finished Loading
             getPlayerMap().put(pUUID,new PyrexPlayer(pUUID,cachedName,tokens,gems,pyrexPoints,rank,pickaxe,isArmorEquiped,armorMap,selectedGemstone,gemstoneCount,null));
+            playerNameMap.put(cachedName.toUpperCase(),pUUID);
         }
     }
 
@@ -203,6 +212,11 @@ public class PlayerManager {
         List<UUID> sortedValues = new ArrayList<>(playerMap.keySet());
         sortedValues.sort(Comparator.comparingInt(o -> playerMap.get(o).getRank()));
         return sortedValues;
+    }
+
+    @Nullable
+    public UUID getPlayerUUID(String name) {
+        return getPlayerNameMap().get(name.toUpperCase());
     }
 
     public void payForBlocks(Player p,long amount) {

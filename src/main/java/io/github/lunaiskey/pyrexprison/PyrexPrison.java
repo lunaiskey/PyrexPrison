@@ -118,7 +118,10 @@ public final class PyrexPrison extends JavaPlugin {
             save(uuid,true);
             savePending.removeIf(n -> (Bukkit.getPlayer(n) == null));
         }
-        this.getLogger().info("Saving Player and Mine data...");
+        for (Gang gang : gangManager.getGangMap().values()) {
+            gang.save();
+        }
+        this.getLogger().info("Saving Player, Mine and Gang data...");
     }
 
     private boolean setupConfig() {
@@ -135,6 +138,11 @@ public final class PyrexPrison extends JavaPlugin {
         File playerFolder = new File(getDataFolder(), "playerdata");
         if (!playerFolder.exists() && !playerFolder.mkdir()) {
             this.getLogger().severe("Could not make PlayerData folder.");
+            return false;
+        }
+        File gangFolder = new File(getDataFolder(), "gangdata");
+        if (!gangFolder.exists() && !gangFolder.mkdir()) {
+            this.getLogger().severe("Could not make GangData folder.");
             return false;
         }
         return true;

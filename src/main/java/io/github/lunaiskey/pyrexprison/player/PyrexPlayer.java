@@ -144,7 +144,9 @@ public class PyrexPlayer {
     }
 
     public void setName(String name) {
+        PyrexPrison.getPlugin().getPlayerManager().getPlayerNameMap().remove(this.name);
         this.name = name;
+        PyrexPrison.getPlugin().getPlayerManager().getPlayerNameMap().put(name.toUpperCase(),this.pUUID);
     }
 
     public void setRank(int rank) {
