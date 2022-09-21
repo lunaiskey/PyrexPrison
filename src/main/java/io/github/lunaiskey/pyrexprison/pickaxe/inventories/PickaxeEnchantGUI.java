@@ -30,11 +30,9 @@ public class PickaxeEnchantGUI {
     private Player p;
     private Inventory inv = new PyrexHolder(name,size, PyrexInvType.PICKAXE_ENCHANTS).getInventory();
     private PyrexPickaxe pickaxe;
-    private Map<Integer, EnchantType> enchantLocation = new HashMap<>();
+    private static Map<Integer, EnchantType> enchantLocation = new HashMap<>();
 
-    public PickaxeEnchantGUI(Player p) {
-        this.p = p;
-        pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId()).getPickaxe();
+    static {
         enchantLocation.put(20,EnchantType.FORTUNE);
         enchantLocation.put(21,EnchantType.JACK_HAMMER);
         enchantLocation.put(22,EnchantType.STRIKE);
@@ -45,7 +43,10 @@ public class PickaxeEnchantGUI {
         enchantLocation.put(31,EnchantType.KEY_FINDER);
         enchantLocation.put(32,EnchantType.LOOT_FINDER);
         enchantLocation.put(33,EnchantType.XP_BOOST);
-
+    }
+    public PickaxeEnchantGUI(Player p) {
+        this.p = p;
+        pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(p.getUniqueId()).getPickaxe();
     }
 
     private void init() {

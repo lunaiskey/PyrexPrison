@@ -67,6 +67,7 @@ public final class PyrexPrison extends JavaPlugin {
             new PyrexExpansion(this).register();
         }
 
+
         Bukkit.getPluginManager().registerEvents(new PlayerEvents(this),this);
         this.getLogger().info("version " + getDescription().getVersion() + " enabled!");
 

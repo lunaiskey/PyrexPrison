@@ -5,11 +5,9 @@ import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInvType;
 import io.github.lunaiskey.pyrexprison.gui.PyrexInventory;
 import io.github.lunaiskey.pyrexprison.mines.PMine;
-import io.github.lunaiskey.pyrexprison.mines.PMineManager;
 import io.github.lunaiskey.pyrexprison.util.ItemBuilder;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -18,14 +16,14 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+
 
 import java.util.*;
 
 public class PMineBlocksGUI implements PyrexInventory {
 
-    private static Map<UUID,Material> editMap = new HashMap<>();
-    private static Map<UUID,Integer> pageMap = new HashMap<>();
+    private static Map<UUID,Material> editMap;
+    private static Map<UUID,Integer> pageMap;
 
     private String name = "Blocks";
     private int size = 54;
@@ -34,6 +32,11 @@ public class PMineBlocksGUI implements PyrexInventory {
     private List<Material> materialList;
     private Map<Material,Double> mineComposition;
     private int totalPages;
+
+    static {
+        editMap = new HashMap<>();
+        pageMap = new HashMap<>();
+    }
 
 
     public PMineBlocksGUI(Player p) {

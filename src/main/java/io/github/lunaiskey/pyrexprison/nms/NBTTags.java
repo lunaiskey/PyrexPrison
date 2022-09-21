@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.nms;
 
+import io.github.lunaiskey.pyrexprison.items.ItemID;
 import io.github.lunaiskey.pyrexprison.player.CurrencyType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -121,5 +122,13 @@ public class NBTTags {
             return itemTag.getCompound("PyrexData");
         }
         return new CompoundTag();
+    }
+
+    public static ItemID getItemID(ItemStack item) {
+        try {
+            return ItemID.valueOf(getPyrexDataMap(item).getString("id"));
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 }

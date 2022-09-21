@@ -56,64 +56,53 @@ public class PlayerEvents implements Listener {
     private PyrexPrison plugin;
     private PMineManager pMineManager;
     private PlayerManager playerManager;
+    private Map<UUID,PyrexPlayer> playerMap;
 
     public PlayerEvents(PyrexPrison plugin) {
         this.plugin = plugin;
         pMineManager = plugin.getPmineManager();
         playerManager = plugin.getPlayerManager();
+        playerMap = playerManager.getPlayerMap();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
         Block block = e.getBlock();
+        Location blockLoc = block.getLocation();
         ItemStack mainHand = e.getPlayer().getInventory().getItemInMainHand();
-        PyrexPickaxe pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).getPickaxe();
+        //PyrexPickaxe pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).getPickaxe();
         if (e.isCancelled()) {
             return;
         }
-        if (block.getLocation().getWorld().getName().equals(PMineWorld.getWorldName())) {
-            Pair<Integer,Integer> gridLoc = pMineManager.getGridLocation(block.getLocation());
-            PMine pMine = PyrexPrison.getPlugin().getPmineManager().getPMine(gridLoc.getLeft(), gridLoc.getRight());
-            if (pMine != null) {
-                if (pMine.isInMineRegion(block.getLocation())) {
-                    e.setDropItems(false);
-                    e.setExpToDrop(0);
-                    pMine.addMineBlocks(1);
-                    CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(mainHand);
-                    if (pyrexDataMap.contains("id")) {
-                        // is custom pickaxe
-                        if (pyrexDataMap.getString("id").equals(PickaxeHandler.getId())) {
-                            for (EnchantType type : pickaxe.getEnchants().keySet()) {
-                                PyrexEnchant enchant = PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type);
-                                if (enchant.isEnabled()) {
-                                    if (!pickaxe.getDisabledEnchants().contains(type)) {
-                                        enchant.onBlockBreak(e,pickaxe.getEnchants().get(type));
-                                    }
+        ItemID itemID = NBTTags.getItemID(mainHand);
+        if (itemID != null) {
+            switch (itemID) {
+                case BOOSTER -> new BoosterItem(mainHand).onBlockBreak(e);
+                case PYREX_PICKAXE -> {
+                    if (playerMap.containsKey(p.getUniqueId())) {
+                        PyrexPickaxe pickaxe = playerMap.get(p.getUniqueId()).getPickaxe();
+                        pickaxe.onBlockBreak(e);
+                    } else {
+                        if (blockLoc.getWorld() == Bukkit.getWorld(PMineWorld.getWorldName())) {
+                            Pair<Integer,Integer> gridLoc = pMineManager.getGridLocation(block.getLocation());
+                            PMine pMine = PyrexPrison.getPlugin().getPmineManager().getPMine(gridLoc.getLeft(), gridLoc.getRight());
+                            if (pMine != null) {
+                                if (pMine.isInMineRegion(block.getLocation())) {
+                                    e.setDropItems(false);
+                                    e.setExpToDrop(0);
+                                    pMine.addMineBlocks(1);
                                 }
                             }
-                            PyrexPlayer player = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId());
-                            PyrexPrison.getPlugin().getPlayerManager().payForBlocks(e.getPlayer(),1);
-                            p.giveExp(1+player.getXPBoostTotal());
-                            PyrexPrison.getPlugin().getPlayerManager().tickGemstoneCount(p);
-                            pickaxe.setBlocksBroken(pickaxe.getBlocksBroken()+1);
-                            PyrexPrison.getPlugin().getPickaxeHandler().updateInventoryPickaxe(p);
                         }
                     }
                 }
+                default -> {
+                    if (PyrexPrison.getPlugin().getItemManager().getItemMap().containsKey(itemID)) {
+                        PyrexPrison.getPlugin().getItemManager().getItemMap().get(itemID).onBlockBreak(e);
+                    }
+                }
             }
-        }
-        CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(mainHand);
-        if (pyrexDataMap.contains("id")) {
-            try {
-                ItemID itemID = ItemID.valueOf(pyrexDataMap.getString("id"));
-                if (PyrexPrison.getPlugin().getItemManager().getItemMap().containsKey(itemID)) {
-                    PyrexPrison.getPlugin().getItemManager().getItemMap().get(itemID).onBlockBreak(e);
-                }
-                if (itemID == ItemID.BOOSTER) {
-                    new BoosterItem(mainHand).onBlockBreak(e);
-                }
-            } catch (Exception ignored) {}
         }
     }
 

@@ -35,8 +35,14 @@ public class ArmorUpgradeGUI implements PyrexInventory {
     private final PyrexPlayer pyrexPlayer;
     private final Inventory inv;
     private ArmorType type;
-    private Map<Integer,AbilityType> abilitySlots = new HashMap<>();
+    private static Map<Integer,AbilityType> abilitySlots = new HashMap<>();
     private static Map<UUID,ArmorType> customColorMap = new HashMap<>();
+
+    static {
+        abilitySlots.put(21,AbilityType.SALES_BOOST);
+        abilitySlots.put(22,AbilityType.ENCHANTMENT_PROC);
+        //abilitySlots.put(23,AbilityType.XP_BOOST);
+    }
 
     public ArmorUpgradeGUI(Player player, ArmorType type) {
         this.player = player;
@@ -44,9 +50,7 @@ public class ArmorUpgradeGUI implements PyrexInventory {
         this.type = type;
         this.name = type.getName() + " Upgrades";
         this.inv = new ArmorPyrexHolder(name,size, PyrexInvType.ARMOR_UPGRADES,type).getInventory();
-        this.abilitySlots.put(21,AbilityType.SALES_BOOST);
-        this.abilitySlots.put(22,AbilityType.ENCHANTMENT_PROC);
-        this.abilitySlots.put(23,AbilityType.XP_BOOST);
+
     }
 
     @Override
@@ -54,8 +58,13 @@ public class ArmorUpgradeGUI implements PyrexInventory {
         for (int i = 0;i<size;i++) {
             switch (i) {
                 case 13 -> inv.setItem(i,pyrexPlayer.getArmor().get(type).getItemStack());
-                case 21,22,23 -> inv.setItem(i,getUpgradeButton(abilitySlots.get(i)));
-                //case 23 -> inv.setItem(i,ItemBuilder.createItem("&c&lTBD",Material.IRON_BARS,null));
+                case 21,22,23 -> {
+                    if (abilitySlots.containsKey(i)) {
+                        inv.setItem(i,getUpgradeButton(abilitySlots.get(i)));
+                    } else {
+                        inv.setItem(i,ItemBuilder.getComingSoon());
+                    }
+                }
                 case 11 -> inv.setItem(i, getTierUpButton());
                 case 15 -> inv.setItem(i, getColorButton());
                 case 0,9,18,27,8,17,26,35 -> inv.setItem(i, ItemBuilder.createItem(" ", Material.PURPLE_STAINED_GLASS_PANE,null));
@@ -76,22 +85,25 @@ public class ArmorUpgradeGUI implements PyrexInventory {
         Player p = (Player) e.getWhoClicked();
         Inventory inv = e.getClickedInventory();
         Armor armor = pyrexPlayer.getArmor().get(type);
+        int slot = e.getRawSlot();
         boolean isEquiped = pyrexPlayer.isArmorEquiped();
-        switch (e.getRawSlot()) {
+        switch (slot) {
             case 21,22,23 -> {
-                Ability ability = armor.getAbilties().get(abilitySlots.get(e.getRawSlot()));
-                if (ability.getLevel() < ability.getMaxLevel()) {
-                    if (pyrexPlayer.getGems() >= ability.getCost()) {
-                        pyrexPlayer.takeGems(ability.getCost());
-                        ability.setLevel(ability.getLevel()+1);
-                        player.sendMessage(StringUtil.color("&aUpgraded "+abilitySlots.get(e.getRawSlot()).name()+" to level "+ability.getLevel()+"."));
-                        if (isEquiped) {
-                            p.getInventory().setItem(type.getSlot(),armor.getItemStack());
-                        }
+                if (abilitySlots.containsKey(slot)) {
+                    Ability ability = armor.getAbilties().get(abilitySlots.get(slot));
+                    if (ability.getLevel() < ability.getMaxLevel()) {
+                        if (pyrexPlayer.getGems() >= ability.getCost()) {
+                            pyrexPlayer.takeGems(ability.getCost());
+                            ability.setLevel(ability.getLevel() + 1);
+                            player.sendMessage(StringUtil.color("&aUpgraded " + abilitySlots.get(slot).name() + " to level " + ability.getLevel() + "."));
+                            if (isEquiped) {
+                                p.getInventory().setItem(type.getSlot(), armor.getItemStack());
+                            }
 
-                        Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(),()-> player.openInventory(new ArmorUpgradeGUI(player,type).getInv()));
-                    } else {
-                        player.sendMessage(StringUtil.color("&cYou cannot afford this upgrade."));
+                            Bukkit.getScheduler().runTask(PyrexPrison.getPlugin(), () -> player.openInventory(new ArmorUpgradeGUI(player, type).getInv()));
+                        } else {
+                            player.sendMessage(StringUtil.color("&cYou cannot afford this upgrade."));
+                        }
                     }
                 }
             }
@@ -125,7 +137,7 @@ public class ArmorUpgradeGUI implements PyrexInventory {
                             if (isEquiped) {
                                 p.getInventory().setItem(type.getSlot(),armor.getItemStack());
                             }
-                            inv.setItem(e.getRawSlot(),getColorButton());
+                            inv.setItem(slot,getColorButton());
                             inv.setItem(13,armor.getItemStack());
                         }
                     }

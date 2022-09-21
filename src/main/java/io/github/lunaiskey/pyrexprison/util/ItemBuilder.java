@@ -94,6 +94,14 @@ public class ItemBuilder {
         return ItemBuilder.createItem(StringUtil.color("&aNext Page"),Material.ARROW,List.of(StringUtil.color("&7Page "+page)));
     }
 
+    public static ItemStack getComingSoon() {
+        return createItem("&c&lCOMING SOON", Material.BEDROCK, null);
+    }
+
+    public static ItemStack getComingLater() {
+        return createItem("&c&lCOMING LATER", Material.BEDROCK, null);
+    }
+
     /**
      * @return A black stained glass pane, with an empty name and no lore.
      */

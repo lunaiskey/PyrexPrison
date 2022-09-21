@@ -27,14 +27,17 @@ public class ArmorGUI implements PyrexInventory {
     private final int size = 27;
     private final Inventory inv = new PyrexHolder(name,size, PyrexInvType.ARMOR).getInventory();
     private final Player p;
-    private final Map<Integer, ArmorType> armorSlots = new HashMap<>();
+    private static final Map<Integer, ArmorType> armorSlots = new HashMap<>();
 
-    public ArmorGUI(Player p) {
-        this.p = p;
+    static {
         armorSlots.put(10,ArmorType.HELMET);
         armorSlots.put(11,ArmorType.CHESTPLATE);
         armorSlots.put(12,ArmorType.LEGGINGS);
         armorSlots.put(13,ArmorType.BOOTS);
+    }
+
+    public ArmorGUI(Player p) {
+        this.p = p;
     }
 
     @Override

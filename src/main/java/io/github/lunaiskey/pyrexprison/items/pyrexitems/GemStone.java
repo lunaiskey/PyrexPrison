@@ -1,5 +1,6 @@
 package io.github.lunaiskey.pyrexprison.items.pyrexitems;
 
+import com.google.gson.Gson;
 import io.github.lunaiskey.pyrexprison.items.ItemID;
 import io.github.lunaiskey.pyrexprison.items.PyrexItem;
 import io.github.lunaiskey.pyrexprison.nms.NBTTags;
