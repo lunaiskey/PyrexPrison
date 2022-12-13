@@ -66,17 +66,19 @@ public class NMSBlockChange {
 
 
             for (Player p : Bukkit.getOnlinePlayers()) {
-                ServerPlayer ep = ((CraftPlayer) p).getHandle();
-                int dist = Bukkit.getViewDistance() + 1;
-                int chunkX = ep.chunkPosition().x;
-                int chunkZ = ep.chunkPosition().z;
-                if (chunk.getPos().x < chunkX - dist ||
-                        chunk.getPos().x > chunkX + dist ||
-                        chunk.getPos().z < chunkZ - dist ||
-                        chunk.getPos().z > chunkZ + dist) continue;
-                ep.connection.send(unload);
-                ep.connection.send(load);
-                //ep.connection.send(light);
+                if (p.getLocation().getWorld().getName().equalsIgnoreCase(bukkitWorld.getName())) {
+                    ServerPlayer ep = ((CraftPlayer) p).getHandle();
+                    int dist = Bukkit.getViewDistance() + 1;
+                    int chunkX = ep.chunkPosition().x;
+                    int chunkZ = ep.chunkPosition().z;
+                    if (chunk.getPos().x < chunkX - dist ||
+                            chunk.getPos().x > chunkX + dist ||
+                            chunk.getPos().z < chunkZ - dist ||
+                            chunk.getPos().z > chunkZ + dist) continue;
+                    ep.connection.send(unload);
+                    ep.connection.send(load);
+                    //ep.connection.send(light);
+                }
             }
         }
 
