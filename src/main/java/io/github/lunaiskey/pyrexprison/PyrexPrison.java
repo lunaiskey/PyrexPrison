@@ -1,17 +1,16 @@
 package io.github.lunaiskey.pyrexprison;
 
-import io.github.lunaiskey.pyrexprison.gangs.Gang;
-import io.github.lunaiskey.pyrexprison.gangs.GangManager;
+import io.github.lunaiskey.pyrexprison.modules.gangs.Gang;
+import io.github.lunaiskey.pyrexprison.modules.gangs.GangManager;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
-import io.github.lunaiskey.pyrexprison.items.ItemManager;
-import io.github.lunaiskey.pyrexprison.leaderboards.LeaderboardStorage;
+import io.github.lunaiskey.pyrexprison.modules.items.ItemManager;
+import io.github.lunaiskey.pyrexprison.modules.leaderboards.LeaderboardStorage;
 import io.github.lunaiskey.pyrexprison.listeners.PlayerEvents;
-import io.github.lunaiskey.pyrexprison.mines.PMineManager;
-import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
-import io.github.lunaiskey.pyrexprison.pickaxe.PickaxeHandler;
-import io.github.lunaiskey.pyrexprison.player.PlayerManager;
-import io.github.lunaiskey.pyrexprison.player.boosters.Boosters;
-import net.minecraft.world.level.gameevent.BlockPositionSource;
+import io.github.lunaiskey.pyrexprison.modules.pmines.PMineManager;
+import io.github.lunaiskey.pyrexprison.modules.pmines.generator.PMineWorld;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.PickaxeManager;
+import io.github.lunaiskey.pyrexprison.modules.player.PlayerManager;
+import io.github.lunaiskey.pyrexprison.modules.boosters.Boosters;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,7 +24,7 @@ public final class PyrexPrison extends JavaPlugin {
     private static PyrexPrison plugin;
     private PMineManager pmineManager;
     private PlayerManager playerManager;
-    private PickaxeHandler pickaxeHandler;
+    private PickaxeManager pickaxeManager;
     private ItemManager itemManager;
     private GangManager gangManager;
     private LeaderboardStorage leaderboardStorage;
@@ -47,7 +46,7 @@ public final class PyrexPrison extends JavaPlugin {
 
         pmineManager = new PMineManager();
         playerManager = new PlayerManager();
-        pickaxeHandler = new PickaxeHandler();
+        pickaxeManager = new PickaxeManager();
         itemManager = new ItemManager();
         leaderboardStorage = new LeaderboardStorage();
         gangManager = new GangManager();
@@ -55,7 +54,6 @@ public final class PyrexPrison extends JavaPlugin {
         playerManager.loadPlayers();
         pmineManager.loadPMines();
         gangManager.loadGangs();
-        itemManager.registerItems();
         new CommandManager().registerCommands();
         new Boosters().scheduleTask();
 
@@ -174,8 +172,8 @@ public final class PyrexPrison extends JavaPlugin {
         return playerManager;
     }
 
-    public PickaxeHandler getPickaxeHandler() {
-        return pickaxeHandler;
+    public PickaxeManager getPickaxeHandler() {
+        return pickaxeManager;
     }
 
     public ItemManager getItemManager() {

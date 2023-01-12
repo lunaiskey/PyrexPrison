@@ -1,29 +1,33 @@
 package io.github.lunaiskey.pyrexprison.listeners;
 
 import io.github.lunaiskey.pyrexprison.PyrexPrison;
-import io.github.lunaiskey.pyrexprison.commands.CommandPMine;
+import io.github.lunaiskey.pyrexprison.modules.armor.gui.ArmorGUI;
+import io.github.lunaiskey.pyrexprison.modules.armor.gui.ArmorUpgradeGUI;
+import io.github.lunaiskey.pyrexprison.modules.boosters.gui.PersonalBoosterGUI;
+import io.github.lunaiskey.pyrexprison.modules.items.gui.GemStoneGUI;
+import io.github.lunaiskey.pyrexprison.modules.pmines.commands.CommandPMine;
 import io.github.lunaiskey.pyrexprison.gui.PyrexHolder;
-import io.github.lunaiskey.pyrexprison.items.ItemID;
-import io.github.lunaiskey.pyrexprison.items.pyrexitems.BoosterItem;
-import io.github.lunaiskey.pyrexprison.items.pyrexitems.Voucher;
-import io.github.lunaiskey.pyrexprison.leaderboards.LeaderboardGUI;
-import io.github.lunaiskey.pyrexprison.mines.*;
-import io.github.lunaiskey.pyrexprison.mines.generator.PMineWorld;
-import io.github.lunaiskey.pyrexprison.mines.inventories.*;
-import io.github.lunaiskey.pyrexprison.nms.NBTTags;
-import io.github.lunaiskey.pyrexprison.pickaxe.*;
-import io.github.lunaiskey.pyrexprison.pickaxe.enchants.MineBomb;
-import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeAddLevelsGUI;
-import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeEnchantGUI;
-import io.github.lunaiskey.pyrexprison.pickaxe.inventories.PickaxeEnchantToggleGUI;
-import io.github.lunaiskey.pyrexprison.player.CurrencyType;
-import io.github.lunaiskey.pyrexprison.player.PlayerManager;
-import io.github.lunaiskey.pyrexprison.player.PyrexPlayer;
-import io.github.lunaiskey.pyrexprison.player.ViewPlayerHolder;
-import io.github.lunaiskey.pyrexprison.player.armor.Armor;
-import io.github.lunaiskey.pyrexprison.player.armor.ArmorType;
-import io.github.lunaiskey.pyrexprison.player.inventories.*;
-import io.github.lunaiskey.pyrexprison.player.armor.ArmorPyrexHolder;
+import io.github.lunaiskey.pyrexprison.modules.items.ItemID;
+import io.github.lunaiskey.pyrexprison.modules.items.items.BoosterItem;
+import io.github.lunaiskey.pyrexprison.modules.items.items.Voucher;
+import io.github.lunaiskey.pyrexprison.modules.leaderboards.LeaderboardGUI;
+import io.github.lunaiskey.pyrexprison.modules.pmines.*;
+import io.github.lunaiskey.pyrexprison.modules.pmines.generator.PMineWorld;
+import io.github.lunaiskey.pyrexprison.modules.pmines.inventories.*;
+import io.github.lunaiskey.pyrexprison.util.nms.NBTTags;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.*;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.enchants.MineBomb;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.inventories.PickaxeAddLevelsGUI;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.inventories.PickaxeEnchantGUI;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.inventories.PickaxeEnchantToggleGUI;
+import io.github.lunaiskey.pyrexprison.modules.player.CurrencyType;
+import io.github.lunaiskey.pyrexprison.modules.player.PlayerManager;
+import io.github.lunaiskey.pyrexprison.modules.player.PyrexPlayer;
+import io.github.lunaiskey.pyrexprison.modules.player.ViewPlayerHolder;
+import io.github.lunaiskey.pyrexprison.modules.armor.Armor;
+import io.github.lunaiskey.pyrexprison.modules.armor.ArmorType;
+import io.github.lunaiskey.pyrexprison.modules.player.inventories.*;
+import io.github.lunaiskey.pyrexprison.modules.armor.ArmorPyrexHolder;
 import io.github.lunaiskey.pyrexprison.util.Numbers;
 import io.github.lunaiskey.pyrexprison.util.StringUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -109,7 +113,7 @@ public class PlayerEvents implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
         Player p = e.getPlayer();
-        CompoundTag tag = NBTTags.getPyrexDataMap(e.getItemInHand());
+        CompoundTag tag = NBTTags.getPyrexDataCompound(e.getItemInHand());
         if (tag.contains("id")) {
             String id = tag.getString("id");
             try {
@@ -227,7 +231,7 @@ public class PlayerEvents implements Listener {
             if (e.getView().getType() == InventoryType.CRAFTING) {
                 switch (e.getRawSlot()) {
                     case 5,6,7,8 -> {
-                        CompoundTag tag = NBTTags.getPyrexDataMap(e.getCurrentItem());
+                        CompoundTag tag = NBTTags.getPyrexDataCompound(e.getCurrentItem());
                         if (tag.getString("id").toUpperCase().contains("PYREX_ARMOR_")) {
                             e.setCancelled(true);
                             p.sendMessage(StringUtil.color("&cTo unequip this armor please do so from /armor."));
@@ -272,10 +276,10 @@ public class PlayerEvents implements Listener {
         Player p = e.getPlayer();
         ItemStack item = e.getItem();
         if (item != null && item.getType() != Material.AIR) {
-            CompoundTag pyrexDataMap = NBTTags.getPyrexDataMap(e.getItem());
+            CompoundTag pyrexDataMap = NBTTags.getPyrexDataCompound(e.getItem());
             if (pyrexDataMap.contains("id")) {
                 // is custom pickaxe
-                if (pyrexDataMap.getString("id").equals(PickaxeHandler.getId())) {
+                if (pyrexDataMap.getString("id").equals(PickaxeManager.getID())) {
                     if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                         p.openInventory(new PickaxeEnchantGUI(p).getInv());
                     }
@@ -307,9 +311,9 @@ public class PlayerEvents implements Listener {
     public void onDrop(PlayerDropItemEvent e) {
         Player p = e.getPlayer();
         ItemStack item = e.getItemDrop().getItemStack();
-        CompoundTag pyrexData = NBTTags.getPyrexDataMap(item);
+        CompoundTag pyrexData = NBTTags.getPyrexDataCompound(item);
         if (pyrexData.contains("id")) {
-            if (pyrexData.getString("id").equalsIgnoreCase(PickaxeHandler.getId())) {
+            if (pyrexData.getString("id").equalsIgnoreCase(PickaxeManager.getID())) {
                 e.setCancelled(true);
                 PyrexPickaxe pickaxe = plugin.getPlayerManager().getPlayerMap().get(p.getUniqueId()).getPickaxe();
                 for (EnchantType enchantType : pickaxe.getEnchants().keySet()) {
@@ -448,12 +452,12 @@ public class PlayerEvents implements Listener {
         Player p = e.getPlayer();
         ItemStack oldItem = p.getInventory().getItem(e.getPreviousSlot()) != null ? p.getInventory().getItem(e.getPreviousSlot()) : new ItemStack(Material.AIR);
         ItemStack newItem = p.getInventory().getItem(e.getNewSlot()) != null ? p.getInventory().getItem(e.getNewSlot()) : new ItemStack(Material.AIR);
-        CompoundTag oldMap = NBTTags.getPyrexDataMap(oldItem);
-        CompoundTag newMap = NBTTags.getPyrexDataMap(newItem);
+        CompoundTag oldMap = NBTTags.getPyrexDataCompound(oldItem);
+        CompoundTag newMap = NBTTags.getPyrexDataCompound(newItem);
         PyrexPickaxe pickaxe = PyrexPrison.getPlugin().getPlayerManager().getPlayerMap().get(e.getPlayer().getUniqueId()).getPickaxe();
         if (oldMap.contains("id")) {
             // is custom pickaxe
-            if (oldMap.getString("id").equals(PickaxeHandler.getId())) {
+            if (oldMap.getString("id").equals(PickaxeManager.getID())) {
                 for (EnchantType type : pickaxe.getEnchants().keySet()) {
                     PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onUnEquip(p,oldItem,pickaxe.getEnchants().get(type));
                 }
@@ -461,7 +465,7 @@ public class PlayerEvents implements Listener {
         }
         if (newMap.contains("id")) {
             // is custom pickaxe
-            if (newMap.getString("id").equals(PickaxeHandler.getId())) {
+            if (newMap.getString("id").equals(PickaxeManager.getID())) {
                 for (EnchantType type : pickaxe.getEnchants().keySet()) {
                     if (!pickaxe.getDisabledEnchants().contains(type)) {
                         PyrexPrison.getPlugin().getPickaxeHandler().getEnchantments().get(type).onEquip(p,newItem,pickaxe.getEnchants().get(type));

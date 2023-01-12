@@ -6,12 +6,12 @@
 
     <groupId>io.github.lunaiskey</groupId>
     <artifactId>PyrexPrison</artifactId>
-    <version>0.3.10</version>
+    <version>0.3.11</version>
     <packaging>jar</packaging>
 
     <name>PyrexPrison</name>
 
-    <description>Custom built for PyrexMC.net</description>
+    <description>Made for PyrexMC</description>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

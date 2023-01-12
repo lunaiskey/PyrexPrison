@@ -1,8 +1,17 @@
 package io.github.lunaiskey.pyrexprison;
 
-import io.github.lunaiskey.pyrexprison.commands.*;
-import io.github.lunaiskey.pyrexprison.player.CurrencyType;
-import io.github.lunaiskey.pyrexprison.player.boosters.Booster;
+import io.github.lunaiskey.pyrexprison.modules.armor.commands.CommandArmor;
+import io.github.lunaiskey.pyrexprison.modules.boosters.commands.CommandBooster;
+import io.github.lunaiskey.pyrexprison.modules.gangs.commands.CommandGang;
+import io.github.lunaiskey.pyrexprison.modules.items.commands.CommandGemstones;
+import io.github.lunaiskey.pyrexprison.modules.items.commands.CommandPItem;
+import io.github.lunaiskey.pyrexprison.modules.leaderboards.commands.CommandLeaderboard;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.commands.CommandEnchant;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.commands.CommandGetPickaxe;
+import io.github.lunaiskey.pyrexprison.modules.pickaxe.commands.CommandResetPickaxe;
+import io.github.lunaiskey.pyrexprison.modules.player.CurrencyType;
+import io.github.lunaiskey.pyrexprison.modules.player.commands.*;
+import io.github.lunaiskey.pyrexprison.modules.pmines.commands.CommandPMine;
 import org.bukkit.Bukkit;
 
 public class CommandManager {
